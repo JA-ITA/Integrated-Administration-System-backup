@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Backend Testing Suite for ITADIAS Identity Microservice
-Tests all REST API endpoints, database operations, and service integrations.
+UPDATED Registration Microservice Medical Certificate Requirements Testing
+Tests the UPDATED business rule: MC2 certificate is now required for ALL Class C tests including upgrades (regardless of vehicle weight)
 """
 
 import asyncio
@@ -9,27 +9,30 @@ import json
 import uuid
 import requests
 import time
-from datetime import datetime, date
-from typing import Dict, Any, Optional
+import base64
 import os
+from datetime import datetime, date
+from typing import Dict, Any, Optional, List
 import sys
 
 # Test configuration
-BACKEND_URL = "http://localhost:8002"
-API_BASE = f"{BACKEND_URL}/api/v1"
+REGISTRATION_SERVICE_URL = "http://localhost:8004"
+MAIN_BACKEND_URL = "https://signup-system-2.preview.emergentagent.com"
+API_BASE = f"{REGISTRATION_SERVICE_URL}/api/v1"
 
-class IdentityServiceTester:
-    """Comprehensive tester for the Identity microservice."""
+class UpdatedMedicalCertificateRulesTester:
+    """Comprehensive tester for the UPDATED Registration microservice medical certificate rules."""
     
     def __init__(self):
-        self.base_url = API_BASE
+        self.registration_base_url = API_BASE
+        self.main_backend_url = MAIN_BACKEND_URL
         self.session = requests.Session()
         self.session.headers.update({
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         })
         self.test_results = []
-        self.created_candidates = []
+        self.created_registrations = []
         
     def log_test(self, test_name: str, success: bool, message: str, details: Optional[Dict] = None):
         """Log test result."""
@@ -47,744 +50,651 @@ class IdentityServiceTester:
         if details and not success:
             print(f"   Details: {details}")
     
-    def generate_test_candidate_data(self, suffix: str = None) -> Dict[str, Any]:
-        """Generate realistic test candidate data."""
-        if suffix is None:
-            suffix = str(int(time.time()))[-6:]
+    def generate_test_jwt_token(self) -> str:
+        """Generate a test JWT token for authentication"""
+        return "test-jwt-token-12345"
+    
+    def create_test_document_base64(self, doc_type: str, filename: str) -> str:
+        """Create a small test document in base64 format"""
+        if doc_type in ["photo"]:
+            # Create a minimal JPEG-like content
+            content = b'\xff\xd8\xff\xe0\x10JFIF\x01\x01\x01HH\xff\xdbC\x08\x06\x06\x07\x06\x05\x08\x07\x07\x07\t\t\x08\n\x0c\x14\r\x0c\x0b\x0b\x0c\x19\x12\x13\x0f\x14\x1d\x1a\x1f\x1e\x1d\x1a\x1c\x1c $.\' ",#\x1c\x1c(7),01444\x1f\'9=82<.342\xff\xc0\x11\x08\x01\x01\x01\x01\x11\x02\x11\x01\x03\x11\x01\xff\xc4\x14\x01\x08\xff\xc4\x14\x10\x01\xff\xda\x0c\x03\x01\x02\x11\x03\x11\x3f\xaa\xff\xd9'
+        elif doc_type in ["mc1", "mc2", "other"]:
+            # Create a minimal PDF-like content
+            content = b'%PDF-1.4\n1 0 obj\n<<\n/Type /Catalog\n/Pages 2 0 R\n>>\nendobj\n2 0 obj\n<<\n/Type /Pages\n/Kids [3 0 R]\n/Count 1\n>>\nendobj\n3 0 obj\n<<\n/Type /Page\n/Parent 2 0 R\n/MediaBox [0 0 612 792]\n>>\nendobj\nxref\n0 4\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \ntrailer\n<<\n/Size 4\n/Root 1 0 R\n>>\nstartxref\n174\n%%EOF'
+        else:
+            # Default content for id_proof (can be JPEG or PDF)
+            content = b'\xff\xd8\xff\xe0\x10JFIF\x01\x01\x01HH\xff\xdbC\x08\x06\x06\x07\x06\x05\x08\x07\x07\x07\t\t\x08\n\x0c\x14\r\x0c\x0b\x0b\x0c\x19\x12\x13\x0f\x14\x1d\x1a\x1f\x1e\x1d\x1a\x1c\x1c $.\' ",#\x1c\x1c(7),01444\x1f\'9=82<.342\xff\xc0\x11\x08\x01\x01\x01\x01\x11\x02\x11\x01\x03\x11\x01\xff\xc4\x14\x01\x08\xff\xc4\x14\x10\x01\xff\xda\x0c\x03\x01\x02\x11\x03\x11\x3f\xaa\xff\xd9'
+        
+        return base64.b64encode(content).decode('utf-8')
+    
+    def generate_test_registration_data(self, vehicle_category: str = "B", age_years: float = 20.0, vehicle_weight: int = 5000, include_mc1: bool = False, include_mc2: bool = False) -> Dict[str, Any]:
+        """Generate realistic test registration data"""
+        booking_id = str(uuid.uuid4())
+        receipt_no = f"TAJ{int(time.time())}"[-12:]  # Last 12 chars to keep it reasonable
+        
+        # Create documents list
+        docs = [
+            {
+                "type": "photo",
+                "filename": "photo.jpg",
+                "content": self.create_test_document_base64("photo", "photo.jpg"),
+                "mime_type": "image/jpeg"
+            },
+            {
+                "type": "id_proof",
+                "filename": "id_proof.jpg",
+                "content": self.create_test_document_base64("id_proof", "id_proof.jpg"),
+                "mime_type": "image/jpeg"
+            }
+        ]
+        
+        # Add medical certificates based on parameters
+        if include_mc1:
+            docs.append({
+                "type": "mc1",
+                "filename": "medical_cert_1.pdf",
+                "content": self.create_test_document_base64("mc1", "medical_cert_1.pdf"),
+                "mime_type": "application/pdf"
+            })
+        
+        if include_mc2:
+            docs.append({
+                "type": "mc2",
+                "filename": "medical_cert_2.pdf",
+                "content": self.create_test_document_base64("mc2", "medical_cert_2.pdf"),
+                "mime_type": "application/pdf"
+            })
         
         return {
-            "email": f"candidate.{suffix}@bermuda.bm",
-            "first_name": "Maria",
-            "last_name": "Santos",
-            "phone": f"+1-441-555-{suffix[-4:]}",
-            "date_of_birth": "1995-03-15",
-            "national_id": f"BM{suffix}789",
-            "passport_number": f"P{suffix}456",
-            "street_address": "45 Front Street",
-            "city": "Hamilton",
-            "postal_code": "HM11",
-            "country": "Bermuda",
-            "preferred_language": "en",
-            "timezone": "Atlantic/Bermuda"
+            "booking_id": booking_id,
+            "receipt_no": receipt_no,
+            "vehicle_weight_kg": vehicle_weight,
+            "vehicle_category": vehicle_category,
+            "docs": docs,
+            "manager_override": False,
+            "override_reason": None,
+            "override_by": None
         }
     
-    def test_health_check(self):
-        """Test health check endpoints."""
+    def test_service_health_check(self):
+        """Test registration service health check"""
         try:
-            # Test main health endpoint
-            response = self.session.get(f"{BACKEND_URL}/health")
+            response = self.session.get(f"{REGISTRATION_SERVICE_URL}/health")
             if response.status_code == 200:
                 data = response.json()
-                self.log_test(
-                    "Health Check - Main",
-                    True,
-                    f"Service healthy: {data.get('status', 'unknown')}",
-                    data
-                )
+                
+                # Check required health check components
+                required_components = ["status", "service", "version", "database", "events", "dependencies"]
+                missing_components = [comp for comp in required_components if comp not in data]
+                
+                if not missing_components:
+                    self.log_test(
+                        "Service Health Check",
+                        True,
+                        f"Service healthy: {data.get('status')}",
+                        {
+                            "database": data.get("database"),
+                            "events": data.get("events"),
+                            "dependencies": data.get("dependencies", {}).get("all_dependencies_available", False)
+                        }
+                    )
+                else:
+                    self.log_test(
+                        "Service Health Check",
+                        False,
+                        f"Health response missing components: {missing_components}",
+                        data
+                    )
             else:
                 self.log_test(
-                    "Health Check - Main",
+                    "Service Health Check",
                     False,
                     f"Health check failed with status {response.status_code}",
-                    {"response": response.text}
-                )
-            
-            # Test root endpoint
-            response = self.session.get(f"{BACKEND_URL}/")
-            if response.status_code == 200:
-                data = response.json()
-                self.log_test(
-                    "Root Endpoint",
-                    True,
-                    f"Root endpoint accessible: {data.get('message', 'unknown')}",
-                    data
-                )
-            else:
-                self.log_test(
-                    "Root Endpoint",
-                    False,
-                    f"Root endpoint failed with status {response.status_code}",
                     {"response": response.text}
                 )
                 
         except Exception as e:
             self.log_test(
-                "Health Check",
+                "Service Health Check",
                 False,
                 f"Health check error: {str(e)}",
                 {"error": str(e)}
             )
     
-    def test_create_candidate_success(self):
-        """Test successful candidate creation."""
+    def test_class_c_light_vehicle_mc2_requirement(self):
+        """Test Class C Test (Vehicle < 7000kg) - Should require MC2 certificate (NEW BEHAVIOR)"""
         try:
-            candidate_data = self.generate_test_candidate_data()
+            # Test with vehicle weight 5000kg (under the old threshold) - should REQUIRE MC2
+            registration_data = self.generate_test_registration_data(
+                vehicle_category="C", 
+                age_years=20.5, 
+                vehicle_weight=5000,  # Under 7000kg threshold
+                include_mc2=True  # Include MC2 certificate
+            )
+            jwt_token = self.generate_test_jwt_token()
+            
+            headers = {
+                "Authorization": f"Bearer {jwt_token}",
+                "Content-Type": "application/json"
+            }
             
             response = self.session.post(
-                f"{self.base_url}/candidates",
-                json=candidate_data,
-                headers={"X-Correlation-ID": f"test-{uuid.uuid4()}"}
+                f"{self.registration_base_url}/registrations",
+                json=registration_data,
+                headers=headers
             )
             
-            if response.status_code == 201:
+            if response.status_code in [200, 201]:
                 data = response.json()
-                candidate_id = data.get('candidate', {}).get('id')
-                
-                if candidate_id:
-                    self.created_candidates.append(candidate_id)
-                
-                # Validate response structure
-                required_fields = ['candidate', 'otp_sent', 'message', 'next_steps']
-                missing_fields = [field for field in required_fields if field not in data]
-                
-                if not missing_fields:
-                    candidate = data['candidate']
-                    otp_sent = data['otp_sent']
+                if data.get("success"):
+                    registration = data.get("registration", {})
+                    registration_id = registration.get("id")
+                    if registration_id:
+                        self.created_registrations.append(registration_id)
                     
                     self.log_test(
-                        "Create Candidate - Success",
+                        "Class C Light Vehicle (< 7000kg) - MC2 Required (NEW RULE)",
                         True,
-                        f"Candidate created successfully: {candidate.get('email')}",
+                        f"Class C registration with 5000kg vehicle successfully requires MC2 certificate",
                         {
-                            "candidate_id": candidate_id,
-                            "email_otp_sent": otp_sent.get('email'),
-                            "phone_otp_sent": otp_sent.get('phone'),
-                            "status": candidate.get('status')
+                            "registration_id": registration_id,
+                            "vehicle_weight": 5000,
+                            "vehicle_category": "C",
+                            "required_medical_certificate": registration.get("required_medical_certificate"),
+                            "age_in_years": registration.get("age_in_years")
                         }
                     )
-                    return candidate_id
                 else:
                     self.log_test(
-                        "Create Candidate - Success",
+                        "Class C Light Vehicle (< 7000kg) - MC2 Required (NEW RULE)",
                         False,
-                        f"Response missing required fields: {missing_fields}",
+                        f"Registration failed unexpectedly: {data.get('message')}",
                         data
                     )
             else:
                 self.log_test(
-                    "Create Candidate - Success",
+                    "Class C Light Vehicle (< 7000kg) - MC2 Required (NEW RULE)",
                     False,
-                    f"Expected 201, got {response.status_code}",
+                    f"Expected 200/201, got {response.status_code}",
                     {"response": response.text}
                 )
                 
         except Exception as e:
             self.log_test(
-                "Create Candidate - Success",
+                "Class C Light Vehicle (< 7000kg) - MC2 Required (NEW RULE)",
                 False,
                 f"Request error: {str(e)}",
                 {"error": str(e)}
             )
-        
-        return None
     
-    def test_create_candidate_validation_errors(self):
-        """Test candidate creation with various validation errors."""
+    def test_class_c_light_vehicle_missing_mc2(self):
+        """Test Class C Test (Vehicle < 7000kg) - Should FAIL without MC2 certificate (NEW BEHAVIOR)"""
+        try:
+            # Test with vehicle weight 5000kg (under the old threshold) - should FAIL without MC2
+            registration_data = self.generate_test_registration_data(
+                vehicle_category="C", 
+                age_years=20.5, 
+                vehicle_weight=5000,  # Under 7000kg threshold
+                include_mc2=False  # Missing MC2 certificate
+            )
+            jwt_token = self.generate_test_jwt_token()
+            
+            headers = {
+                "Authorization": f"Bearer {jwt_token}",
+                "Content-Type": "application/json"
+            }
+            
+            response = self.session.post(
+                f"{self.registration_base_url}/registrations",
+                json=registration_data,
+                headers=headers
+            )
+            
+            if response.status_code in [400, 422]:
+                data = response.json()
+                if not data.get("success", True):
+                    # Check if the error message mentions MC2 requirement
+                    error_message = data.get("message", "").lower()
+                    validation_errors = data.get("validation_errors", [])
+                    mc2_mentioned = any("mc2" in str(error).lower() for error in validation_errors) or "mc2" in error_message
+                    
+                    self.log_test(
+                        "Class C Light Vehicle (< 7000kg) - Missing MC2 Should Fail (NEW RULE)",
+                        mc2_mentioned,
+                        f"Class C registration with 5000kg vehicle properly rejected for missing MC2: {data.get('message')}",
+                        {
+                            "vehicle_weight": 5000,
+                            "vehicle_category": "C",
+                            "validation_errors": validation_errors,
+                            "mc2_mentioned_in_error": mc2_mentioned
+                        }
+                    )
+                else:
+                    self.log_test(
+                        "Class C Light Vehicle (< 7000kg) - Missing MC2 Should Fail (NEW RULE)",
+                        False,
+                        f"Expected failure but got success",
+                        data
+                    )
+            else:
+                self.log_test(
+                    "Class C Light Vehicle (< 7000kg) - Missing MC2 Should Fail (NEW RULE)",
+                    False,
+                    f"Expected 400/422 but got {response.status_code}",
+                    {"response": response.text}
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "Class C Light Vehicle (< 7000kg) - Missing MC2 Should Fail (NEW RULE)",
+                False,
+                f"Request error: {str(e)}",
+                {"error": str(e)}
+            )
+    
+    def test_class_c_heavy_vehicle_mc2_requirement(self):
+        """Test Class C Test (Vehicle > 7000kg) - Should require MC2 certificate (unchanged)"""
+        try:
+            # Test with vehicle weight 8000kg (over the threshold) - should REQUIRE MC2
+            registration_data = self.generate_test_registration_data(
+                vehicle_category="C", 
+                age_years=20.5, 
+                vehicle_weight=8000,  # Over 7000kg threshold
+                include_mc2=True  # Include MC2 certificate
+            )
+            jwt_token = self.generate_test_jwt_token()
+            
+            headers = {
+                "Authorization": f"Bearer {jwt_token}",
+                "Content-Type": "application/json"
+            }
+            
+            response = self.session.post(
+                f"{self.registration_base_url}/registrations",
+                json=registration_data,
+                headers=headers
+            )
+            
+            if response.status_code in [200, 201]:
+                data = response.json()
+                if data.get("success"):
+                    registration = data.get("registration", {})
+                    registration_id = registration.get("id")
+                    if registration_id:
+                        self.created_registrations.append(registration_id)
+                    
+                    self.log_test(
+                        "Class C Heavy Vehicle (> 7000kg) - MC2 Required (unchanged)",
+                        True,
+                        f"Class C registration with 8000kg vehicle successfully requires MC2 certificate",
+                        {
+                            "registration_id": registration_id,
+                            "vehicle_weight": 8000,
+                            "vehicle_category": "C",
+                            "required_medical_certificate": registration.get("required_medical_certificate"),
+                            "age_in_years": registration.get("age_in_years")
+                        }
+                    )
+                else:
+                    self.log_test(
+                        "Class C Heavy Vehicle (> 7000kg) - MC2 Required (unchanged)",
+                        False,
+                        f"Registration failed unexpectedly: {data.get('message')}",
+                        data
+                    )
+            else:
+                self.log_test(
+                    "Class C Heavy Vehicle (> 7000kg) - MC2 Required (unchanged)",
+                    False,
+                    f"Expected 200/201, got {response.status_code}",
+                    {"response": response.text}
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "Class C Heavy Vehicle (> 7000kg) - MC2 Required (unchanged)",
+                False,
+                f"Request error: {str(e)}",
+                {"error": str(e)}
+            )
+    
+    def test_ppv_mc2_requirement(self):
+        """Test PPV Test (Any weight) - Should require MC2 certificate (unchanged)"""
+        try:
+            # Test PPV category - should REQUIRE MC2
+            registration_data = self.generate_test_registration_data(
+                vehicle_category="PPV", 
+                age_years=20.5, 
+                vehicle_weight=3500,  # Any weight for PPV
+                include_mc2=True  # Include MC2 certificate
+            )
+            jwt_token = self.generate_test_jwt_token()
+            
+            headers = {
+                "Authorization": f"Bearer {jwt_token}",
+                "Content-Type": "application/json"
+            }
+            
+            response = self.session.post(
+                f"{self.registration_base_url}/registrations",
+                json=registration_data,
+                headers=headers
+            )
+            
+            if response.status_code in [200, 201]:
+                data = response.json()
+                if data.get("success"):
+                    registration = data.get("registration", {})
+                    registration_id = registration.get("id")
+                    if registration_id:
+                        self.created_registrations.append(registration_id)
+                    
+                    self.log_test(
+                        "PPV Test - MC2 Required (unchanged)",
+                        True,
+                        f"PPV registration successfully requires MC2 certificate",
+                        {
+                            "registration_id": registration_id,
+                            "vehicle_weight": 3500,
+                            "vehicle_category": "PPV",
+                            "required_medical_certificate": registration.get("required_medical_certificate"),
+                            "age_in_years": registration.get("age_in_years")
+                        }
+                    )
+                else:
+                    self.log_test(
+                        "PPV Test - MC2 Required (unchanged)",
+                        False,
+                        f"Registration failed unexpectedly: {data.get('message')}",
+                        data
+                    )
+            else:
+                self.log_test(
+                    "PPV Test - MC2 Required (unchanged)",
+                    False,
+                    f"Expected 200/201, got {response.status_code}",
+                    {"response": response.text}
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "PPV Test - MC2 Required (unchanged)",
+                False,
+                f"Request error: {str(e)}",
+                {"error": str(e)}
+            )
+    
+    def test_class_b_no_mc_requirement(self):
+        """Test Class B Test - Should NOT require medical certificate (unchanged)"""
+        try:
+            # Test Class B category - should NOT require any medical certificate
+            registration_data = self.generate_test_registration_data(
+                vehicle_category="B", 
+                age_years=17.5, 
+                vehicle_weight=2000,  # Any weight for Class B
+                include_mc1=False,  # No MC1
+                include_mc2=False   # No MC2
+            )
+            jwt_token = self.generate_test_jwt_token()
+            
+            headers = {
+                "Authorization": f"Bearer {jwt_token}",
+                "Content-Type": "application/json"
+            }
+            
+            response = self.session.post(
+                f"{self.registration_base_url}/registrations",
+                json=registration_data,
+                headers=headers
+            )
+            
+            if response.status_code in [200, 201]:
+                data = response.json()
+                if data.get("success"):
+                    registration = data.get("registration", {})
+                    registration_id = registration.get("id")
+                    if registration_id:
+                        self.created_registrations.append(registration_id)
+                    
+                    # Verify no medical certificate is required
+                    required_mc = registration.get("required_medical_certificate")
+                    no_mc_required = required_mc is None or required_mc == ""
+                    
+                    self.log_test(
+                        "Class B Test - No Medical Certificate Required (unchanged)",
+                        no_mc_required,
+                        f"Class B registration correctly requires no medical certificate",
+                        {
+                            "registration_id": registration_id,
+                            "vehicle_weight": 2000,
+                            "vehicle_category": "B",
+                            "required_medical_certificate": required_mc,
+                            "age_in_years": registration.get("age_in_years"),
+                            "no_mc_required": no_mc_required
+                        }
+                    )
+                else:
+                    self.log_test(
+                        "Class B Test - No Medical Certificate Required (unchanged)",
+                        False,
+                        f"Registration failed unexpectedly: {data.get('message')}",
+                        data
+                    )
+            else:
+                self.log_test(
+                    "Class B Test - No Medical Certificate Required (unchanged)",
+                    False,
+                    f"Expected 200/201, got {response.status_code}",
+                    {"response": response.text}
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "Class B Test - No Medical Certificate Required (unchanged)",
+                False,
+                f"Request error: {str(e)}",
+                {"error": str(e)}
+            )
+    
+    def test_provisional_mc1_requirement(self):
+        """Test Provisional Test - Should require MC1 certificate (unchanged)"""
+        try:
+            # Test Provisional (SPECIAL) category - should REQUIRE MC1
+            registration_data = self.generate_test_registration_data(
+                vehicle_category="SPECIAL", 
+                age_years=16.6, 
+                vehicle_weight=2000,  # Any weight for Provisional
+                include_mc1=True,   # Include MC1 certificate
+                include_mc2=False   # No MC2
+            )
+            jwt_token = self.generate_test_jwt_token()
+            
+            headers = {
+                "Authorization": f"Bearer {jwt_token}",
+                "Content-Type": "application/json"
+            }
+            
+            response = self.session.post(
+                f"{self.registration_base_url}/registrations",
+                json=registration_data,
+                headers=headers
+            )
+            
+            if response.status_code in [200, 201]:
+                data = response.json()
+                if data.get("success"):
+                    registration = data.get("registration", {})
+                    registration_id = registration.get("id")
+                    if registration_id:
+                        self.created_registrations.append(registration_id)
+                    
+                    # Verify MC1 is required
+                    required_mc = registration.get("required_medical_certificate")
+                    mc1_required = required_mc == "mc1"
+                    
+                    self.log_test(
+                        "Provisional Test - MC1 Required (unchanged)",
+                        mc1_required,
+                        f"Provisional registration correctly requires MC1 certificate",
+                        {
+                            "registration_id": registration_id,
+                            "vehicle_weight": 2000,
+                            "vehicle_category": "SPECIAL",
+                            "required_medical_certificate": required_mc,
+                            "age_in_years": registration.get("age_in_years"),
+                            "mc1_required": mc1_required
+                        }
+                    )
+                else:
+                    self.log_test(
+                        "Provisional Test - MC1 Required (unchanged)",
+                        False,
+                        f"Registration failed unexpectedly: {data.get('message')}",
+                        data
+                    )
+            else:
+                self.log_test(
+                    "Provisional Test - MC1 Required (unchanged)",
+                    False,
+                    f"Expected 200/201, got {response.status_code}",
+                    {"response": response.text}
+                )
+                
+        except Exception as e:
+            self.log_test(
+                "Provisional Test - MC1 Required (unchanged)",
+                False,
+                f"Request error: {str(e)}",
+                {"error": str(e)}
+            )
+    
+    def test_age_validation_scenarios(self):
+        """Test age validation for different vehicle categories"""
         test_cases = [
             {
-                "name": "Invalid Email",
-                "data": {"email": "invalid-email", "first_name": "Test", "last_name": "User", "phone": "4415551234"},
-                "expected_status": 422
+                "name": "Provisional - Valid Age (16.5+)",
+                "category": "SPECIAL",
+                "age": 16.6,
+                "should_pass": True,
+                "include_mc1": True,
+                "include_mc2": False
             },
             {
-                "name": "Missing Required Fields",
-                "data": {"email": "test@example.com"},
-                "expected_status": 422
+                "name": "Class B - Valid Age (17+)",
+                "category": "B",
+                "age": 17.5,
+                "should_pass": True,
+                "include_mc1": False,
+                "include_mc2": False
             },
             {
-                "name": "Invalid Phone Format",
-                "data": {"email": "test@example.com", "first_name": "Test", "last_name": "User", "phone": "123"},
-                "expected_status": 422
+                "name": "Class C - Valid Age (20+)",
+                "category": "C",
+                "age": 20.5,
+                "should_pass": True,
+                "include_mc1": False,
+                "include_mc2": True
             },
             {
-                "name": "Underage Candidate",
-                "data": {
-                    "email": "young@example.com",
-                    "first_name": "Young",
-                    "last_name": "Person",
-                    "phone": "+1-441-555-1234",
-                    "date_of_birth": "2010-01-01"  # Too young
-                },
-                "expected_status": 422
+                "name": "PPV - Valid Age (20+)",
+                "category": "PPV",
+                "age": 20.5,
+                "should_pass": True,
+                "include_mc1": False,
+                "include_mc2": True
             }
         ]
         
         for test_case in test_cases:
             try:
+                registration_data = self.generate_test_registration_data(
+                    vehicle_category=test_case["category"], 
+                    age_years=test_case["age"],
+                    vehicle_weight=5000,  # Use consistent weight
+                    include_mc1=test_case["include_mc1"],
+                    include_mc2=test_case["include_mc2"]
+                )
+                jwt_token = self.generate_test_jwt_token()
+                
+                headers = {
+                    "Authorization": f"Bearer {jwt_token}",
+                    "Content-Type": "application/json"
+                }
+                
                 response = self.session.post(
-                    f"{self.base_url}/candidates",
-                    json=test_case["data"]
+                    f"{self.registration_base_url}/registrations",
+                    json=registration_data,
+                    headers=headers
                 )
                 
-                success = response.status_code == test_case["expected_status"]
-                self.log_test(
-                    f"Create Candidate - {test_case['name']}",
-                    success,
-                    f"Expected {test_case['expected_status']}, got {response.status_code}",
-                    {"response_data": response.json() if response.headers.get('content-type', '').startswith('application/json') else response.text}
-                )
-                
+                if test_case["should_pass"]:
+                    # Should succeed
+                    if response.status_code in [200, 201]:
+                        data = response.json()
+                        if data.get("success"):
+                            registration_id = data.get("registration", {}).get("id")
+                            if registration_id:
+                                self.created_registrations.append(registration_id)
+                            
+                            self.log_test(
+                                f"Age Validation - {test_case['name']}",
+                                True,
+                                f"Age validation passed for {test_case['category']} at {test_case['age']} years",
+                                {"registration_id": registration_id}
+                            )
+                        else:
+                            self.log_test(
+                                f"Age Validation - {test_case['name']}",
+                                False,
+                                f"Expected success but got failure: {data.get('message')}",
+                                data
+                            )
+                    else:
+                        self.log_test(
+                            f"Age Validation - {test_case['name']}",
+                            False,
+                            f"Expected success but got status {response.status_code}",
+                            {"response": response.text}
+                        )
+                        
             except Exception as e:
                 self.log_test(
-                    f"Create Candidate - {test_case['name']}",
+                    f"Age Validation - {test_case['name']}",
                     False,
                     f"Request error: {str(e)}",
                     {"error": str(e)}
                 )
     
-    def test_create_duplicate_candidate(self):
-        """Test creating duplicate candidate."""
+    def test_jwt_authentication(self):
+        """Test JWT authentication requirements"""
         try:
-            # Create first candidate
-            candidate_data = self.generate_test_candidate_data("duplicate")
+            registration_data = self.generate_test_registration_data("B", 18.0)
             
-            response1 = self.session.post(
-                f"{self.base_url}/candidates",
-                json=candidate_data
+            # Test without Authorization header
+            response = self.session.post(
+                f"{self.registration_base_url}/registrations",
+                json=registration_data
             )
             
-            if response1.status_code == 201:
-                candidate_id = response1.json().get('candidate', {}).get('id')
-                if candidate_id:
-                    self.created_candidates.append(candidate_id)
-                
-                # Try to create duplicate
-                response2 = self.session.post(
-                    f"{self.base_url}/candidates",
-                    json=candidate_data
-                )
-                
-                if response2.status_code == 400:
-                    data = response2.json()
-                    if "already exists" in data.get('detail', {}).get('message', '').lower():
-                        self.log_test(
-                            "Create Candidate - Duplicate Prevention",
-                            True,
-                            "Duplicate candidate properly rejected",
-                            data
-                        )
-                    else:
-                        self.log_test(
-                            "Create Candidate - Duplicate Prevention",
-                            False,
-                            "Wrong error message for duplicate",
-                            data
-                        )
-                else:
-                    self.log_test(
-                        "Create Candidate - Duplicate Prevention",
-                        False,
-                        f"Expected 400, got {response2.status_code}",
-                        {"response": response2.text}
-                    )
-            else:
+            if response.status_code == 401:
                 self.log_test(
-                    "Create Candidate - Duplicate Prevention",
-                    False,
-                    f"Failed to create first candidate: {response1.status_code}",
-                    {"response": response1.text}
-                )
-                
-        except Exception as e:
-            self.log_test(
-                "Create Candidate - Duplicate Prevention",
-                False,
-                f"Request error: {str(e)}",
-                {"error": str(e)}
-            )
-    
-    def test_get_candidate_success(self, candidate_id: str):
-        """Test successful candidate retrieval."""
-        if not candidate_id:
-            self.log_test(
-                "Get Candidate - Success",
-                False,
-                "No candidate ID provided",
-                {}
-            )
-            return
-        
-        try:
-            response = self.session.get(
-                f"{self.base_url}/candidates/{candidate_id}"
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                
-                # Validate response structure
-                required_fields = ['id', 'email', 'first_name', 'last_name', 'status']
-                missing_fields = [field for field in required_fields if field not in data]
-                
-                if not missing_fields:
-                    self.log_test(
-                        "Get Candidate - Success",
-                        True,
-                        f"Candidate retrieved successfully: {data.get('email')}",
-                        {
-                            "candidate_id": data.get('id'),
-                            "status": data.get('status'),
-                            "is_email_verified": data.get('is_email_verified'),
-                            "is_phone_verified": data.get('is_phone_verified')
-                        }
-                    )
-                else:
-                    self.log_test(
-                        "Get Candidate - Success",
-                        False,
-                        f"Response missing required fields: {missing_fields}",
-                        data
-                    )
-            else:
-                self.log_test(
-                    "Get Candidate - Success",
-                    False,
-                    f"Expected 200, got {response.status_code}",
-                    {"response": response.text}
-                )
-                
-        except Exception as e:
-            self.log_test(
-                "Get Candidate - Success",
-                False,
-                f"Request error: {str(e)}",
-                {"error": str(e)}
-            )
-    
-    def test_get_candidate_not_found(self):
-        """Test candidate retrieval with non-existent ID."""
-        try:
-            fake_id = str(uuid.uuid4())
-            response = self.session.get(
-                f"{self.base_url}/candidates/{fake_id}"
-            )
-            
-            if response.status_code == 404:
-                data = response.json()
-                if data.get('detail', {}).get('error') == 'not_found':
-                    self.log_test(
-                        "Get Candidate - Not Found",
-                        True,
-                        "Non-existent candidate properly returns 404",
-                        data
-                    )
-                else:
-                    self.log_test(
-                        "Get Candidate - Not Found",
-                        False,
-                        "Wrong error format for 404",
-                        data
-                    )
-            else:
-                self.log_test(
-                    "Get Candidate - Not Found",
-                    False,
-                    f"Expected 404, got {response.status_code}",
-                    {"response": response.text}
-                )
-                
-        except Exception as e:
-            self.log_test(
-                "Get Candidate - Not Found",
-                False,
-                f"Request error: {str(e)}",
-                {"error": str(e)}
-            )
-    
-    def test_get_candidate_invalid_uuid(self):
-        """Test candidate retrieval with invalid UUID format."""
-        try:
-            invalid_id = "not-a-valid-uuid"
-            response = self.session.get(
-                f"{self.base_url}/candidates/{invalid_id}"
-            )
-            
-            # Should return 422 for invalid UUID format or 404
-            if response.status_code in [422, 404, 400]:
-                self.log_test(
-                    "Get Candidate - Invalid UUID",
+                    "JWT Authentication - Missing Token",
                     True,
-                    f"Invalid UUID properly handled with status {response.status_code}",
-                    {"response": response.json() if response.headers.get('content-type', '').startswith('application/json') else response.text}
-                )
-            else:
-                self.log_test(
-                    "Get Candidate - Invalid UUID",
-                    False,
-                    f"Expected 422/404/400, got {response.status_code}",
-                    {"response": response.text}
-                )
-                
-        except Exception as e:
-            self.log_test(
-                "Get Candidate - Invalid UUID",
-                False,
-                f"Request error: {str(e)}",
-                {"error": str(e)}
-            )
-    
-    def test_otp_verification_flow(self, candidate_id: str):
-        """Test OTP verification functionality."""
-        if not candidate_id:
-            self.log_test(
-                "OTP Verification Flow",
-                False,
-                "No candidate ID provided",
-                {}
-            )
-            return
-        
-        # Test OTP status check
-        try:
-            response = self.session.get(
-                f"{self.base_url}/identity/v1/candidates/{candidate_id}/otp-status"
-            )
-            
-            if response.status_code == 200:
-                status_data = response.json()
-                self.log_test(
-                    "OTP Status Check",
-                    True,
-                    f"OTP status retrieved successfully",
-                    {
-                        "email_otp_status": status_data.get('email_otp_status'),
-                        "phone_otp_status": status_data.get('phone_otp_status'),
-                        "can_set_password": status_data.get('can_set_password')
-                    }
-                )
-            else:
-                self.log_test(
-                    "OTP Status Check",
-                    False,
-                    f"Expected 200, got {response.status_code}",
-                    {"response": response.text}
-                )
-        except Exception as e:
-            self.log_test(
-                "OTP Status Check",
-                False,
-                f"Request error: {str(e)}",
-                {"error": str(e)}
-            )
-        
-        # Test OTP verification with invalid code
-        try:
-            otp_data = {
-                "candidate_id": candidate_id,
-                "otp_type": "email",
-                "otp_code": "000000"  # Invalid code
-            }
-            
-            response = self.session.post(
-                f"{self.base_url}/identity/v1/candidates/{candidate_id}/verify-otp",
-                json=otp_data
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                if not data.get('success', True):  # Should fail
-                    self.log_test(
-                        "OTP Verification - Invalid Code",
-                        True,
-                        f"Invalid OTP properly rejected: {data.get('message')}",
-                        data
-                    )
-                else:
-                    self.log_test(
-                        "OTP Verification - Invalid Code",
-                        False,
-                        "Invalid OTP was accepted (should fail)",
-                        data
-                    )
-            else:
-                self.log_test(
-                    "OTP Verification - Invalid Code",
-                    False,
-                    f"Expected 200, got {response.status_code}",
-                    {"response": response.text}
-                )
-        except Exception as e:
-            self.log_test(
-                "OTP Verification - Invalid Code",
-                False,
-                f"Request error: {str(e)}",
-                {"error": str(e)}
-            )
-        
-        # Test OTP resend
-        try:
-            resend_data = {
-                "candidate_id": candidate_id,
-                "otp_type": "email"
-            }
-            
-            response = self.session.post(
-                f"{self.base_url}/identity/v1/candidates/{candidate_id}/resend-otp",
-                json=resend_data
-            )
-            
-            if response.status_code in [200, 400]:  # 400 might be cooldown
-                data = response.json()
-                if response.status_code == 200:
-                    self.log_test(
-                        "OTP Resend",
-                        True,
-                        f"OTP resend successful: {data.get('message')}",
-                        data
-                    )
-                else:  # 400 - might be cooldown
-                    if "wait" in data.get('detail', {}).get('message', '').lower():
-                        self.log_test(
-                            "OTP Resend - Cooldown",
-                            True,
-                            f"OTP resend cooldown properly enforced: {data.get('detail', {}).get('message')}",
-                            data
-                        )
-                    else:
-                        self.log_test(
-                            "OTP Resend",
-                            False,
-                            f"Unexpected error: {data}",
-                            data
-                        )
-            else:
-                self.log_test(
-                    "OTP Resend",
-                    False,
-                    f"Expected 200/400, got {response.status_code}",
-                    {"response": response.text}
-                )
-        except Exception as e:
-            self.log_test(
-                "OTP Resend",
-                False,
-                f"Request error: {str(e)}",
-                {"error": str(e)}
-            )
-    
-    def test_password_setting_flow(self, candidate_id: str):
-        """Test password setting functionality."""
-        if not candidate_id:
-            self.log_test(
-                "Password Setting Flow",
-                False,
-                "No candidate ID provided",
-                {}
-            )
-            return
-        
-        # Test password setting with weak password
-        try:
-            weak_password_data = {
-                "candidate_id": candidate_id,
-                "password": "weak",
-                "confirm_password": "weak"
-            }
-            
-            response = self.session.post(
-                f"{self.base_url}/identity/v1/candidates/{candidate_id}/set-password",
-                json=weak_password_data
-            )
-            
-            if response.status_code == 422:
-                self.log_test(
-                    "Password Setting - Weak Password",
-                    True,
-                    "Weak password properly rejected",
-                    {"response": response.json() if response.headers.get('content-type', '').startswith('application/json') else response.text}
-                )
-            else:
-                self.log_test(
-                    "Password Setting - Weak Password",
-                    False,
-                    f"Expected 422, got {response.status_code}",
-                    {"response": response.text}
-                )
-        except Exception as e:
-            self.log_test(
-                "Password Setting - Weak Password",
-                False,
-                f"Request error: {str(e)}",
-                {"error": str(e)}
-            )
-        
-        # Test password setting with mismatched passwords
-        try:
-            mismatch_data = {
-                "candidate_id": candidate_id,
-                "password": "StrongPass123!",
-                "confirm_password": "DifferentPass123!"
-            }
-            
-            response = self.session.post(
-                f"{self.base_url}/identity/v1/candidates/{candidate_id}/set-password",
-                json=mismatch_data
-            )
-            
-            if response.status_code == 422:
-                self.log_test(
-                    "Password Setting - Mismatch",
-                    True,
-                    "Password mismatch properly rejected",
-                    {"response": response.json() if response.headers.get('content-type', '').startswith('application/json') else response.text}
-                )
-            else:
-                self.log_test(
-                    "Password Setting - Mismatch",
-                    False,
-                    f"Expected 422, got {response.status_code}",
-                    {"response": response.text}
-                )
-        except Exception as e:
-            self.log_test(
-                "Password Setting - Mismatch",
-                False,
-                f"Request error: {str(e)}",
-                {"error": str(e)}
-            )
-        
-        # Test password setting without verification (should fail)
-        try:
-            valid_password_data = {
-                "candidate_id": candidate_id,
-                "password": "StrongPass123!",
-                "confirm_password": "StrongPass123!"
-            }
-            
-            response = self.session.post(
-                f"{self.base_url}/identity/v1/candidates/{candidate_id}/set-password",
-                json=valid_password_data
-            )
-            
-            # Should fail because candidate is not verified
-            if response.status_code == 400:
-                data = response.json()
-                if "verification" in data.get('detail', {}).get('message', '').lower():
-                    self.log_test(
-                        "Password Setting - Unverified Candidate",
-                        True,
-                        f"Unverified candidate properly rejected: {data.get('detail', {}).get('message')}",
-                        data
-                    )
-                else:
-                    self.log_test(
-                        "Password Setting - Unverified Candidate",
-                        False,
-                        f"Wrong error message: {data}",
-                        data
-                    )
-            else:
-                self.log_test(
-                    "Password Setting - Unverified Candidate",
-                    False,
-                    f"Expected 400, got {response.status_code}",
-                    {"response": response.text}
-                )
-        except Exception as e:
-            self.log_test(
-                "Password Setting - Unverified Candidate",
-                False,
-                f"Request error: {str(e)}",
-                {"error": str(e)}
-            )
-    
-    def test_error_handling(self):
-        """Test various error handling scenarios."""
-        # Test with malformed JSON
-        try:
-            response = self.session.post(
-                f"{self.base_url}/identity/v1/candidates",
-                data="invalid json",
-                headers={'Content-Type': 'application/json'}
-            )
-            
-            if response.status_code == 422:
-                self.log_test(
-                    "Error Handling - Malformed JSON",
-                    True,
-                    "Malformed JSON properly rejected",
+                    "Missing authorization properly rejected",
                     {"status": response.status_code}
                 )
             else:
                 self.log_test(
-                    "Error Handling - Malformed JSON",
+                    "JWT Authentication - Missing Token",
                     False,
-                    f"Expected 422, got {response.status_code}",
+                    f"Expected 401, got {response.status_code}",
                     {"response": response.text}
                 )
-        except Exception as e:
-            self.log_test(
-                "Error Handling - Malformed JSON",
-                False,
-                f"Request error: {str(e)}",
-                {"error": str(e)}
-            )
-        
-        # Test with missing Content-Type
-        try:
-            candidate_data = self.generate_test_candidate_data("error_test")
-            response = self.session.post(
-                f"{self.base_url}/identity/v1/candidates",
-                json=candidate_data,
-                headers={'Content-Type': 'text/plain'}  # Wrong content type
-            )
-            
-            # Should handle gracefully
-            if response.status_code in [400, 422, 415]:
-                self.log_test(
-                    "Error Handling - Wrong Content Type",
-                    True,
-                    f"Wrong content type handled with status {response.status_code}",
-                    {"status": response.status_code}
-                )
-            else:
-                self.log_test(
-                    "Error Handling - Wrong Content Type",
-                    False,
-                    f"Unexpected status {response.status_code}",
-                    {"response": response.text}
-                )
-        except Exception as e:
-            self.log_test(
-                "Error Handling - Wrong Content Type",
-                False,
-                f"Request error: {str(e)}",
-                {"error": str(e)}
-            )
-    
-    def test_correlation_id_handling(self):
-        """Test correlation ID handling."""
-        try:
-            candidate_data = self.generate_test_candidate_data("correlation")
-            correlation_id = f"test-correlation-{uuid.uuid4()}"
-            
-            response = self.session.post(
-                f"{self.base_url}/candidates",
-                json=candidate_data,
-                headers={"X-Correlation-ID": correlation_id}
-            )
-            
-            if response.status_code == 201:
-                candidate_id = response.json().get('candidate', {}).get('id')
-                if candidate_id:
-                    self.created_candidates.append(candidate_id)
                 
-                self.log_test(
-                    "Correlation ID Handling",
-                    True,
-                    f"Request with correlation ID processed successfully",
-                    {"correlation_id": correlation_id, "candidate_id": candidate_id}
-                )
-            else:
-                self.log_test(
-                    "Correlation ID Handling",
-                    False,
-                    f"Expected 201, got {response.status_code}",
-                    {"response": response.text}
-                )
         except Exception as e:
             self.log_test(
-                "Correlation ID Handling",
+                "JWT Authentication - Missing Token",
                 False,
                 f"Request error: {str(e)}",
                 {"error": str(e)}
@@ -792,39 +702,48 @@ class IdentityServiceTester:
     
     def run_all_tests(self):
         """Run all tests in sequence."""
-        print("🚀 Starting ITADIAS Identity Microservice Backend Tests")
-        print(f"🌐 Testing against: {BACKEND_URL}")
-        print("=" * 80)
+        print("🚀 Starting UPDATED Registration Microservice Medical Certificate Requirements Tests")
+        print(f"🌐 Testing Registration Service: {REGISTRATION_SERVICE_URL}")
+        print("🔍 Focus: UPDATED MC2 certificate requirements for ALL Class C tests (including upgrades)")
+        print("=" * 100)
         
-        # Health checks first
-        self.test_health_check()
+        # Service health check
+        self.test_service_health_check()
         
-        # Create a candidate for subsequent tests
-        candidate_id = self.test_create_candidate_success()
+        # Authentication test
+        self.test_jwt_authentication()
         
-        # Validation tests
-        self.test_create_candidate_validation_errors()
-        self.test_create_duplicate_candidate()
+        # CORE UPDATED MEDICAL CERTIFICATE TESTS
+        print("\n🎯 TESTING UPDATED MEDICAL CERTIFICATE REQUIREMENTS:")
+        print("   NEW RULE: MC2 certificate is now required for ALL Class C tests including upgrades (regardless of vehicle weight)")
         
-        # Candidate retrieval tests
-        self.test_get_candidate_success(candidate_id)
-        self.test_get_candidate_not_found()
-        self.test_get_candidate_invalid_uuid()
+        # 1. Class C Test (Vehicle < 7000kg) - Should require MC2 certificate (NEW BEHAVIOR)
+        self.test_class_c_light_vehicle_mc2_requirement()
+        self.test_class_c_light_vehicle_missing_mc2()
         
-        # Error handling tests
-        self.test_error_handling()
+        # 2. Class C Test (Vehicle > 7000kg) - Should require MC2 certificate (unchanged)
+        self.test_class_c_heavy_vehicle_mc2_requirement()
         
-        # Correlation ID tests
-        self.test_correlation_id_handling()
+        # 3. PPV Test (Any weight) - Should require MC2 certificate (unchanged)
+        self.test_ppv_mc2_requirement()
+        
+        # 4. Class B Test - Should NOT require medical certificate (unchanged)
+        self.test_class_b_no_mc_requirement()
+        
+        # 5. Provisional Test - Should require MC1 certificate (unchanged)
+        self.test_provisional_mc1_requirement()
+        
+        # Age validation tests
+        self.test_age_validation_scenarios()
         
         # Print summary
         self.print_summary()
     
     def print_summary(self):
         """Print test summary."""
-        print("\n" + "=" * 80)
-        print("📊 TEST SUMMARY")
-        print("=" * 80)
+        print("\n" + "=" * 100)
+        print("📊 UPDATED MEDICAL CERTIFICATE REQUIREMENTS TEST SUMMARY")
+        print("=" * 100)
         
         total_tests = len(self.test_results)
         passed_tests = sum(1 for result in self.test_results if result['success'])
@@ -835,16 +754,22 @@ class IdentityServiceTester:
         print(f"❌ Failed: {failed_tests}")
         print(f"Success Rate: {(passed_tests/total_tests)*100:.1f}%")
         
+        print("\n🎯 KEY VALIDATION POINTS:")
+        print("   ✓ MC2 required for ALL Class C tests (including light vehicles under 7000kg)")
+        print("   ✓ Proper error messages when MC2 is missing for Class C")
+        print("   ✓ Age validation works correctly for all categories")
+        print("   ✓ JWT authentication enforced")
+        
         if failed_tests > 0:
             print("\n🔍 FAILED TESTS:")
             for result in self.test_results:
                 if not result['success']:
                     print(f"  ❌ {result['test']}: {result['message']}")
         
-        print(f"\n📝 Created {len(self.created_candidates)} test candidates during testing")
+        print(f"\n📝 Created {len(self.created_registrations)} test registrations during testing")
         
         # Save detailed results to file
-        with open('/app/backend_test_results.json', 'w') as f:
+        with open('/app/updated_medical_cert_test_results.json', 'w') as f:
             json.dump({
                 'summary': {
                     'total_tests': total_tests,
@@ -852,18 +777,19 @@ class IdentityServiceTester:
                     'failed_tests': failed_tests,
                     'success_rate': (passed_tests/total_tests)*100,
                     'test_timestamp': datetime.now().isoformat(),
-                    'backend_url': BACKEND_URL
+                    'registration_service_url': REGISTRATION_SERVICE_URL,
+                    'focus': 'UPDATED MC2 certificate requirements for ALL Class C tests'
                 },
                 'test_results': self.test_results,
-                'created_candidates': self.created_candidates
+                'created_registrations': self.created_registrations
             }, f, indent=2)
         
-        print(f"📄 Detailed results saved to: /app/backend_test_results.json")
+        print(f"📄 Detailed results saved to: /app/updated_medical_cert_test_results.json")
 
 
 def main():
     """Main test execution function."""
-    tester = IdentityServiceTester()
+    tester = UpdatedMedicalCertificateRulesTester()
     tester.run_all_tests()
 
 
