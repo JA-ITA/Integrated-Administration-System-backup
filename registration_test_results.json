@@ -1,0 +1,374 @@
+{
+  "summary": {
+    "total_tests": 25,
+    "passed_tests": 10,
+    "failed_tests": 15,
+    "success_rate": 40.0,
+    "test_timestamp": "2025-08-17T23:16:22.321131",
+    "registration_service_url": "http://localhost:8004",
+    "main_backend_url": "https://signup-service.preview.emergentagent.com"
+  },
+  "test_results": [
+    {
+      "test": "Service Health Check",
+      "success": true,
+      "message": "Service healthy: healthy",
+      "timestamp": "2025-08-17T23:16:20.823237",
+      "details": {
+        "database": "connected",
+        "events": "connected",
+        "dependencies": false,
+        "configuration": {
+          "min_age_provisional": 16.5,
+          "min_age_class_b": 17,
+          "min_age_class_c_ppv": 20,
+          "weight_threshold_class_c": 7000,
+          "max_document_size_mb": 5,
+          "environment": "development"
+        }
+      }
+    },
+    {
+      "test": "Configuration Endpoint",
+      "success": true,
+      "message": "Configuration retrieved successfully",
+      "timestamp": "2025-08-17T23:16:20.825042",
+      "details": {
+        "min_age_provisional": 16.5,
+        "min_age_class_b": 17,
+        "min_age_class_c_ppv": 20,
+        "weight_threshold_class_c": 7000,
+        "document_formats": {
+          "photo": [
+            "jpeg",
+            "jpg",
+            "png"
+          ],
+          "id_proof": [
+            "jpeg",
+            "jpg",
+            "png",
+            "pdf"
+          ],
+          "medical": [
+            "pdf"
+          ],
+          "other": [
+            "pdf"
+          ]
+        }
+      }
+    },
+    {
+      "test": "Events Status Endpoint",
+      "success": true,
+      "message": "Events status retrieved successfully",
+      "timestamp": "2025-08-17T23:16:20.826611",
+      "details": {
+        "event_service_connected": false,
+        "fallback_events_count": 0,
+        "has_fallback_events": false
+      }
+    },
+    {
+      "test": "Authentication - Missing Token",
+      "success": true,
+      "message": "Missing authorization properly rejected",
+      "timestamp": "2025-08-17T23:16:20.828967",
+      "details": {
+        "status": 401
+      }
+    },
+    {
+      "test": "Authentication - Invalid Token Format",
+      "success": true,
+      "message": "Invalid token format properly rejected",
+      "timestamp": "2025-08-17T23:16:20.830800",
+      "details": {
+        "status": 401
+      }
+    },
+    {
+      "test": "Direct Registration API - Class B Success",
+      "success": false,
+      "message": "Registration failed: External validation failed",
+      "timestamp": "2025-08-17T23:16:20.901289",
+      "details": {
+        "success": false,
+        "registration": null,
+        "message": "External validation failed",
+        "validation_errors": [
+          "Booking validation error: All connection attempts failed",
+          "Receipt validation error: All connection attempts failed"
+        ],
+        "driver_record_id": null
+      }
+    },
+    {
+      "test": "Age Validation - Provisional - Valid Age (16.5+)",
+      "success": false,
+      "message": "Expected success but got failure: External validation failed",
+      "timestamp": "2025-08-17T23:16:20.971573",
+      "details": {
+        "success": false,
+        "registration": null,
+        "message": "External validation failed",
+        "validation_errors": [
+          "Booking validation error: All connection attempts failed",
+          "Receipt validation error: All connection attempts failed"
+        ],
+        "driver_record_id": null
+      }
+    },
+    {
+      "test": "Age Validation - Provisional - Invalid Age (<16.5)",
+      "success": false,
+      "message": "Expected 400/422 but got 200",
+      "timestamp": "2025-08-17T23:16:21.047381",
+      "details": {
+        "response": "{\"success\":false,\"registration\":null,\"message\":\"External validation failed\",\"validation_errors\":[\"Booking validation error: All connection attempts failed\",\"Receipt validation error: All connection attempts failed\"],\"driver_record_id\":null}"
+      }
+    },
+    {
+      "test": "Age Validation - Class B - Valid Age (17+)",
+      "success": false,
+      "message": "Expected success but got failure: External validation failed",
+      "timestamp": "2025-08-17T23:16:21.118272",
+      "details": {
+        "success": false,
+        "registration": null,
+        "message": "External validation failed",
+        "validation_errors": [
+          "Booking validation error: All connection attempts failed",
+          "Receipt validation error: All connection attempts failed"
+        ],
+        "driver_record_id": null
+      }
+    },
+    {
+      "test": "Age Validation - Class B - Invalid Age (<17)",
+      "success": false,
+      "message": "Expected 400/422 but got 200",
+      "timestamp": "2025-08-17T23:16:21.188580",
+      "details": {
+        "response": "{\"success\":false,\"registration\":null,\"message\":\"External validation failed\",\"validation_errors\":[\"Booking validation error: All connection attempts failed\",\"Receipt validation error: All connection attempts failed\"],\"driver_record_id\":null}"
+      }
+    },
+    {
+      "test": "Age Validation - Class C - Valid Age (20+)",
+      "success": false,
+      "message": "Expected success but got failure: External validation failed",
+      "timestamp": "2025-08-17T23:16:21.261548",
+      "details": {
+        "success": false,
+        "registration": null,
+        "message": "External validation failed",
+        "validation_errors": [
+          "Booking validation error: All connection attempts failed",
+          "Receipt validation error: All connection attempts failed"
+        ],
+        "driver_record_id": null
+      }
+    },
+    {
+      "test": "Age Validation - Class C - Invalid Age (<20)",
+      "success": false,
+      "message": "Expected 400/422 but got 200",
+      "timestamp": "2025-08-17T23:16:21.331620",
+      "details": {
+        "response": "{\"success\":false,\"registration\":null,\"message\":\"External validation failed\",\"validation_errors\":[\"Booking validation error: All connection attempts failed\",\"Receipt validation error: All connection attempts failed\"],\"driver_record_id\":null}"
+      }
+    },
+    {
+      "test": "Medical Certificate - Provisional - MC1 Required",
+      "success": false,
+      "message": "Expected success but got failure: External validation failed",
+      "timestamp": "2025-08-17T23:16:21.401476",
+      "details": {
+        "success": false,
+        "registration": null,
+        "message": "External validation failed",
+        "validation_errors": [
+          "Booking validation error: All connection attempts failed",
+          "Receipt validation error: All connection attempts failed"
+        ],
+        "driver_record_id": null
+      }
+    },
+    {
+      "test": "Medical Certificate - Provisional - Missing MC1",
+      "success": false,
+      "message": "Expected 400/422 but got 200",
+      "timestamp": "2025-08-17T23:16:21.473271",
+      "details": {
+        "response": "{\"success\":false,\"registration\":null,\"message\":\"External validation failed\",\"validation_errors\":[\"Booking validation error: All connection attempts failed\",\"Receipt validation error: All connection attempts failed\"],\"driver_record_id\":null}"
+      }
+    },
+    {
+      "test": "Medical Certificate - Class C - MC2 Required",
+      "success": false,
+      "message": "Expected success but got failure: External validation failed",
+      "timestamp": "2025-08-17T23:16:21.542902",
+      "details": {
+        "success": false,
+        "registration": null,
+        "message": "External validation failed",
+        "validation_errors": [
+          "Booking validation error: All connection attempts failed",
+          "Receipt validation error: All connection attempts failed"
+        ],
+        "driver_record_id": null
+      }
+    },
+    {
+      "test": "Medical Certificate - Class C - Missing MC2",
+      "success": false,
+      "message": "Expected 400/422 but got 200",
+      "timestamp": "2025-08-17T23:16:21.613697",
+      "details": {
+        "response": "{\"success\":false,\"registration\":null,\"message\":\"External validation failed\",\"validation_errors\":[\"Booking validation error: All connection attempts failed\",\"Receipt validation error: All connection attempts failed\"],\"driver_record_id\":null}"
+      }
+    },
+    {
+      "test": "Medical Certificate - Class B - No MC Required",
+      "success": false,
+      "message": "Expected success but got failure: External validation failed",
+      "timestamp": "2025-08-17T23:16:21.687395",
+      "details": {
+        "success": false,
+        "registration": null,
+        "message": "External validation failed",
+        "validation_errors": [
+          "Booking validation error: All connection attempts failed",
+          "Receipt validation error: All connection attempts failed"
+        ],
+        "driver_record_id": null
+      }
+    },
+    {
+      "test": "Document Validation - Missing Required Documents",
+      "success": true,
+      "message": "Missing required documents properly rejected",
+      "timestamp": "2025-08-17T23:16:21.689708",
+      "details": {
+        "status": 422
+      }
+    },
+    {
+      "test": "Document Validation - Oversized Document",
+      "success": false,
+      "message": "Expected 400/422, got 200",
+      "timestamp": "2025-08-17T23:16:21.810474",
+      "details": {
+        "response": "{\"success\":false,\"registration\":null,\"message\":\"External validation failed\",\"validation_errors\":[\"Booking validation error: All connection attempts failed\",\"Receipt validation error: All connection attempts failed\"],\"driver_record_id\":null}"
+      }
+    },
+    {
+      "test": "External Service Validation",
+      "success": true,
+      "message": "External service validation handled gracefully with status 200",
+      "timestamp": "2025-08-17T23:16:21.886329",
+      "details": {
+        "status": 200,
+        "success": false,
+        "message": "External validation failed"
+      }
+    },
+    {
+      "test": "Manager Override Functionality",
+      "success": false,
+      "message": "Manager override failed: External validation failed",
+      "timestamp": "2025-08-17T23:16:21.958587",
+      "details": {
+        "success": false,
+        "registration": null,
+        "message": "External validation failed",
+        "validation_errors": [
+          "Booking validation error: All connection attempts failed",
+          "Receipt validation error: All connection attempts failed"
+        ],
+        "driver_record_id": null
+      }
+    },
+    {
+      "test": "Registration Retrieval",
+      "success": false,
+      "message": "No registration ID provided",
+      "timestamp": "2025-08-17T23:16:21.958651",
+      "details": {}
+    },
+    {
+      "test": "Main Backend Integration - Health Check",
+      "success": true,
+      "message": "Registration health check via main backend: healthy",
+      "timestamp": "2025-08-17T23:16:22.158404",
+      "details": {
+        "status": "healthy",
+        "service": "ITADIAS Registration Microservice",
+        "version": "1.0.0",
+        "database": "connected",
+        "events": "connected",
+        "event_details": {
+          "connected": false,
+          "rabbitmq_url": "localhost:5672",
+          "exchange": "itadias.events",
+          "fallback_events_count": 0
+        },
+        "dependencies": {
+          "all_dependencies_available": false,
+          "services": {
+            "calendar": {
+              "available": false,
+              "error": "All connection attempts failed"
+            },
+            "receipt": {
+              "available": false,
+              "error": "All connection attempts failed"
+            }
+          }
+        },
+        "configuration": {
+          "min_age_provisional": 16.5,
+          "min_age_class_b": 17,
+          "min_age_class_c_ppv": 20,
+          "weight_threshold_class_c": 7000,
+          "max_document_size_mb": 5,
+          "environment": "development"
+        }
+      }
+    },
+    {
+      "test": "Main Backend Integration - Dependencies Check",
+      "success": true,
+      "message": "Dependencies check via main backend: degraded",
+      "timestamp": "2025-08-17T23:16:22.270244",
+      "details": {
+        "status": "degraded",
+        "dependencies": {
+          "all_dependencies_available": false,
+          "services": {
+            "calendar": {
+              "available": false,
+              "error": "All connection attempts failed"
+            },
+            "receipt": {
+              "available": false,
+              "error": "All connection attempts failed"
+            }
+          }
+        }
+      }
+    },
+    {
+      "test": "Main Backend Integration - Events Status",
+      "success": true,
+      "message": "Events status via main backend retrieved successfully",
+      "timestamp": "2025-08-17T23:16:22.320877",
+      "details": {
+        "event_service_connected": false,
+        "fallback_events_count": 0
+      }
+    }
+  ],
+  "created_registrations": []
+}
