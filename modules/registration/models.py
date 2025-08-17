@@ -13,6 +13,21 @@ import enum
 from database import Base
 from config import config
 
+# Define UUID column type based on database type
+def get_uuid_column():
+    """Get appropriate UUID column type based on database"""
+    if config.db.db_type == "sqlite":
+        return Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    else:
+        return Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+
+def get_uuid_foreign_key_column(foreign_key=None):
+    """Get appropriate UUID foreign key column type based on database"""
+    if config.db.db_type == "sqlite":
+        return Column(String(36), nullable=False, index=True)
+    else:
+        return Column(UUID(as_uuid=True), nullable=False, index=True)
+
 # Enums
 
 class VehicleCategory(str, enum.Enum):
