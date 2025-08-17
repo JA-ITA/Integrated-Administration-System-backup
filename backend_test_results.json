@@ -1,139 +1,183 @@
 {
   "summary": {
-    "total_tests": 16,
-    "passed_tests": 1,
-    "failed_tests": 15,
-    "success_rate": 6.25,
-    "test_timestamp": "2025-08-17T20:30:31.477168",
-    "backend_url": "https://profile-manager-12.preview.emergentagent.com"
+    "total_tests": 14,
+    "passed_tests": 5,
+    "failed_tests": 9,
+    "success_rate": 35.714285714285715,
+    "test_timestamp": "2025-08-17T21:00:12.302222",
+    "backend_url": "http://localhost:8002"
   },
   "test_results": [
     {
       "test": "Health Check - Main",
-      "success": false,
-      "message": "Health check failed with status 404",
-      "timestamp": "2025-08-17T20:30:31.351461",
+      "success": true,
+      "message": "Service healthy: healthy",
+      "timestamp": "2025-08-17T21:00:12.195826",
       "details": {
-        "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /health</pre>\n</body>\n</html>\n"
+        "status": "healthy",
+        "service": "ITADIAS Identity Microservice",
+        "version": "1.0.0",
+        "database": "connected",
+        "events": "connected"
       }
     },
     {
-      "test": "Health Check - Identity Module",
-      "success": false,
-      "message": "Identity health check failed with status 404",
-      "timestamp": "2025-08-17T20:30:31.360687",
+      "test": "Root Endpoint",
+      "success": true,
+      "message": "Root endpoint accessible: ITADIAS Identity Microservice",
+      "timestamp": "2025-08-17T21:00:12.197446",
       "details": {
-        "response": "{\"detail\":\"Not Found\"}"
+        "message": "ITADIAS Identity Microservice",
+        "version": "1.0.0",
+        "docs": "/docs"
       }
     },
     {
       "test": "Create Candidate - Success",
       "success": false,
-      "message": "Expected 201, got 404",
-      "timestamp": "2025-08-17T20:30:31.373248",
+      "message": "Expected 201, got 500",
+      "timestamp": "2025-08-17T21:00:12.271395",
       "details": {
-        "response": "{\"detail\":\"Not Found\"}"
+        "response": "{\"detail\":\"Internal server error\"}"
       }
     },
     {
       "test": "Create Candidate - Invalid Email",
-      "success": false,
-      "message": "Expected 422, got 404",
-      "timestamp": "2025-08-17T20:30:31.381014",
+      "success": true,
+      "message": "Expected 422, got 422",
+      "timestamp": "2025-08-17T21:00:12.273982",
       "details": {
         "response_data": {
-          "detail": "Not Found"
+          "detail": [
+            {
+              "type": "value_error",
+              "loc": [
+                "body",
+                "email"
+              ],
+              "msg": "value is not a valid email address: An email address must have an @-sign.",
+              "input": "invalid-email",
+              "ctx": {
+                "reason": "An email address must have an @-sign."
+              }
+            }
+          ]
         }
       }
     },
     {
       "test": "Create Candidate - Missing Required Fields",
-      "success": false,
-      "message": "Expected 422, got 404",
-      "timestamp": "2025-08-17T20:30:31.395642",
+      "success": true,
+      "message": "Expected 422, got 422",
+      "timestamp": "2025-08-17T21:00:12.276332",
       "details": {
         "response_data": {
-          "detail": "Not Found"
+          "detail": [
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "first_name"
+              ],
+              "msg": "Field required",
+              "input": {
+                "email": "test@example.com"
+              },
+              "url": "https://errors.pydantic.dev/2.5/v/missing"
+            },
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "last_name"
+              ],
+              "msg": "Field required",
+              "input": {
+                "email": "test@example.com"
+              },
+              "url": "https://errors.pydantic.dev/2.5/v/missing"
+            }
+          ]
         }
       }
     },
     {
       "test": "Create Candidate - Invalid Phone Format",
       "success": false,
-      "message": "Expected 422, got 404",
-      "timestamp": "2025-08-17T20:30:31.403593",
+      "message": "Expected 422, got 500",
+      "timestamp": "2025-08-17T21:00:12.282601",
       "details": {
         "response_data": {
-          "detail": "Not Found"
+          "detail": "Internal server error"
         }
       }
     },
     {
       "test": "Create Candidate - Underage Candidate",
       "success": false,
-      "message": "Expected 422, got 404",
-      "timestamp": "2025-08-17T20:30:31.412508",
+      "message": "Expected 422, got 500",
+      "timestamp": "2025-08-17T21:00:12.288021",
       "details": {
         "response_data": {
-          "detail": "Not Found"
+          "detail": "Internal server error"
         }
       }
     },
     {
       "test": "Create Candidate - Duplicate Prevention",
       "success": false,
-      "message": "Failed to create first candidate: 404",
-      "timestamp": "2025-08-17T20:30:31.424087",
+      "message": "Failed to create first candidate: 422",
+      "timestamp": "2025-08-17T21:00:12.290167",
       "details": {
-        "response": "{\"detail\":\"Not Found\"}"
+        "response": "{\"detail\":[{\"type\":\"string_pattern_mismatch\",\"loc\":[\"body\",\"phone\"],\"msg\":\"String should match pattern '^\\\\+?[\\\\d\\\\s\\\\-\\\\(\\\\)]+$'\",\"input\":\"441555cate\",\"ctx\":{\"pattern\":\"^\\\\+?[\\\\d\\\\s\\\\-\\\\(\\\\)]+$\"},\"url\":\"https://errors.pydantic.dev/2.5/v/string_pattern_mismatch\"}]}"
       }
     },
     {
       "test": "Get Candidate - Success",
       "success": false,
       "message": "No candidate ID provided",
-      "timestamp": "2025-08-17T20:30:31.424134",
+      "timestamp": "2025-08-17T21:00:12.290209",
       "details": {}
     },
     {
       "test": "Get Candidate - Not Found",
       "success": false,
-      "message": "Request error: 'str' object has no attribute 'get'",
-      "timestamp": "2025-08-17T20:30:31.431513",
+      "message": "Expected 404, got 500",
+      "timestamp": "2025-08-17T21:00:12.295114",
       "details": {
-        "error": "'str' object has no attribute 'get'"
+        "response": "{\"detail\":\"Internal server error\"}"
       }
     },
     {
       "test": "Get Candidate - Invalid UUID",
       "success": true,
-      "message": "Invalid UUID properly handled with status 404",
-      "timestamp": "2025-08-17T20:30:31.439233",
+      "message": "Invalid UUID properly handled with status 422",
+      "timestamp": "2025-08-17T21:00:12.296791",
       "details": {
         "response": {
-          "detail": "Not Found"
+          "detail": [
+            {
+              "type": "uuid_parsing",
+              "loc": [
+                "path",
+                "candidate_id"
+              ],
+              "msg": "Input should be a valid UUID, invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `n` at 1",
+              "input": "not-a-valid-uuid",
+              "ctx": {
+                "error": "invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `n` at 1"
+              },
+              "url": "https://errors.pydantic.dev/2.5/v/uuid_parsing"
+            }
+          ]
         }
       }
-    },
-    {
-      "test": "OTP Verification Flow",
-      "success": false,
-      "message": "No candidate ID provided",
-      "timestamp": "2025-08-17T20:30:31.439273",
-      "details": {}
-    },
-    {
-      "test": "Password Setting Flow",
-      "success": false,
-      "message": "No candidate ID provided",
-      "timestamp": "2025-08-17T20:30:31.439281",
-      "details": {}
     },
     {
       "test": "Error Handling - Malformed JSON",
       "success": false,
       "message": "Expected 422, got 404",
-      "timestamp": "2025-08-17T20:30:31.446586",
+      "timestamp": "2025-08-17T21:00:12.298029",
       "details": {
         "response": "{\"detail\":\"Not Found\"}"
       }
@@ -142,7 +186,7 @@
       "test": "Error Handling - Wrong Content Type",
       "success": false,
       "message": "Unexpected status 404",
-      "timestamp": "2025-08-17T20:30:31.469264",
+      "timestamp": "2025-08-17T21:00:12.299340",
       "details": {
         "response": "{\"detail\":\"Not Found\"}"
       }
@@ -150,10 +194,10 @@
     {
       "test": "Correlation ID Handling",
       "success": false,
-      "message": "Expected 201, got 404",
-      "timestamp": "2025-08-17T20:30:31.476934",
+      "message": "Expected 201, got 422",
+      "timestamp": "2025-08-17T21:00:12.301961",
       "details": {
-        "response": "{\"detail\":\"Not Found\"}"
+        "response": "{\"detail\":[{\"type\":\"string_pattern_mismatch\",\"loc\":[\"body\",\"phone\"],\"msg\":\"String should match pattern '^\\\\+?[\\\\d\\\\s\\\\-\\\\(\\\\)]+$'\",\"input\":\"441555tion\",\"ctx\":{\"pattern\":\"^\\\\+?[\\\\d\\\\s\\\\-\\\\(\\\\)]+$\"},\"url\":\"https://errors.pydantic.dev/2.5/v/string_pattern_mismatch\"}]}"
       }
     }
   ],
