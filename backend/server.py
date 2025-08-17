@@ -11,6 +11,7 @@ import uuid
 from datetime import datetime
 from calendar_client import calendar_client, BookingRequest
 from receipt_client import receipt_client, ReceiptValidationRequest
+from registration_routes import router as registration_router
 
 
 ROOT_DIR = Path(__file__).parent
