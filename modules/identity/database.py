@@ -79,8 +79,10 @@ async def get_db_session():
 async def get_db():
     """Dependency to get database session"""
     if not async_session_maker:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=503, detail="Database not available")
+        # Return None when database is not available instead of raising exception
+        logger.warning("Database not available, returning None")
+        yield None
+        return
     
     async with get_db_session() as session:
         yield session
