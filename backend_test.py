@@ -862,7 +862,7 @@ class IdentityServiceTester:
                 },
                 'test_results': self.test_results,
                 'created_candidates': self.created_candidates
-            }, indent=2)
+            }, f, indent=2)
         
         print(f"📄 Detailed results saved to: /app/backend_test_results.json")
 
