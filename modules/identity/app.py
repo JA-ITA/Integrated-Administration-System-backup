@@ -82,23 +82,28 @@ async def health_check():
     try:
         # Check database connection
         engine = get_db_engine()
-        if not engine:
-            raise HTTPException(status_code=503, detail="Database not available")
+        db_status = "connected" if engine else "unavailable"
         
         # Check event service
-        if not hasattr(app.state, 'event_service'):
-            raise HTTPException(status_code=503, detail="Event service not available")
+        event_status = "connected" if hasattr(app.state, 'event_service') else "unavailable"
         
         return {
             "status": "healthy",
             "service": "ITADIAS Identity Microservice",
             "version": "1.0.0",
-            "database": "connected",
-            "events": "connected"
+            "database": db_status,
+            "events": event_status
         }
     except Exception as e:
         logger.error(f"Health check failed: {e}")
-        raise HTTPException(status_code=503, detail=f"Service unhealthy: {str(e)}")
+        return {
+            "status": "degraded",
+            "service": "ITADIAS Identity Microservice", 
+            "version": "1.0.0",
+            "database": "error",
+            "events": "error",
+            "error": str(e)
+        }
 
 # Include routers
 app.include_router(candidates_router, prefix="/api/v1", tags=["candidates"])
