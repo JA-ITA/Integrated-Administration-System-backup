@@ -212,7 +212,7 @@ class IdentityServiceTester:
         for test_case in test_cases:
             try:
                 response = self.session.post(
-                    f"{self.base_url}/identity/v1/candidates",
+                    f"{self.base_url}/candidates",
                     json=test_case["data"]
                 )
                 
