@@ -66,7 +66,7 @@ curl http://localhost:8002/health
 
 ### 2. Get Available Slots
 ```bash
-curl "http://localhost:8002/api/v1/slots?hub=550e8400-e29b-41d4-a716-446655440000&date=2024-12-28"
+curl "http://localhost:8002/api/v1/slots?hub=receipt-tracker-18&date=2024-12-28"
 ```
 
 ### 3. Create Booking (15-min lock)
@@ -86,7 +86,7 @@ curl -X POST "http://localhost:8002/api/v1/bookings" \
 curl http://localhost:8001/api/calendar/health
 
 # Get slots through main backend  
-curl "http://localhost:8001/api/calendar/slots?hub_id=550e8400-e29b-41d4-a716-446655440000&date=2024-12-28"
+curl "http://localhost:8001/api/calendar/slots?hub_id=receipt-tracker-18&date=2024-12-28"
 
 # Create booking through main backend
 curl -X POST "http://localhost:8001/api/calendar/bookings" \
