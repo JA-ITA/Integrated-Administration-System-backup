@@ -285,11 +285,14 @@ agent_communication:
     file: "/modules/registration/models.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Implemented comprehensive business rules: age validation using dateutil for precise calculations, medical certificate requirements by vehicle category, weight threshold validation (>7000kg for Class C), manager override support"
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: Business rules properly configured and accessible via /config endpoint. Age requirements: Provisional≥16.5, Class B≥17, Class C/PPV≥20 years. Weight threshold 7000kg for Class C. Medical certificate requirements: MC1 for Provisional, MC2 for Class C/PPV, none for Class B. All validation logic properly structured."
 
   - task: "External Service Integration (Calendar & Receipt)"
     implemented: true
