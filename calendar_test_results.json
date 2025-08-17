@@ -1,0 +1,287 @@
+{
+  "summary": {
+    "total_tests": 15,
+    "passed_tests": 10,
+    "failed_tests": 5,
+    "success_rate": 66.66666666666666,
+    "test_timestamp": "2025-08-17T22:26:11.956169",
+    "calendar_service_url": "http://localhost:8002",
+    "main_backend_url": "https://slot-reservation.preview.emergentagent.com"
+  },
+  "test_results": [
+    {
+      "test": "Calendar Service Health Check",
+      "success": true,
+      "message": "Calendar service healthy: healthy",
+      "timestamp": "2025-08-17T22:26:11.829054",
+      "details": {
+        "status": "healthy",
+        "database": "unavailable",
+        "events": "connected",
+        "cleanup_service": "running"
+      }
+    },
+    {
+      "test": "Calendar Service Root Endpoint",
+      "success": true,
+      "message": "Root endpoint accessible: ITADIAS Calendar Microservice",
+      "timestamp": "2025-08-17T22:26:11.830705",
+      "details": {
+        "message": "ITADIAS Calendar Microservice",
+        "version": "1.0.0",
+        "docs": "/docs"
+      }
+    },
+    {
+      "test": "Main Backend - Calendar Health",
+      "success": true,
+      "message": "Calendar service accessible via main backend: healthy",
+      "timestamp": "2025-08-17T22:26:11.899805",
+      "details": {
+        "calendar_service": "healthy",
+        "status": {
+          "status": "healthy",
+          "service": "ITADIAS Calendar Microservice",
+          "version": "1.0.0",
+          "database": "unavailable",
+          "events": "connected",
+          "cleanup_service": "running"
+        }
+      }
+    },
+    {
+      "test": "Get Available Slots - Direct",
+      "success": true,
+      "message": "Retrieved 2 slots for 2025-08-18",
+      "timestamp": "2025-08-17T22:26:11.902094",
+      "details": {
+        "slot_count": 2,
+        "date": "2025-08-18",
+        "hub_id": "550e8400-e29b-41d4-a716-446655440000",
+        "first_slot": {
+          "start_time": "2025-08-17T09:00:00Z",
+          "end_time": "2025-08-17T10:00:00Z",
+          "max_capacity": 1,
+          "notes": null,
+          "id": "7751a24c-d343-412f-908c-4faeade0dda1",
+          "hub_id": "550e8400-e29b-41d4-a716-446655440000",
+          "status": "available",
+          "current_bookings": 0,
+          "is_available": true,
+          "created_at": "2025-08-17T22:26:11.901290Z"
+        }
+      }
+    },
+    {
+      "test": "Create Booking - Direct",
+      "success": true,
+      "message": "Booking created successfully: BK2508174JZLAT",
+      "timestamp": "2025-08-17T22:26:11.904202",
+      "details": {
+        "booking_id": "c3344da8-6328-4faa-91df-0fcc444e1923",
+        "booking_reference": "BK2508174JZLAT",
+        "status": "pending",
+        "lock_expires_at": "2025-08-17T22:41:11.903436Z",
+        "slot_locked": true
+      }
+    },
+    {
+      "test": "Get Booking - Direct",
+      "success": false,
+      "message": "Expected 200, got 503",
+      "timestamp": "2025-08-17T22:26:11.905861",
+      "details": {
+        "response": "{\"detail\":\"Database not available\"}"
+      }
+    },
+    {
+      "test": "Get Slots - Via Main Backend",
+      "success": true,
+      "message": "Retrieved 2 slots via main backend",
+      "timestamp": "2025-08-17T22:26:11.919855",
+      "details": {
+        "slot_count": 2,
+        "date": "2025-08-18",
+        "hub_id": "550e8400-e29b-41d4-a716-446655440000",
+        "integration_working": true
+      }
+    },
+    {
+      "test": "Create Booking - Via Main Backend",
+      "success": true,
+      "message": "Booking created via main backend: BK250817QA17XG",
+      "timestamp": "2025-08-17T22:26:11.929927",
+      "details": {
+        "booking_id": "ff827e77-f011-4606-9558-e8d63db76843",
+        "booking_reference": "BK250817QA17XG",
+        "status": "pending",
+        "lock_expires_at": "2025-08-17T22:41:11.925912+00:00",
+        "integration_working": true
+      }
+    },
+    {
+      "test": "Get Booking - Via Main Backend",
+      "success": false,
+      "message": "Booking not found via main backend",
+      "timestamp": "2025-08-17T22:26:11.942119",
+      "details": {
+        "error": "Server error '503 Service Unavailable' for url 'http://localhost:8002/api/v1/bookings/ff827e77-f011-4606-9558-e8d63db76843'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503"
+      }
+    },
+    {
+      "test": "Slot Locking - 15 Minute Lock",
+      "success": false,
+      "message": "Expected 409 for locked slot, got 201",
+      "timestamp": "2025-08-17T22:26:11.947737",
+      "details": {
+        "response": "{\"booking\":{\"contact_email\":\"candidate.469571@bermuda.bm\",\"contact_phone\":\"+1-441-555-9571\",\"special_requirements\":\"Wheelchair accessible\",\"id\":\"4d84a440-24d7-49f8-a94e-230caf80e82c\",\"slot_id\":\"7601590e-ac95-4e98-8835-424c63ee12d1\",\"candidate_id\":\"31fa360a-c537-45ed-923b-e5baaa3fbe27\",\"status\":\"pending\",\"booking_reference\":\"BK250817VPR4CO\",\"created_at\":\"2025-08-17T22:26:11.947105Z\",\"slot\":{\"start_time\":\"2025-08-18T00:26:11.947109Z\",\"end_time\":\"2025-08-18T01:26:11.947112Z\",\"max_capacity\":1,\"notes\":null,\"id\":\"7601590e-ac95-4e98-8835-424c63ee12d1\",\"hub_id\":\"10c99804-549c-4ec5-b488-c767045ed09b\",\"status\":\"locked\",\"current_bookings\":1,\"is_available\":false,\"created_at\":\"2025-08-17T22:26:11.947114Z\"}},\"lock_expires_at\":\"2025-08-17T22:41:11.947078Z\",\"message\":\"Booking created successfully. Slot locked for 15 minutes.\"}"
+      }
+    },
+    {
+      "test": "Booking Validation - Invalid Slot ID",
+      "success": true,
+      "message": "Expected 422, got 422",
+      "timestamp": "2025-08-17T22:26:11.949460",
+      "details": {
+        "response_data": {
+          "detail": [
+            {
+              "type": "uuid_parsing",
+              "loc": [
+                "body",
+                "slot_id"
+              ],
+              "msg": "Input should be a valid UUID, invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `i` at 1",
+              "input": "invalid-uuid",
+              "ctx": {
+                "error": "invalid character: expected an optional prefix of `urn:uuid:` followed by [0-9a-fA-F-], found `i` at 1"
+              },
+              "url": "https://errors.pydantic.dev/2.5/v/uuid_parsing"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "test": "Booking Validation - Missing Required Fields",
+      "success": true,
+      "message": "Expected 422, got 422",
+      "timestamp": "2025-08-17T22:26:11.951150",
+      "details": {
+        "response_data": {
+          "detail": [
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "contact_email"
+              ],
+              "msg": "Field required",
+              "input": {
+                "slot_id": "4d1017e0-6cf2-4000-a59d-ce629d5c011b"
+              },
+              "url": "https://errors.pydantic.dev/2.5/v/missing"
+            },
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "candidate_id"
+              ],
+              "msg": "Field required",
+              "input": {
+                "slot_id": "4d1017e0-6cf2-4000-a59d-ce629d5c011b"
+              },
+              "url": "https://errors.pydantic.dev/2.5/v/missing"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "test": "Booking Validation - Invalid Email Format",
+      "success": false,
+      "message": "Expected 422, got 201",
+      "timestamp": "2025-08-17T22:26:11.952890",
+      "details": {
+        "response_data": {
+          "booking": {
+            "contact_email": "invalid-email",
+            "contact_phone": null,
+            "special_requirements": null,
+            "id": "543b4142-0ec6-4dfd-bc03-73586771f21d",
+            "slot_id": "ba87413b-e747-44ad-9abf-44628de1f80f",
+            "candidate_id": "bcf3cdac-7bd2-4c6e-9595-4fe59f12d515",
+            "status": "pending",
+            "booking_reference": "BK25081731RY6E",
+            "created_at": "2025-08-17T22:26:11.952260Z",
+            "slot": {
+              "start_time": "2025-08-18T00:26:11.952265Z",
+              "end_time": "2025-08-18T01:26:11.952268Z",
+              "max_capacity": 1,
+              "notes": null,
+              "id": "ba87413b-e747-44ad-9abf-44628de1f80f",
+              "hub_id": "7eb4c58f-c7c6-4e48-95ed-4371c7f5d9f6",
+              "status": "locked",
+              "current_bookings": 1,
+              "is_available": false,
+              "created_at": "2025-08-17T22:26:11.952269Z"
+            }
+          },
+          "lock_expires_at": "2025-08-17T22:41:11.952219Z",
+          "message": "Booking created successfully. Slot locked for 15 minutes."
+        }
+      }
+    },
+    {
+      "test": "Booking Validation - Non-existent Slot",
+      "success": false,
+      "message": "Expected 404, got 201",
+      "timestamp": "2025-08-17T22:26:11.954650",
+      "details": {
+        "response_data": {
+          "booking": {
+            "contact_email": "test@example.com",
+            "contact_phone": null,
+            "special_requirements": null,
+            "id": "975569c1-c1ad-4a68-bee7-49a69cffb48a",
+            "slot_id": "2519cbb1-5f4e-43a8-968a-aa4a9dbfce89",
+            "candidate_id": "bf45421c-e85f-44a7-a5ad-4ef9e8cd3ad8",
+            "status": "pending",
+            "booking_reference": "BK250817MPC0HU",
+            "created_at": "2025-08-17T22:26:11.954027Z",
+            "slot": {
+              "start_time": "2025-08-18T00:26:11.954032Z",
+              "end_time": "2025-08-18T01:26:11.954035Z",
+              "max_capacity": 1,
+              "notes": null,
+              "id": "2519cbb1-5f4e-43a8-968a-aa4a9dbfce89",
+              "hub_id": "9f12c27e-9229-4d3a-a108-6a2e67d8fe80",
+              "status": "locked",
+              "current_bookings": 1,
+              "is_available": false,
+              "created_at": "2025-08-17T22:26:11.954037Z"
+            }
+          },
+          "lock_expires_at": "2025-08-17T22:41:11.953997Z",
+          "message": "Booking created successfully. Slot locked for 15 minutes."
+        }
+      }
+    },
+    {
+      "test": "Event Publishing - Service Status",
+      "success": true,
+      "message": "Event service status: connected (fallback in-memory storage expected)",
+      "timestamp": "2025-08-17T22:26:11.955956",
+      "details": {
+        "events_status": "connected",
+        "fallback_expected": false
+      }
+    }
+  ],
+  "created_bookings": [
+    "c3344da8-6328-4faa-91df-0fcc444e1923",
+    "ff827e77-f011-4606-9558-e8d63db76843",
+    "0ee9d5d4-1e92-41cc-8a51-c8efc1e1d6bd"
+  ]
+}
