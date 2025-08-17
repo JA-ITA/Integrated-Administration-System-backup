@@ -1,0 +1,245 @@
+{
+  "summary": {
+    "total_tests": 16,
+    "passed_tests": 5,
+    "failed_tests": 11,
+    "success_rate": 31.25,
+    "test_timestamp": "2025-08-17T22:46:19.174100",
+    "main_backend_url": "https://receipt-tracker-18.preview.emergentagent.com",
+    "receipt_service_url": "http://localhost:8003"
+  },
+  "test_results": [
+    {
+      "test": "Receipt Service Health Check",
+      "success": true,
+      "message": "Service healthy: healthy",
+      "timestamp": "2025-08-17T22:46:18.958455",
+      "details": {
+        "status": "healthy",
+        "service": "ITADIAS Receipt Microservice",
+        "version": "1.0.0",
+        "database": "unavailable",
+        "events": "connected",
+        "configuration": {
+          "max_receipt_age_days": 365,
+          "valid_locations_count": 9,
+          "environment": "development"
+        }
+      }
+    },
+    {
+      "test": "Main Backend Receipt Integration Health",
+      "success": true,
+      "message": "Integration healthy: healthy",
+      "timestamp": "2025-08-17T22:46:19.055155",
+      "details": {
+        "receipt_service": "healthy",
+        "status": {
+          "status": "healthy",
+          "service": "ITADIAS Receipt Microservice",
+          "version": "1.0.0",
+          "database": "unavailable",
+          "events": "connected",
+          "configuration": {
+            "max_receipt_age_days": 365,
+            "valid_locations_count": 9,
+            "environment": "development"
+          }
+        }
+      }
+    },
+    {
+      "test": "Valid Receipt Validation - Valid Receipt - TAJ Online",
+      "success": false,
+      "message": "Expected 200, got 503",
+      "timestamp": "2025-08-17T22:46:19.062593",
+      "details": {
+        "response": "{\"success\":false,\"error\":\"Service temporarily unavailable\",\"detail\":\"Database connection not available\",\"code\":\"DB_UNAVAILABLE\"}"
+      }
+    },
+    {
+      "test": "Valid Receipt Validation - Valid Receipt - TAJ Mumbai Office",
+      "success": false,
+      "message": "Expected 200, got 503",
+      "timestamp": "2025-08-17T22:46:19.065438",
+      "details": {
+        "response": "{\"success\":false,\"error\":\"Service temporarily unavailable\",\"detail\":\"Database connection not available\",\"code\":\"DB_UNAVAILABLE\"}"
+      }
+    },
+    {
+      "test": "Valid Receipt Validation - Valid Receipt - Recent Date",
+      "success": false,
+      "message": "Expected 200, got 503",
+      "timestamp": "2025-08-17T22:46:19.067922",
+      "details": {
+        "response": "{\"success\":false,\"error\":\"Service temporarily unavailable\",\"detail\":\"Database connection not available\",\"code\":\"DB_UNAVAILABLE\"}"
+      }
+    },
+    {
+      "test": "Invalid Receipt Validation - Invalid Receipt Number Format",
+      "success": false,
+      "message": "Expected 400, got 422",
+      "timestamp": "2025-08-17T22:46:19.070276",
+      "details": {
+        "response_data": {
+          "detail": [
+            {
+              "type": "string_too_short",
+              "loc": [
+                "body",
+                "receipt_no"
+              ],
+              "msg": "String should have at least 8 characters",
+              "input": "abc123",
+              "ctx": {
+                "min_length": 8
+              },
+              "url": "https://errors.pydantic.dev/2.5/v/string_too_short"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "test": "Invalid Receipt Validation - Receipt Number Too Short",
+      "success": false,
+      "message": "Expected 400, got 422",
+      "timestamp": "2025-08-17T22:46:19.072539",
+      "details": {
+        "response_data": {
+          "detail": [
+            {
+              "type": "string_too_short",
+              "loc": [
+                "body",
+                "receipt_no"
+              ],
+              "msg": "String should have at least 8 characters",
+              "input": "ABC123",
+              "ctx": {
+                "min_length": 8
+              },
+              "url": "https://errors.pydantic.dev/2.5/v/string_too_short"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "test": "Invalid Receipt Validation - Invalid Location",
+      "success": false,
+      "message": "Expected 400, got 422",
+      "timestamp": "2025-08-17T22:46:19.074818",
+      "details": {
+        "response_data": {
+          "detail": [
+            {
+              "type": "value_error",
+              "loc": [
+                "body",
+                "location"
+              ],
+              "msg": "Value error, Invalid location. Must be one of: TAJ Online, TAJ Mumbai Office, TAJ Delhi Office, TAJ Bangalore Office, TAJ Chennai Office, TAJ Kolkata Office, TAJ Pune Office, TAJ Hyderabad Office, TAJ Ahmedabad Office",
+              "input": "Invalid Office",
+              "ctx": {
+                "error": {}
+              },
+              "url": "https://errors.pydantic.dev/2.5/v/value_error"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "test": "Invalid Receipt Validation - Old Receipt Date",
+      "success": false,
+      "message": "Expected 400, got 422",
+      "timestamp": "2025-08-17T22:46:19.076994",
+      "details": {
+        "response_data": {
+          "detail": [
+            {
+              "type": "value_error",
+              "loc": [
+                "body",
+                "issue_date"
+              ],
+              "msg": "Value error, Receipt is too old. Maximum age is 365 days",
+              "input": "2023-01-01T00:00:00Z",
+              "ctx": {
+                "error": {}
+              },
+              "url": "https://errors.pydantic.dev/2.5/v/value_error"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "test": "Duplicate Receipt Validation",
+      "success": false,
+      "message": "First receipt validation failed with status 503",
+      "timestamp": "2025-08-17T22:46:19.079060",
+      "details": {
+        "response": "{\"success\":false,\"error\":\"Service temporarily unavailable\",\"detail\":\"Database connection not available\",\"code\":\"DB_UNAVAILABLE\"}"
+      }
+    },
+    {
+      "test": "Main Backend Receipt Validation",
+      "success": false,
+      "message": "Main backend validation returned success=false: No message",
+      "timestamp": "2025-08-17T22:46:19.121084",
+      "details": {
+        "success": false,
+        "error": "Receipt service unavailable"
+      }
+    },
+    {
+      "test": "Get Receipt Details",
+      "success": false,
+      "message": "No validated receipts available for testing",
+      "timestamp": "2025-08-17T22:46:19.121144",
+      "details": {}
+    },
+    {
+      "test": "Receipt Statistics - Main Backend",
+      "success": true,
+      "message": "Statistics retrieved successfully",
+      "timestamp": "2025-08-17T22:46:19.167893",
+      "details": {
+        "statistics": {
+          "found": false,
+          "receipt": null
+        }
+      }
+    },
+    {
+      "test": "Receipt Statistics - Direct Service",
+      "success": false,
+      "message": "Expected 200, got 503",
+      "timestamp": "2025-08-17T22:46:19.170214",
+      "details": {
+        "response": "{\"detail\":\"Database connection not available\"}"
+      }
+    },
+    {
+      "test": "Error Handling - Malformed JSON",
+      "success": true,
+      "message": "Malformed JSON properly rejected",
+      "timestamp": "2025-08-17T22:46:19.171755",
+      "details": {
+        "status": 422
+      }
+    },
+    {
+      "test": "Error Handling - Missing Fields",
+      "success": true,
+      "message": "Missing required fields properly rejected",
+      "timestamp": "2025-08-17T22:46:19.173847",
+      "details": {
+        "status": 422
+      }
+    }
+  ],
+  "validated_receipts": []
+}
