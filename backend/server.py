@@ -228,6 +228,9 @@ async def get_receipt_statistics():
 # Include the router in the main app
 app.include_router(api_router)
 
+# Include registration routes
+app.include_router(registration_router, prefix="/api")
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
