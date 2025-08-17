@@ -11,7 +11,7 @@ from unittest.mock import AsyncMock, patch, MagicMock
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.exceptions import ValidationError, DatabaseError
 from ..service import CandidateService
-from ..schemas import CandidateCreateRequest, OTPType
+from ..schemas import CandidateCreateRequest, OTPType, PasswordSetRequest
 from ..models import Candidate, OTPAttempt
 
 
