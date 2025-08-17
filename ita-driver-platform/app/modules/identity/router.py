@@ -1,352 +1,611 @@
 """
-Identity Module Router - Authentication and User Management
-Handles user registration, authentication, profile management, and role-based access control.
+Identity Module Router - Enhanced Candidate Management API
+Handles candidate registration, OTP verification, and profile management.
+API Version: v1
 """
 
-from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+import uuid
 
 from core.database import get_db
-from core.exceptions import AuthenticationError, AuthorizationError
+from core.logging_config import get_logger
 from .schemas import (
-    UserCreate,
-    UserResponse,
-    UserUpdate,
-    LoginRequest,
-    LoginResponse,
-    TokenRefreshRequest,
+    CandidateCreateRequest,
+    CandidateCreateResponse,
+    CandidateResponse,
+    OTPVerificationRequest,
+    OTPVerificationResponse,
+    OTPResendRequest,
+    PasswordSetRequest,
+    OTPStatusResponse,
+    OTPType,
+    ApiErrorResponse
 )
-from .service import IdentityService
-from .dependencies import get_current_user, require_permissions
+from .service import CandidateService
 
-router = APIRouter()
-security = HTTPBearer()
+logger = get_logger("identity.router")
+
+# Create router with v1 prefix
+router = APIRouter(prefix="/v1")
 
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-async def register_user(
-    user_data: UserCreate,
+def get_correlation_id(request: Request) -> str:
+    """Extract or generate correlation ID for request tracing."""
+    correlation_id = request.headers.get("X-Correlation-ID")
+    if not correlation_id:
+        correlation_id = str(uuid.uuid4())
+    return correlation_id
+
+
+def get_client_info(request: Request) -> tuple[Optional[str], Optional[str]]:
+    """Extract client IP and User-Agent from request."""
+    ip_address = request.client.host if request.client else None
+    user_agent = request.headers.get("User-Agent")
+    return ip_address, user_agent
+
+
+@router.post("/candidates", response_model=CandidateCreateResponse, status_code=status.HTTP_201_CREATED)
+async def create_candidate(
+    candidate_request: CandidateCreateRequest,
+    request: Request,
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Register a new user in the system.
+    Create a new candidate with OTP verification.
     
-    - **email**: Valid email address (will be username)
-    - **password**: Strong password meeting requirements
-    - **first_name**: User's first name
-    - **last_name**: User's last name
-    - **phone**: Contact phone number
-    - **user_type**: Type of user (driver, examiner, admin)
+    **This endpoint creates a new driver license candidate and initiates the verification process.**
+    
+    - **email**: Valid email address (will be used for login)
+    - **first_name**: Candidate's first name 
+    - **last_name**: Candidate's last name
+    - **phone**: Bermuda phone number for SMS verification
+    - **date_of_birth**: Date of birth (must be 16+ years old)
+    - **national_id**: Bermuda national ID number (optional)
+    - **passport_number**: Passport number (optional)
+    - **street_address**: Street address (optional)
+    - **city**: City (optional)
+    - **postal_code**: Postal code (optional)
+    - **country**: Country (defaults to Bermuda)
+    
+    **Process:**
+    1. Validates candidate information
+    2. Creates candidate record with PENDING_VERIFICATION status
+    3. Sends OTP to email and phone
+    4. Publishes CandidateCreated event
+    5. Returns candidate info and verification instructions
+    
+    **Response includes:**
+    - Created candidate information
+    - OTP sending status for email and phone
+    - Next steps for verification
     """
-    service = IdentityService(db)
+    service = CandidateService(db)
+    correlation_id = get_correlation_id(request)
+    ip_address, user_agent = get_client_info(request)
     
     try:
-        user = await service.create_user(user_data)
-        return UserResponse.from_orm(user)
+        logger.info(
+            f"Creating candidate: {candidate_request.email}",
+            extra={"correlation_id": correlation_id}
+        )
+        
+        response = await service.create_candidate(
+            candidate_data=candidate_request,
+            correlation_id=correlation_id,
+            ip_address=ip_address,
+            user_agent=user_agent
+        )
+        
+        logger.info(
+            f"Candidate created successfully: {response.candidate.id}",
+            extra={"correlation_id": correlation_id, "candidate_id": response.candidate.id}
+        )
+        
+        return response
+        
     except ValueError as e:
+        logger.warning(
+            f"Candidate creation validation error: {str(e)}",
+            extra={"correlation_id": correlation_id, "email": candidate_request.email}
+        )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
+            detail={
+                "error": "validation_error",
+                "message": str(e),
+                "correlation_id": correlation_id
+            }
+        )
+    except Exception as e:
+        logger.error(
+            f"Candidate creation error: {str(e)}",
+            extra={"correlation_id": correlation_id, "email": candidate_request.email}
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "error": "internal_error",
+                "message": "An error occurred while creating candidate",
+                "correlation_id": correlation_id
+            }
         )
 
 
-@router.post("/login", response_model=LoginResponse)
-async def login(
-    login_data: LoginRequest,
+@router.get("/candidates/{candidate_id}", response_model=CandidateResponse)
+async def get_candidate(
+    candidate_id: str,
+    request: Request,
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Authenticate user and return access and refresh tokens.
+    Get candidate information by ID.
     
-    - **email**: User's email address
-    - **password**: User's password
+    **Returns detailed candidate information including:**
+    - Personal information (with sensitive data masked)
+    - Verification status (email, phone, identity)
+    - Profile completion percentage
+    - Current candidate status
+    - Timestamps for creation and updates
+    
+    **Access Control:**
+    - Public endpoint for candidate's own information
+    - Admin endpoints for viewing any candidate (future implementation)
+    
+    **Data Privacy:**
+    - National ID and passport numbers are masked in response
+    - Full information available only to authorized personnel
     """
-    service = IdentityService(db)
+    service = CandidateService(db)
+    correlation_id = get_correlation_id(request)
     
     try:
-        result = await service.authenticate_user(
-            email=login_data.email,
-            password=login_data.password
+        candidate = await service.get_candidate_by_id(candidate_id)
+        
+        if not candidate:
+            logger.warning(
+                f"Candidate not found: {candidate_id}",
+                extra={"correlation_id": correlation_id}
+            )
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail={
+                    "error": "not_found",
+                    "message": "Candidate not found",
+                    "correlation_id": correlation_id
+                }
+            )
+        
+        response = await service._candidate_to_response(candidate)
+        
+        logger.info(
+            f"Candidate retrieved: {candidate_id}",
+            extra={"correlation_id": correlation_id, "candidate_id": candidate_id}
         )
-        return result
-    except AuthenticationError as e:
+        
+        return response
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(
+            f"Error retrieving candidate: {str(e)}",
+            extra={"correlation_id": correlation_id, "candidate_id": candidate_id}
+        )
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(e)
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "error": "internal_error", 
+                "message": "An error occurred while retrieving candidate",
+                "correlation_id": correlation_id
+            }
         )
 
 
-@router.post("/refresh", response_model=LoginResponse)
-async def refresh_token(
-    refresh_data: TokenRefreshRequest,
+@router.post("/candidates/{candidate_id}/verify-otp", response_model=OTPVerificationResponse)
+async def verify_candidate_otp(
+    candidate_id: str,
+    verification_request: OTPVerificationRequest,
+    request: Request,
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Refresh access token using valid refresh token.
+    Verify OTP code for candidate email or phone verification.
     
-    - **refresh_token**: Valid refresh token
+    **OTP Verification Process:**
+    1. Validates the provided OTP code
+    2. Marks email or phone as verified
+    3. Updates candidate status if both verifications complete
+    4. Publishes verification events
+    
+    **Parameters:**
+    - **candidate_id**: Must match the ID in the request body
+    - **otp_type**: Either "email" or "phone"
+    - **otp_code**: 6-digit verification code
+    
+    **Verification Rules:**
+    - OTP expires after 10 minutes
+    - Maximum 3 attempts per OTP
+    - New OTP required after expiration or exhausted attempts
+    
+    **Success Response:**
+    - Confirmation of successful verification  
+    - Next steps (set password if both email/phone verified)
     """
-    service = IdentityService(db)
+    if verification_request.candidate_id != candidate_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error": "validation_error",
+                "message": "Candidate ID mismatch"
+            }
+        )
+    
+    service = CandidateService(db)
+    correlation_id = get_correlation_id(request)
     
     try:
-        result = await service.refresh_access_token(refresh_data.refresh_token)
-        return result
-    except AuthenticationError as e:
+        success, message = await service.verify_candidate_otp(
+            candidate_id=candidate_id,
+            otp_type=verification_request.otp_type,
+            otp_code=verification_request.otp_code,
+            correlation_id=correlation_id
+        )
+        
+        # Determine next step
+        next_step = None
+        if success:
+            candidate = await service.get_candidate_by_id(candidate_id)
+            if candidate and candidate.is_fully_verified and not candidate.hashed_password:
+                next_step = "set_password"
+        
+        response = OTPVerificationResponse(
+            success=success,
+            message=message,
+            candidate_id=candidate_id,
+            verification_type=verification_request.otp_type,
+            next_step=next_step
+        )
+        
+        if success:
+            logger.info(
+                f"OTP verification successful: {candidate_id} - {verification_request.otp_type.value}",
+                extra={"correlation_id": correlation_id, "candidate_id": candidate_id}
+            )
+        else:
+            logger.warning(
+                f"OTP verification failed: {candidate_id} - {message}",
+                extra={"correlation_id": correlation_id, "candidate_id": candidate_id}
+            )
+        
+        return response
+        
+    except Exception as e:
+        logger.error(
+            f"OTP verification error: {str(e)}",
+            extra={"correlation_id": correlation_id, "candidate_id": candidate_id}
+        )
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(e)
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "error": "internal_error",
+                "message": "An error occurred during OTP verification",
+                "correlation_id": correlation_id
+            }
         )
 
 
-@router.post("/logout")
-async def logout(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-    current_user = Depends(get_current_user),
+@router.post("/candidates/{candidate_id}/resend-otp")
+async def resend_candidate_otp(
+    candidate_id: str,
+    resend_request: OTPResendRequest,
+    request: Request,
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Logout user and invalidate tokens.
-    """
-    service = IdentityService(db)
+    Resend OTP code to candidate's email or phone.
     
-    token = credentials.credentials
-    await service.logout_user(token)
+    **Resend Rules:**
+    - 2-minute cooldown between resend requests
+    - Previous OTP becomes invalid when new one is sent
+    - Rate limiting applied per IP address
     
-    return {"message": "Successfully logged out"}
-
-
-@router.get("/profile", response_model=UserResponse)
-async def get_profile(
-    current_user = Depends(get_current_user)
-):
+    **Parameters:**
+    - **candidate_id**: Must match the ID in request body
+    - **otp_type**: Either "email" or "phone"
+    
+    **Success Response:**
+    - Confirmation that OTP was sent
+    - Masked recipient information
+    - Expiration time for new OTP
     """
-    Get current user's profile information.
-    """
-    return UserResponse.from_orm(current_user)
+    if resend_request.candidate_id != candidate_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error": "validation_error", 
+                "message": "Candidate ID mismatch"
+            }
+        )
+    
+    service = CandidateService(db)
+    correlation_id = get_correlation_id(request)
+    ip_address, user_agent = get_client_info(request)
+    
+    try:
+        success, message = await service.resend_otp(
+            candidate_id=candidate_id,
+            otp_type=resend_request.otp_type,
+            ip_address=ip_address,
+            user_agent=user_agent
+        )
+        
+        if success:
+            logger.info(
+                f"OTP resent successfully: {candidate_id} - {resend_request.otp_type.value}",
+                extra={"correlation_id": correlation_id, "candidate_id": candidate_id}
+            )
+            return JSONResponse(
+                status_code=status.HTTP_200_OK,
+                content={
+                    "success": True,
+                    "message": message,
+                    "candidate_id": candidate_id,
+                    "otp_type": resend_request.otp_type.value,
+                    "correlation_id": correlation_id
+                }
+            )
+        else:
+            logger.warning(
+                f"OTP resend failed: {candidate_id} - {message}",
+                extra={"correlation_id": correlation_id, "candidate_id": candidate_id}
+            )
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "error": "resend_error",
+                    "message": message,
+                    "correlation_id": correlation_id
+                }
+            )
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(
+            f"OTP resend error: {str(e)}",
+            extra={"correlation_id": correlation_id, "candidate_id": candidate_id}
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "error": "internal_error",
+                "message": "An error occurred while resending OTP",
+                "correlation_id": correlation_id
+            }
+        )
 
 
-@router.put("/profile", response_model=UserResponse)
-async def update_profile(
-    profile_data: UserUpdate,
-    current_user = Depends(get_current_user),
+@router.post("/candidates/{candidate_id}/set-password")
+async def set_candidate_password(
+    candidate_id: str,
+    password_request: PasswordSetRequest,
+    request: Request,
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Update current user's profile information.
+    Set password for candidate after complete verification.
     
-    - **first_name**: Updated first name
-    - **last_name**: Updated last name
-    - **phone**: Updated phone number
+    **Prerequisites:**
+    - Both email and phone must be verified
+    - No existing password set
+    - Valid candidate ID
+    
+    **Password Requirements:**
+    - Minimum 8 characters
+    - At least one uppercase letter
+    - At least one lowercase letter  
+    - At least one digit
+    - At least one special character
+    
+    **Process:**
+    1. Validates password requirements
+    2. Confirms passwords match
+    3. Hashes and stores password
+    4. Activates candidate account
+    5. Updates status to ACTIVE
     """
-    service = IdentityService(db)
+    if password_request.candidate_id != candidate_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error": "validation_error",
+                "message": "Candidate ID mismatch"
+            }
+        )
     
-    updated_user = await service.update_user(current_user.id, profile_data)
-    return UserResponse.from_orm(updated_user)
+    service = CandidateService(db)
+    correlation_id = get_correlation_id(request)
+    
+    try:
+        success = await service.set_candidate_password(
+            candidate_id=candidate_id,
+            password=password_request.password,
+            correlation_id=correlation_id
+        )
+        
+        if success:
+            logger.info(
+                f"Password set successfully: {candidate_id}",
+                extra={"correlation_id": correlation_id, "candidate_id": candidate_id}
+            )
+            return JSONResponse(
+                status_code=status.HTTP_200_OK,
+                content={
+                    "success": True,
+                    "message": "Password set successfully. Your account is now active.",
+                    "candidate_id": candidate_id,
+                    "status": "active",
+                    "correlation_id": correlation_id
+                }
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail={
+                    "error": "internal_error",
+                    "message": "Failed to set password"
+                }
+            )
+            
+    except ValueError as e:
+        logger.warning(
+            f"Password set validation error: {str(e)}",
+            extra={"correlation_id": correlation_id, "candidate_id": candidate_id}
+        )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error": "validation_error",
+                "message": str(e),
+                "correlation_id": correlation_id
+            }
+        )
+    except Exception as e:
+        logger.error(
+            f"Password set error: {str(e)}",
+            extra={"correlation_id": correlation_id, "candidate_id": candidate_id}
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "error": "internal_error",
+                "message": "An error occurred while setting password",
+                "correlation_id": correlation_id
+            }
+        )
 
 
-@router.get("/users", response_model=List[UserResponse])
-async def list_users(
-    page: int = 1,
-    limit: int = 20,
-    user_type: Optional[str] = None,
-    current_user = Depends(require_permissions(["view_users"])),
+@router.get("/candidates/{candidate_id}/otp-status", response_model=OTPStatusResponse)
+async def get_otp_status(
+    candidate_id: str,
+    request: Request,
     db: AsyncSession = Depends(get_db)
 ):
     """
-    List users with pagination and filtering.
-    Requires 'view_users' permission.
+    Get OTP verification status for candidate.
     
-    - **page**: Page number (default: 1)
-    - **limit**: Items per page (default: 20, max: 100)
-    - **user_type**: Filter by user type (optional)
+    **Returns:**
+    - Email OTP status (not_sent, pending, verified, expired, exhausted)
+    - Phone OTP status (not_sent, pending, verified, expired, exhausted)
+    - Overall verification status
+    - Whether candidate can proceed to set password
+    
+    **Status Values:**
+    - **not_sent**: No OTP has been sent
+    - **pending**: OTP sent and awaiting verification
+    - **verified**: OTP successfully verified
+    - **expired**: OTP has expired (10+ minutes old)
+    - **exhausted**: Maximum attempts (3) reached
+    
+    **Use Cases:**
+    - Check verification progress
+    - Determine if resend is needed
+    - Show appropriate UI state
     """
-    if limit > 100:
-        limit = 100
+    service = CandidateService(db)
+    correlation_id = get_correlation_id(request)
     
-    service = IdentityService(db)
-    users = await service.list_users(
-        page=page,
-        limit=limit,
-        user_type=user_type
+    try:
+        status_info = await service.get_otp_status(candidate_id)
+        
+        response = OTPStatusResponse(**status_info)
+        
+        logger.info(
+            f"OTP status retrieved: {candidate_id}",
+            extra={"correlation_id": correlation_id, "candidate_id": candidate_id}
+        )
+        
+        return response
+        
+    except ValueError as e:
+        logger.warning(
+            f"OTP status validation error: {str(e)}",
+            extra={"correlation_id": correlation_id, "candidate_id": candidate_id}
+        )
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "error": "not_found",
+                "message": str(e),
+                "correlation_id": correlation_id
+            }
+        )
+    except Exception as e:
+        logger.error(
+            f"OTP status error: {str(e)}",
+            extra={"correlation_id": correlation_id, "candidate_id": candidate_id}
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "error": "internal_error",
+                "message": "An error occurred while retrieving OTP status",
+                "correlation_id": correlation_id
+            }
+        )
+
+
+# Health check endpoint for the identity module
+@router.get("/health")
+async def identity_health_check():
+    """
+    Health check endpoint for the Identity module.
+    
+    **Returns:**
+    - Module status
+    - Available features
+    - Version information
+    """
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={
+            "module": "Identity & Profile Management",
+            "version": "1.0.0",
+            "status": "healthy",
+            "features": {
+                "candidate_registration": "available",
+                "otp_verification": "available",
+                "event_publishing": "available",
+                "profile_management": "available"
+            },
+            "endpoints": {
+                "create_candidate": "POST /api/v1/candidates",
+                "get_candidate": "GET /api/v1/candidates/{id}",
+                "verify_otp": "POST /api/v1/candidates/{id}/verify-otp",
+                "resend_otp": "POST /api/v1/candidates/{id}/resend-otp",
+                "set_password": "POST /api/v1/candidates/{id}/set-password",
+                "otp_status": "GET /api/v1/candidates/{id}/otp-status"
+            }
+        }
     )
-    
-    return [UserResponse.from_orm(user) for user in users]
 
 
-@router.get("/users/{user_id}", response_model=UserResponse)
-async def get_user(
-    user_id: str,
-    current_user = Depends(require_permissions(["view_users"])),
-    db: AsyncSession = Depends(get_db)
-):
-    """
-    Get specific user by ID.
-    Requires 'view_users' permission.
-    """
-    service = IdentityService(db)
+# Error handlers for the identity module
+@router.exception_handler(HTTPException)
+async def identity_http_exception_handler(request: Request, exc: HTTPException):
+    """Custom HTTP exception handler for identity module."""
+    correlation_id = get_correlation_id(request)
     
-    user = await service.get_user_by_id(user_id)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
-    
-    return UserResponse.from_orm(user)
-
-
-@router.put("/users/{user_id}/status")
-async def update_user_status(
-    user_id: str,
-    is_active: bool,
-    current_user = Depends(require_permissions(["manage_users"])),
-    db: AsyncSession = Depends(get_db)
-):
-    """
-    Activate or deactivate a user account.
-    Requires 'manage_users' permission.
-    
-    - **is_active**: True to activate, False to deactivate
-    """
-    service = IdentityService(db)
-    
-    user = await service.update_user_status(user_id, is_active)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
-    
-    return {
-        "message": f"User {'activated' if is_active else 'deactivated'} successfully",
-        "user_id": user_id,
-        "is_active": is_active
-    }
-
-
-@router.post("/users/{user_id}/roles/{role_name}")
-async def assign_role(
-    user_id: str,
-    role_name: str,
-    current_user = Depends(require_permissions(["manage_roles"])),
-    db: AsyncSession = Depends(get_db)
-):
-    """
-    Assign role to user.
-    Requires 'manage_roles' permission.
-    """
-    service = IdentityService(db)
-    
-    try:
-        await service.assign_role_to_user(user_id, role_name)
-        return {
-            "message": f"Role '{role_name}' assigned to user successfully",
-            "user_id": user_id,
-            "role": role_name
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": "http_error",
+            "message": exc.detail,
+            "status_code": exc.status_code,
+            "correlation_id": correlation_id,
+            "timestamp": "2025-01-27T00:00:00Z"  # In real app, use actual timestamp
         }
-    except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
-
-
-@router.delete("/users/{user_id}/roles/{role_name}")
-async def remove_role(
-    user_id: str,
-    role_name: str,
-    current_user = Depends(require_permissions(["manage_roles"])),
-    db: AsyncSession = Depends(get_db)
-):
-    """
-    Remove role from user.
-    Requires 'manage_roles' permission.
-    """
-    service = IdentityService(db)
-    
-    try:
-        await service.remove_role_from_user(user_id, role_name)
-        return {
-            "message": f"Role '{role_name}' removed from user successfully",
-            "user_id": user_id,
-            "role": role_name
-        }
-    except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
-
-
-@router.post("/change-password")
-async def change_password(
-    current_password: str,
-    new_password: str,
-    current_user = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    """
-    Change user's password.
-    
-    - **current_password**: Current password for verification
-    - **new_password**: New password meeting security requirements
-    """
-    service = IdentityService(db)
-    
-    try:
-        await service.change_password(
-            user_id=current_user.id,
-            current_password=current_password,
-            new_password=new_password
-        )
-        return {"message": "Password changed successfully"}
-    except AuthenticationError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
-
-
-@router.post("/reset-password-request")
-async def request_password_reset(
-    email: str,
-    db: AsyncSession = Depends(get_db)
-):
-    """
-    Request password reset for user.
-    
-    - **email**: User's email address
-    """
-    service = IdentityService(db)
-    
-    # Always return success to prevent email enumeration
-    await service.request_password_reset(email)
-    return {
-        "message": "If the email exists, password reset instructions have been sent"
-    }
-
-
-@router.post("/reset-password")
-async def reset_password(
-    reset_token: str,
-    new_password: str,
-    db: AsyncSession = Depends(get_db)
-):
-    """
-    Reset password using reset token.
-    
-    - **reset_token**: Password reset token from email
-    - **new_password**: New password meeting security requirements
-    """
-    service = IdentityService(db)
-    
-    try:
-        await service.reset_password(reset_token, new_password)
-        return {"message": "Password reset successfully"}
-    except AuthenticationError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+    )
