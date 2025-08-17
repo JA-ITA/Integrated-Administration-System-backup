@@ -94,21 +94,15 @@ async def get_calendar_slots(
         return {"error": str(e)}
 
 @api_router.post("/calendar/bookings")
-async def create_calendar_booking(
-    slot_id: str,
-    candidate_id: str,
-    contact_email: str,
-    contact_phone: Optional[str] = None,
-    special_requirements: Optional[str] = None
-):
+async def create_calendar_booking(booking_data: dict):
     """Create a booking via calendar service"""
     try:
         booking_request = BookingRequest(
-            slot_id=uuid.UUID(slot_id),
-            candidate_id=uuid.UUID(candidate_id),
-            contact_email=contact_email,
-            contact_phone=contact_phone,
-            special_requirements=special_requirements
+            slot_id=uuid.UUID(booking_data["slot_id"]),
+            candidate_id=uuid.UUID(booking_data["candidate_id"]),
+            contact_email=booking_data["contact_email"],
+            contact_phone=booking_data.get("contact_phone"),
+            special_requirements=booking_data.get("special_requirements")
         )
         
         result = await calendar_client.create_booking(booking_request)
