@@ -1,0 +1,161 @@
+{
+  "summary": {
+    "total_tests": 16,
+    "passed_tests": 1,
+    "failed_tests": 15,
+    "success_rate": 6.25,
+    "test_timestamp": "2025-08-17T20:30:31.477168",
+    "backend_url": "https://identity-service.preview.emergentagent.com"
+  },
+  "test_results": [
+    {
+      "test": "Health Check - Main",
+      "success": false,
+      "message": "Health check failed with status 404",
+      "timestamp": "2025-08-17T20:30:31.351461",
+      "details": {
+        "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /health</pre>\n</body>\n</html>\n"
+      }
+    },
+    {
+      "test": "Health Check - Identity Module",
+      "success": false,
+      "message": "Identity health check failed with status 404",
+      "timestamp": "2025-08-17T20:30:31.360687",
+      "details": {
+        "response": "{\"detail\":\"Not Found\"}"
+      }
+    },
+    {
+      "test": "Create Candidate - Success",
+      "success": false,
+      "message": "Expected 201, got 404",
+      "timestamp": "2025-08-17T20:30:31.373248",
+      "details": {
+        "response": "{\"detail\":\"Not Found\"}"
+      }
+    },
+    {
+      "test": "Create Candidate - Invalid Email",
+      "success": false,
+      "message": "Expected 422, got 404",
+      "timestamp": "2025-08-17T20:30:31.381014",
+      "details": {
+        "response_data": {
+          "detail": "Not Found"
+        }
+      }
+    },
+    {
+      "test": "Create Candidate - Missing Required Fields",
+      "success": false,
+      "message": "Expected 422, got 404",
+      "timestamp": "2025-08-17T20:30:31.395642",
+      "details": {
+        "response_data": {
+          "detail": "Not Found"
+        }
+      }
+    },
+    {
+      "test": "Create Candidate - Invalid Phone Format",
+      "success": false,
+      "message": "Expected 422, got 404",
+      "timestamp": "2025-08-17T20:30:31.403593",
+      "details": {
+        "response_data": {
+          "detail": "Not Found"
+        }
+      }
+    },
+    {
+      "test": "Create Candidate - Underage Candidate",
+      "success": false,
+      "message": "Expected 422, got 404",
+      "timestamp": "2025-08-17T20:30:31.412508",
+      "details": {
+        "response_data": {
+          "detail": "Not Found"
+        }
+      }
+    },
+    {
+      "test": "Create Candidate - Duplicate Prevention",
+      "success": false,
+      "message": "Failed to create first candidate: 404",
+      "timestamp": "2025-08-17T20:30:31.424087",
+      "details": {
+        "response": "{\"detail\":\"Not Found\"}"
+      }
+    },
+    {
+      "test": "Get Candidate - Success",
+      "success": false,
+      "message": "No candidate ID provided",
+      "timestamp": "2025-08-17T20:30:31.424134",
+      "details": {}
+    },
+    {
+      "test": "Get Candidate - Not Found",
+      "success": false,
+      "message": "Request error: 'str' object has no attribute 'get'",
+      "timestamp": "2025-08-17T20:30:31.431513",
+      "details": {
+        "error": "'str' object has no attribute 'get'"
+      }
+    },
+    {
+      "test": "Get Candidate - Invalid UUID",
+      "success": true,
+      "message": "Invalid UUID properly handled with status 404",
+      "timestamp": "2025-08-17T20:30:31.439233",
+      "details": {
+        "response": {
+          "detail": "Not Found"
+        }
+      }
+    },
+    {
+      "test": "OTP Verification Flow",
+      "success": false,
+      "message": "No candidate ID provided",
+      "timestamp": "2025-08-17T20:30:31.439273",
+      "details": {}
+    },
+    {
+      "test": "Password Setting Flow",
+      "success": false,
+      "message": "No candidate ID provided",
+      "timestamp": "2025-08-17T20:30:31.439281",
+      "details": {}
+    },
+    {
+      "test": "Error Handling - Malformed JSON",
+      "success": false,
+      "message": "Expected 422, got 404",
+      "timestamp": "2025-08-17T20:30:31.446586",
+      "details": {
+        "response": "{\"detail\":\"Not Found\"}"
+      }
+    },
+    {
+      "test": "Error Handling - Wrong Content Type",
+      "success": false,
+      "message": "Unexpected status 404",
+      "timestamp": "2025-08-17T20:30:31.469264",
+      "details": {
+        "response": "{\"detail\":\"Not Found\"}"
+      }
+    },
+    {
+      "test": "Correlation ID Handling",
+      "success": false,
+      "message": "Expected 201, got 404",
+      "timestamp": "2025-08-17T20:30:31.476934",
+      "details": {
+        "response": "{\"detail\":\"Not Found\"}"
+      }
+    }
+  ],
+  "created_candidates": []
+}
