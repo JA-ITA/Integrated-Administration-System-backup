@@ -121,7 +121,7 @@ class IdentityServiceTester:
             candidate_data = self.generate_test_candidate_data()
             
             response = self.session.post(
-                f"{self.base_url}/identity/v1/candidates",
+                f"{self.base_url}/candidates",
                 json=candidate_data,
                 headers={"X-Correlation-ID": f"test-{uuid.uuid4()}"}
             )
