@@ -1,0 +1,162 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: ita-postgres
+    environment:
+      POSTGRES_DB: ita_driver_platform
+      POSTGRES_USER: ita_admin
+      POSTGRES_PASSWORD: ita_secure_2024
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - ita-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ita_admin -d ita_driver_platform"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # RabbitMQ Message Broker
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: ita-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ita_admin
+      RABBITMQ_DEFAULT_PASS: ita_rabbit_2024
+      RABBITMQ_DEFAULT_VHOST: ita_vhost
+    ports:
+      - "5672:5672"      # AMQP port
+      - "15672:15672"    # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./config/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+    networks:
+      - ita-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Jaeger Distributed Tracing
+  jaeger:
+    image: jaegertracing/all-in-one:1.52
+    container_name: ita-jaeger
+    environment:
+      COLLECTOR_OTLP_ENABLED: true
+      COLLECTOR_ZIPKIN_HOST_PORT: :9411
+    ports:
+      - "5775:5775/udp"   # accept zipkin.thrift over compact thrift protocol
+      - "6831:6831/udp"   # accept jaeger.thrift over compact thrift protocol
+      - "6832:6832/udp"   # accept jaeger.thrift over binary thrift protocol
+      - "5778:5778"       # serve configs
+      - "16686:16686"     # serve frontend
+      - "14250:14250"     # accept model.proto
+      - "14268:14268"     # accept jaeger.thrift directly from clients
+      - "14269:14269"     # admin port: health check at / and metrics at /metrics
+      - "9411:9411"       # zipkin compatible endpoint
+    volumes:
+      - jaeger_data:/tmp
+    networks:
+      - ita-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:14269/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Cache (for session management and caching)
+  redis:
+    image: redis:7.2-alpine
+    container_name: ita-redis
+    command: redis-server --requirepass ita_redis_2024
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ita-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # FastAPI Backend Application
+  backend:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: ita-backend
+    environment:
+      DATABASE_URL: postgresql://ita_admin:ita_secure_2024@postgres:5432/ita_driver_platform
+      RABBITMQ_URL: amqp://ita_admin:ita_rabbit_2024@rabbitmq:5672/ita_vhost
+      REDIS_URL: redis://:ita_redis_2024@redis:6379/0
+      JAEGER_AGENT_HOST: jaeger
+      JAEGER_AGENT_PORT: 6831
+      ENVIRONMENT: development
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app
+    depends_on:
+      - postgres
+      - rabbitmq
+      - redis
+      - jaeger
+    networks:
+      - ita-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # React Frontend Application
+  frontend:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    container_name: ita-frontend
+    environment:
+      REACT_APP_API_BASE_URL: http://localhost:8000/api
+      REACT_APP_ENVIRONMENT: development
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./ui:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - ita-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  rabbitmq_data:
+    driver: local
+  jaeger_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  ita-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
