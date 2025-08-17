@@ -176,7 +176,7 @@ async def root():
         "health": "/health",
         "features": [
             "Driver registration with age validation",
-            "Medical certificate requirements (MC1/MC2)",
+            "Medical certificate requirements (MC1 for Provisional, MC2 for ALL Class C/PPV)",
             "Document upload and validation",
             "External service integration (Calendar, Receipt)",
             "Event publishing (RegistrationCompleted)",
