@@ -56,7 +56,7 @@ class IdentityServiceTester:
             "email": f"candidate.{suffix}@bermuda.bm",
             "first_name": "Maria",
             "last_name": "Santos",
-            "phone": f"441555{suffix[-4:]}",
+            "phone": f"+1441555{suffix[-4:]}",
             "date_of_birth": "1995-03-15",
             "national_id": f"BM{suffix}789",
             "passport_number": f"P{suffix}456",
