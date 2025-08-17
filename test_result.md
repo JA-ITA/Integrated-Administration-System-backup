@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Generate a micro-service folder /modules/identity. Expose REST: POST /api/v1/candidates (create + OTP), GET /api/v1/candidates/{id}. Publish event CandidateCreated. Use Postgres schema identity. Provide Dockerfile + unit tests + OpenAPI yaml."
+user_problem_statement: "Generate a micro-service folder /modules/identity. Expose REST: POST /api/v1/candidates (create + OTP), GET /api/v1/candidates/{id}. Publish event CandidateCreated. Use Postgres schema identity. Provide Dockerfile + unit tests + OpenAPI yaml. ADDITIONAL: Test the calendar microservice integration and endpoints running on port 8002 with main backend integration on port 8001."
 
 backend:
   - task: "Identity Microservice Structure Setup"
