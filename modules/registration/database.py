@@ -41,10 +41,16 @@ async def init_db():
             expire_on_commit=False,
         )
         
-        # Create schema if it doesn't exist
-        async with engine.begin() as conn:
-            await conn.execute(text(f"CREATE SCHEMA IF NOT EXISTS {config.db.schema}"))
-            logger.info(f"Schema '{config.db.schema}' ensured")
+        # For PostgreSQL, create schema if it doesn't exist
+        if config.db.db_type != "sqlite":
+            async with engine.begin() as conn:
+                await conn.execute(text(f"CREATE SCHEMA IF NOT EXISTS {config.db.schema}"))
+                logger.info(f"Schema '{config.db.schema}' ensured")
+        else:
+            # For SQLite, ensure the directory exists
+            import os
+            os.makedirs(os.path.dirname(config.db.sqlite_path), exist_ok=True)
+            logger.info(f"SQLite database path ensured: {config.db.sqlite_path}")
         
         # Create all tables
         async with engine.begin() as conn:
