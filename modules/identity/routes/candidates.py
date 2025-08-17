@@ -35,6 +35,62 @@ async def create_candidate(
     try:
         logger.info(f"Creating candidate with email: {candidate_data.email}")
         
+        # Check if database is available
+        if db is None:
+            # Simulate candidate creation without database
+            from datetime import datetime, timezone
+            import uuid
+            
+            candidate_id = uuid.uuid4()
+            mock_candidate = {
+                "id": candidate_id,
+                "email": candidate_data.email,
+                "phone": candidate_data.phone,
+                "first_name": candidate_data.first_name,
+                "last_name": candidate_data.last_name,
+                "is_verified": False,
+                "is_active": True,
+                "created_at": datetime.now(timezone.utc),
+                "updated_at": datetime.now(timezone.utc)
+            }
+            
+            # Simulate OTP sending
+            otp_sent = candidate_data.send_otp
+            otp_channels = []
+            if candidate_data.send_otp:
+                if candidate_data.otp_channel in ["email", "both"]:
+                    otp_channels.append("email")
+                if candidate_data.otp_channel in ["sms", "both"] and candidate_data.phone:
+                    otp_channels.append("sms")
+            
+            message = "Candidate created successfully (simulated - no database)"
+            if otp_sent and otp_channels:
+                message += f". OTP sent via {', '.join(otp_channels)} (simulated)"
+            
+            # Simulate event publishing
+            event_service = getattr(request.app.state, 'event_service', None)
+            if event_service:
+                try:
+                    # Create a mock candidate object for event publishing
+                    class MockCandidate:
+                        def __init__(self, data):
+                            for key, value in data.items():
+                                setattr(self, key, value)
+                    
+                    mock_candidate_obj = MockCandidate(mock_candidate)
+                    await event_service.publish_candidate_created(mock_candidate_obj)
+                    logger.info(f"CandidateCreated event published for {candidate_id} (simulated)")
+                except Exception as e:
+                    logger.error(f"Failed to publish CandidateCreated event: {e}")
+            
+            return CandidateCreateResponse(
+                candidate=mock_candidate,
+                otp_sent=otp_sent,
+                otp_channels=otp_channels,
+                message=message
+            )
+        
+        # Normal database flow (when database is available)
         # Initialize services
         candidate_service = CandidateService(db)
         otp_service = OTPService()
