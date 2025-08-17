@@ -139,6 +139,91 @@ async def get_calendar_booking(booking_id: str):
         logger.error(f"Error getting calendar booking: {e}")
         return {"error": str(e)}
 
+# Receipt service integration endpoints
+@api_router.get("/receipts/health")
+async def check_receipt_service():
+    """Check if receipt service is healthy"""
+    health = await receipt_client.health_check()
+    if health:
+        return {
+            "receipt_service": "healthy",
+            "status": health
+        }
+    else:
+        return {
+            "receipt_service": "unavailable",
+            "status": None
+        }
+
+@api_router.post("/receipts/validate")
+async def validate_receipt(receipt_data: dict):
+    """Validate a receipt via receipt service"""
+    try:
+        # Parse the receipt data
+        validation_request = ReceiptValidationRequest(
+            receipt_no=receipt_data["receipt_no"],
+            issue_date=receipt_data["issue_date"],
+            location=receipt_data["location"],
+            amount=receipt_data["amount"]
+        )
+        
+        result = await receipt_client.validate_receipt(validation_request)
+        if result:
+            return {
+                "success": result.success,
+                "receipt_no": result.receipt_no,
+                "message": result.message,
+                "receipt": result.receipt,
+                "validation_timestamp": result.validation_timestamp.isoformat(),
+                "http_status": 200 if result.success else 409
+            }
+        else:
+            return {
+                "success": False,
+                "error": "Receipt service unavailable"
+            }
+    except Exception as e:
+        logger.error(f"Error validating receipt: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+@api_router.get("/receipts/{receipt_no}")
+async def get_receipt(receipt_no: str):
+    """Get receipt details from receipt service"""
+    try:
+        receipt = await receipt_client.get_receipt(receipt_no)
+        if receipt:
+            return {
+                "found": True,
+                "receipt": receipt
+            }
+        else:
+            return {
+                "found": False,
+                "receipt": None
+            }
+    except Exception as e:
+        logger.error(f"Error getting receipt: {e}")
+        return {"error": str(e)}
+
+@api_router.get("/receipts/statistics")
+async def get_receipt_statistics():
+    """Get receipt validation statistics from receipt service"""
+    try:
+        stats = await receipt_client.get_statistics()
+        if stats:
+            return stats
+        else:
+            return {
+                "success": False,
+                "error": "Receipt service unavailable"
+            }
+    except Exception as e:
+        logger.error(f"Error getting receipt statistics: {e}")
+        return {"error": str(e)}
+
 # Include the router in the main app
 app.include_router(api_router)
 
