@@ -708,7 +708,7 @@ class UpdatedMedicalCertificateRulesTester:
     def test_jwt_authentication(self):
         """Test JWT authentication requirements"""
         try:
-            registration_data = self.generate_test_registration_data("B", 18.0)
+            registration_data = self.generate_test_registration_data("B", 18.0, use_manager_override=False)
             
             # Test without Authorization header
             response = self.session.post(
