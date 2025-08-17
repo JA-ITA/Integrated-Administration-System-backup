@@ -114,6 +114,9 @@ class ReceiptResponse(BaseModel):
     
     class Config:
         from_attributes = True
+        json_encoders = {
+            datetime: lambda v: v.isoformat() if v else None
+        }
 
 class ReceiptValidationResponse(BaseModel):
     """Response schema for receipt validation"""
@@ -122,6 +125,11 @@ class ReceiptValidationResponse(BaseModel):
     message: str
     receipt: Optional[ReceiptResponse] = None
     validation_timestamp: datetime
+    
+    class Config:
+        json_encoders = {
+            datetime: lambda v: v.isoformat() if v else None
+        }
 
 class ErrorResponse(BaseModel):
     """Standard error response schema"""
