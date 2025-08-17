@@ -6,9 +6,10 @@ import os
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
 import uuid
 from datetime import datetime
+from calendar_client import calendar_client, BookingRequest
 
 
 ROOT_DIR = Path(__file__).parent
