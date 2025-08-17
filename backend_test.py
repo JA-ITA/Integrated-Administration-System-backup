@@ -202,7 +202,7 @@ class IdentityServiceTester:
                     "email": "young@example.com",
                     "first_name": "Young",
                     "last_name": "Person",
-                    "phone": "+14415551234",
+                    "phone": "+1-441-555-1234",
                     "date_of_birth": "2010-01-01"  # Too young
                 },
                 "expected_status": 422
