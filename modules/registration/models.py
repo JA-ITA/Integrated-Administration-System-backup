@@ -56,11 +56,11 @@ class Registration(Base):
     # Only use schema for PostgreSQL, not SQLite
     __table_args__ = {"schema": config.db.schema} if config.db.db_type != "sqlite" else {}
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = get_uuid_column()
     
-    # Foreign keys to other services
-    candidate_id = Column(UUID(as_uuid=True), nullable=False, index=True)  # FK to Identity
-    booking_id = Column(UUID(as_uuid=True), nullable=False, index=True)    # FK to Calendar
+    # Foreign keys to other services (string UUIDs for SQLite compatibility)
+    candidate_id = get_uuid_foreign_key_column()  # FK to Identity
+    booking_id = get_uuid_foreign_key_column()    # FK to Calendar
     receipt_no = Column(String(20), nullable=False, index=True)            # FK to Receipt
     
     # Candidate information from JWT claims
