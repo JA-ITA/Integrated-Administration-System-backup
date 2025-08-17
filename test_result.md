@@ -210,10 +210,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Calendar Microservice - Tables Implementation"
-    - "GET /api/v1/slots?hub=X&date=Y Endpoint"
-    - "POST /api/v1/bookings Endpoint with 15-min Lock"
-    - "BookingCreated Event Publishing"
+    - "Receipt Microservice - Tables Implementation"
+    - "POST /api/v1/receipts/validate Endpoint"
+    - "ReceiptValidated Event Publishing"
+    - "Receipt Service Independence (Port 8003)"
+    - "Main Backend Receipt Integration"
   stuck_tasks: []
   test_all: true
   test_priority: "high_first"
