@@ -15,8 +15,8 @@ import os
 import sys
 
 # Test configuration
-BACKEND_URL = "https://profile-manager-12.preview.emergentagent.com"
-API_BASE = f"{BACKEND_URL}/api"
+BACKEND_URL = "http://localhost:8002"
+API_BASE = f"{BACKEND_URL}/api/v1"
 
 class IdentityServiceTester:
     """Comprehensive tester for the Identity microservice."""
