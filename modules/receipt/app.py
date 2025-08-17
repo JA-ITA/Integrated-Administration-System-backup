@@ -60,6 +60,16 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# Configure JSON encoder for datetime serialization
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse as FastAPIJSONResponse
+
+class CustomJSONResponse(FastAPIJSONResponse):
+    def render(self, content) -> bytes:
+        return super().render(jsonable_encoder(content))
+
+app.default_response_class = CustomJSONResponse
+
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
