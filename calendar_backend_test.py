@@ -16,7 +16,7 @@ import sys
 
 # Test configuration
 CALENDAR_SERVICE_URL = "http://localhost:8002"
-MAIN_BACKEND_URL = "https://receipt-tracker-18.preview.emergentagent.com"
+MAIN_BACKEND_URL = "https://signup-service.preview.emergentagent.com"
 CALENDAR_API_BASE = f"{CALENDAR_SERVICE_URL}/api/v1"
 MAIN_API_BASE = f"{MAIN_BACKEND_URL}/api"
 
