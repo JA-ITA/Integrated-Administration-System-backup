@@ -215,11 +215,14 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Receipt Microservice - Tables Implementation"
-    - "POST /api/v1/receipts/validate Endpoint"
-    - "ReceiptValidated Event Publishing"
-    - "Receipt Service Independence (Port 8003)"
-    - "Main Backend Receipt Integration"
+    - "Registration Microservice - Tables Implementation"
+    - "POST /api/v1/registrations Endpoint with Business Rules"
+    - "Document Processing and File Upload Handling"
+    - "Age and Medical Certificate Validation Rules"
+    - "External Service Integration (Calendar & Receipt)"
+    - "RegistrationCompleted Event Publishing"
+    - "Registration Service Independence (Port 8004)"
+    - "Main Backend Registration Integration"
   stuck_tasks: []
   test_all: true
   test_priority: "high_first"
