@@ -306,7 +306,7 @@ class IdentityServiceTester:
         
         try:
             response = self.session.get(
-                f"{self.base_url}/identity/v1/candidates/{candidate_id}"
+                f"{self.base_url}/candidates/{candidate_id}"
             )
             
             if response.status_code == 200:
