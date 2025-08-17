@@ -108,7 +108,11 @@ async def create_calendar_booking(booking_data: dict):
         result = await calendar_client.create_booking(booking_request)
         return {
             "success": True,
-            "booking": result.dict()
+            "booking_id": str(result.booking.id),
+            "booking_reference": result.booking.booking_reference,
+            "lock_expires_at": result.lock_expires_at.isoformat(),
+            "message": result.message,
+            "status": result.booking.status
         }
     except Exception as e:
         logger.error(f"Error creating calendar booking: {e}")
