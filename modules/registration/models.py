@@ -155,8 +155,8 @@ class Document(Base):
     # Only use schema for PostgreSQL, not SQLite
     __table_args__ = {"schema": config.db.schema} if config.db.db_type != "sqlite" else {}
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    registration_id = Column(UUID(as_uuid=True), nullable=False, index=True)
+    id = get_uuid_column()
+    registration_id = get_uuid_foreign_key_column()
     
     # Document metadata
     document_type = Column(String(20), nullable=False)
