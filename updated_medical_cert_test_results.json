@@ -4,7 +4,7 @@
     "passed_tests": 2,
     "failed_tests": 10,
     "success_rate": 16.666666666666664,
-    "test_timestamp": "2025-08-17T23:45:48.026307",
+    "test_timestamp": "2025-08-17T23:46:46.405350",
     "registration_service_url": "http://localhost:8004",
     "focus": "UPDATED MC2 certificate requirements for ALL Class C tests"
   },
@@ -13,7 +13,7 @@
       "test": "Service Health Check",
       "success": true,
       "message": "Service healthy: healthy",
-      "timestamp": "2025-08-17T23:45:47.279879",
+      "timestamp": "2025-08-17T23:46:45.662318",
       "details": {
         "database": "connected",
         "events": "connected",
@@ -24,7 +24,7 @@
       "test": "JWT Authentication - Missing Token",
       "success": true,
       "message": "Missing authorization properly rejected",
-      "timestamp": "2025-08-17T23:45:47.282618",
+      "timestamp": "2025-08-17T23:46:45.664678",
       "details": {
         "status": 401
       }
@@ -33,7 +33,7 @@
       "test": "Class C Light Vehicle (< 7000kg) - MC2 Required (NEW RULE)",
       "success": false,
       "message": "Registration failed unexpectedly: External validation failed",
-      "timestamp": "2025-08-17T23:45:47.357461",
+      "timestamp": "2025-08-17T23:46:45.737991",
       "details": {
         "success": false,
         "registration": null,
@@ -48,17 +48,24 @@
     {
       "test": "Class C Light Vehicle (< 7000kg) - Missing MC2 Should Fail (NEW RULE)",
       "success": false,
-      "message": "Expected 400/422 but got 200",
-      "timestamp": "2025-08-17T23:45:47.431180",
+      "message": "Registration failed but not due to MC2 requirement: External validation failed",
+      "timestamp": "2025-08-17T23:46:45.811876",
       "details": {
-        "response": "{\"success\":false,\"registration\":null,\"message\":\"External validation failed\",\"validation_errors\":[\"Booking validation error: All connection attempts failed\",\"Receipt validation error: All connection attempts failed\"],\"driver_record_id\":null}"
+        "success": false,
+        "registration": null,
+        "message": "External validation failed",
+        "validation_errors": [
+          "Booking validation error: All connection attempts failed",
+          "Receipt validation error: All connection attempts failed"
+        ],
+        "driver_record_id": null
       }
     },
     {
       "test": "Class C Heavy Vehicle (> 7000kg) - MC2 Required (unchanged)",
       "success": false,
       "message": "Registration failed unexpectedly: External validation failed",
-      "timestamp": "2025-08-17T23:45:47.504473",
+      "timestamp": "2025-08-17T23:46:45.884226",
       "details": {
         "success": false,
         "registration": null,
@@ -74,7 +81,7 @@
       "test": "PPV Test - MC2 Required (unchanged)",
       "success": false,
       "message": "Registration failed unexpectedly: External validation failed",
-      "timestamp": "2025-08-17T23:45:47.578618",
+      "timestamp": "2025-08-17T23:46:45.958371",
       "details": {
         "success": false,
         "registration": null,
@@ -90,7 +97,7 @@
       "test": "Class B Test - No Medical Certificate Required (unchanged)",
       "success": false,
       "message": "Registration failed unexpectedly: External validation failed",
-      "timestamp": "2025-08-17T23:45:47.651624",
+      "timestamp": "2025-08-17T23:46:46.034826",
       "details": {
         "success": false,
         "registration": null,
@@ -106,7 +113,7 @@
       "test": "Provisional Test - MC1 Required (unchanged)",
       "success": false,
       "message": "Registration failed unexpectedly: External validation failed",
-      "timestamp": "2025-08-17T23:45:47.726995",
+      "timestamp": "2025-08-17T23:46:46.108210",
       "details": {
         "success": false,
         "registration": null,
@@ -122,7 +129,7 @@
       "test": "Age Validation - Provisional - Valid Age (16.5+)",
       "success": false,
       "message": "Expected success but got failure: External validation failed",
-      "timestamp": "2025-08-17T23:45:47.799959",
+      "timestamp": "2025-08-17T23:46:46.182403",
       "details": {
         "success": false,
         "registration": null,
@@ -138,7 +145,7 @@
       "test": "Age Validation - Class B - Valid Age (17+)",
       "success": false,
       "message": "Expected success but got failure: External validation failed",
-      "timestamp": "2025-08-17T23:45:47.873317",
+      "timestamp": "2025-08-17T23:46:46.258076",
       "details": {
         "success": false,
         "registration": null,
@@ -154,7 +161,7 @@
       "test": "Age Validation - Class C - Valid Age (20+)",
       "success": false,
       "message": "Expected success but got failure: External validation failed",
-      "timestamp": "2025-08-17T23:45:47.950068",
+      "timestamp": "2025-08-17T23:46:46.332166",
       "details": {
         "success": false,
         "registration": null,
@@ -170,7 +177,7 @@
       "test": "Age Validation - PPV - Valid Age (20+)",
       "success": false,
       "message": "Expected success but got failure: External validation failed",
-      "timestamp": "2025-08-17T23:45:48.026050",
+      "timestamp": "2025-08-17T23:46:46.405080",
       "details": {
         "success": false,
         "registration": null,
