@@ -10,6 +10,7 @@ from typing import List, Optional
 import uuid
 from datetime import datetime
 from calendar_client import calendar_client, BookingRequest
+from receipt_client import receipt_client, ReceiptValidationRequest
 
 
 ROOT_DIR = Path(__file__).parent
