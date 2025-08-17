@@ -137,7 +137,8 @@ class Registration(Base):
 class Document(Base):
     """Document metadata model for registration schema"""
     __tablename__ = "documents"
-    __table_args__ = {"schema": config.db.schema}
+    # Only use schema for PostgreSQL, not SQLite
+    __table_args__ = {"schema": config.db.schema} if config.db.db_type != "sqlite" else {}
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     registration_id = Column(UUID(as_uuid=True), nullable=False, index=True)
