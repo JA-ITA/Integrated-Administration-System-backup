@@ -55,6 +55,9 @@ async def init_db():
     except Exception as e:
         logger.warning(f"Failed to initialize database: {e}")
         logger.info("Service will continue without database connectivity")
+        # Reset engine and session maker to None
+        engine = None
+        async_session_maker = None
         # Don't raise the exception, allow service to start
 
 def get_db_engine():
