@@ -4,7 +4,7 @@
     "passed_tests": 7,
     "failed_tests": 18,
     "success_rate": 28.000000000000004,
-    "test_timestamp": "2025-08-17T23:31:53.820995",
+    "test_timestamp": "2025-08-17T23:32:46.139642",
     "registration_service_url": "http://localhost:8004",
     "main_backend_url": "https://signup-system-2.preview.emergentagent.com"
   },
@@ -13,11 +13,11 @@
       "test": "Service Health Check",
       "success": true,
       "message": "Service healthy: healthy",
-      "timestamp": "2025-08-17T23:31:52.579196",
+      "timestamp": "2025-08-17T23:32:44.794465",
       "details": {
         "database": "connected",
         "events": "connected",
-        "dependencies": false,
+        "dependencies": true,
         "configuration": {
           "min_age_provisional": 16.5,
           "min_age_class_b": 17,
@@ -32,7 +32,7 @@
       "test": "Configuration Endpoint",
       "success": true,
       "message": "Configuration retrieved successfully",
-      "timestamp": "2025-08-17T23:31:52.581149",
+      "timestamp": "2025-08-17T23:32:44.796405",
       "details": {
         "min_age_provisional": 16.5,
         "min_age_class_b": 17,
@@ -63,7 +63,7 @@
       "test": "Events Status Endpoint",
       "success": true,
       "message": "Events status retrieved successfully",
-      "timestamp": "2025-08-17T23:31:52.582822",
+      "timestamp": "2025-08-17T23:32:44.797915",
       "details": {
         "event_service_connected": false,
         "fallback_events_count": 0,
@@ -74,7 +74,7 @@
       "test": "Authentication - Missing Token",
       "success": true,
       "message": "Missing authorization properly rejected",
-      "timestamp": "2025-08-17T23:31:52.585204",
+      "timestamp": "2025-08-17T23:32:44.799896",
       "details": {
         "status": 401
       }
@@ -83,7 +83,7 @@
       "test": "Authentication - Invalid Token Format",
       "success": true,
       "message": "Invalid token format properly rejected",
-      "timestamp": "2025-08-17T23:31:52.587313",
+      "timestamp": "2025-08-17T23:32:44.801764",
       "details": {
         "status": 401
       }
@@ -92,14 +92,14 @@
       "test": "Direct Registration API - Class B Success",
       "success": false,
       "message": "Registration failed: External validation failed",
-      "timestamp": "2025-08-17T23:31:52.664659",
+      "timestamp": "2025-08-17T23:32:44.880001",
       "details": {
         "success": false,
         "registration": null,
         "message": "External validation failed",
         "validation_errors": [
-          "Booking validation error: All connection attempts failed",
-          "Receipt validation error: All connection attempts failed"
+          "Failed to validate booking: HTTP 503",
+          "Failed to validate receipt: HTTP 503"
         ],
         "driver_record_id": null
       }
@@ -108,14 +108,14 @@
       "test": "Age Validation - Provisional - Valid Age (16.5+)",
       "success": false,
       "message": "Expected success but got failure: External validation failed",
-      "timestamp": "2025-08-17T23:31:52.737730",
+      "timestamp": "2025-08-17T23:32:44.962420",
       "details": {
         "success": false,
         "registration": null,
         "message": "External validation failed",
         "validation_errors": [
-          "Booking validation error: All connection attempts failed",
-          "Receipt validation error: All connection attempts failed"
+          "Failed to validate booking: HTTP 503",
+          "Failed to validate receipt: HTTP 503"
         ],
         "driver_record_id": null
       }
@@ -124,23 +124,23 @@
       "test": "Age Validation - Provisional - Invalid Age (<16.5)",
       "success": false,
       "message": "Expected 400/422 but got 200",
-      "timestamp": "2025-08-17T23:31:52.811979",
+      "timestamp": "2025-08-17T23:32:45.038079",
       "details": {
-        "response": "{\"success\":false,\"registration\":null,\"message\":\"External validation failed\",\"validation_errors\":[\"Booking validation error: All connection attempts failed\",\"Receipt validation error: All connection attempts failed\"],\"driver_record_id\":null}"
+        "response": "{\"success\":false,\"registration\":null,\"message\":\"External validation failed\",\"validation_errors\":[\"Failed to validate booking: HTTP 503\",\"Failed to validate receipt: HTTP 503\"],\"driver_record_id\":null}"
       }
     },
     {
       "test": "Age Validation - Class B - Valid Age (17+)",
       "success": false,
       "message": "Expected success but got failure: External validation failed",
-      "timestamp": "2025-08-17T23:31:52.882478",
+      "timestamp": "2025-08-17T23:32:45.114686",
       "details": {
         "success": false,
         "registration": null,
         "message": "External validation failed",
         "validation_errors": [
-          "Booking validation error: All connection attempts failed",
-          "Receipt validation error: All connection attempts failed"
+          "Failed to validate booking: HTTP 503",
+          "Failed to validate receipt: HTTP 503"
         ],
         "driver_record_id": null
       }
@@ -149,23 +149,23 @@
       "test": "Age Validation - Class B - Invalid Age (<17)",
       "success": false,
       "message": "Expected 400/422 but got 200",
-      "timestamp": "2025-08-17T23:31:52.957468",
+      "timestamp": "2025-08-17T23:32:45.197264",
       "details": {
-        "response": "{\"success\":false,\"registration\":null,\"message\":\"External validation failed\",\"validation_errors\":[\"Booking validation error: All connection attempts failed\",\"Receipt validation error: All connection attempts failed\"],\"driver_record_id\":null}"
+        "response": "{\"success\":false,\"registration\":null,\"message\":\"External validation failed\",\"validation_errors\":[\"Failed to validate booking: HTTP 503\",\"Failed to validate receipt: HTTP 503\"],\"driver_record_id\":null}"
       }
     },
     {
       "test": "Age Validation - Class C - Valid Age (20+)",
       "success": false,
       "message": "Expected success but got failure: External validation failed",
-      "timestamp": "2025-08-17T23:31:53.033551",
+      "timestamp": "2025-08-17T23:32:45.274421",
       "details": {
         "success": false,
         "registration": null,
         "message": "External validation failed",
         "validation_errors": [
-          "Booking validation error: All connection attempts failed",
-          "Receipt validation error: All connection attempts failed"
+          "Failed to validate booking: HTTP 503",
+          "Failed to validate receipt: HTTP 503"
         ],
         "driver_record_id": null
       }
@@ -174,23 +174,23 @@
       "test": "Age Validation - Class C - Invalid Age (<20)",
       "success": false,
       "message": "Expected 400/422 but got 200",
-      "timestamp": "2025-08-17T23:31:53.103972",
+      "timestamp": "2025-08-17T23:32:45.349042",
       "details": {
-        "response": "{\"success\":false,\"registration\":null,\"message\":\"External validation failed\",\"validation_errors\":[\"Booking validation error: All connection attempts failed\",\"Receipt validation error: All connection attempts failed\"],\"driver_record_id\":null}"
+        "response": "{\"success\":false,\"registration\":null,\"message\":\"External validation failed\",\"validation_errors\":[\"Failed to validate booking: HTTP 503\",\"Failed to validate receipt: HTTP 503\"],\"driver_record_id\":null}"
       }
     },
     {
       "test": "Medical Certificate - Provisional - MC1 Required",
       "success": false,
       "message": "Expected success but got failure: External validation failed",
-      "timestamp": "2025-08-17T23:31:53.177406",
+      "timestamp": "2025-08-17T23:32:45.435047",
       "details": {
         "success": false,
         "registration": null,
         "message": "External validation failed",
         "validation_errors": [
-          "Booking validation error: All connection attempts failed",
-          "Receipt validation error: All connection attempts failed"
+          "Failed to validate booking: HTTP 503",
+          "Failed to validate receipt: HTTP 503"
         ],
         "driver_record_id": null
       }
@@ -199,23 +199,23 @@
       "test": "Medical Certificate - Provisional - Missing MC1",
       "success": false,
       "message": "Expected 400/422 but got 200",
-      "timestamp": "2025-08-17T23:31:53.249625",
+      "timestamp": "2025-08-17T23:32:45.509944",
       "details": {
-        "response": "{\"success\":false,\"registration\":null,\"message\":\"External validation failed\",\"validation_errors\":[\"Booking validation error: All connection attempts failed\",\"Receipt validation error: All connection attempts failed\"],\"driver_record_id\":null}"
+        "response": "{\"success\":false,\"registration\":null,\"message\":\"External validation failed\",\"validation_errors\":[\"Failed to validate booking: HTTP 503\",\"Failed to validate receipt: HTTP 503\"],\"driver_record_id\":null}"
       }
     },
     {
       "test": "Medical Certificate - Class C - MC2 Required",
       "success": false,
       "message": "Expected success but got failure: External validation failed",
-      "timestamp": "2025-08-17T23:31:53.321424",
+      "timestamp": "2025-08-17T23:32:45.581901",
       "details": {
         "success": false,
         "registration": null,
         "message": "External validation failed",
         "validation_errors": [
-          "Booking validation error: All connection attempts failed",
-          "Receipt validation error: All connection attempts failed"
+          "Failed to validate booking: HTTP 503",
+          "Failed to validate receipt: HTTP 503"
         ],
         "driver_record_id": null
       }
@@ -224,23 +224,23 @@
       "test": "Medical Certificate - Class C - Missing MC2",
       "success": false,
       "message": "Expected 400/422 but got 200",
-      "timestamp": "2025-08-17T23:31:53.391831",
+      "timestamp": "2025-08-17T23:32:45.669534",
       "details": {
-        "response": "{\"success\":false,\"registration\":null,\"message\":\"External validation failed\",\"validation_errors\":[\"Booking validation error: All connection attempts failed\",\"Receipt validation error: All connection attempts failed\"],\"driver_record_id\":null}"
+        "response": "{\"success\":false,\"registration\":null,\"message\":\"External validation failed\",\"validation_errors\":[\"Failed to validate booking: HTTP 503\",\"Failed to validate receipt: HTTP 503\"],\"driver_record_id\":null}"
       }
     },
     {
       "test": "Medical Certificate - Class B - No MC Required",
       "success": false,
       "message": "Expected success but got failure: External validation failed",
-      "timestamp": "2025-08-17T23:31:53.467052",
+      "timestamp": "2025-08-17T23:32:45.746313",
       "details": {
         "success": false,
         "registration": null,
         "message": "External validation failed",
         "validation_errors": [
-          "Booking validation error: All connection attempts failed",
-          "Receipt validation error: All connection attempts failed"
+          "Failed to validate booking: HTTP 503",
+          "Failed to validate receipt: HTTP 503"
         ],
         "driver_record_id": null
       }
@@ -249,7 +249,7 @@
       "test": "Document Validation - Missing Required Documents",
       "success": true,
       "message": "Missing required documents properly rejected",
-      "timestamp": "2025-08-17T23:31:53.469330",
+      "timestamp": "2025-08-17T23:32:45.748415",
       "details": {
         "status": 422
       }
@@ -258,16 +258,16 @@
       "test": "Document Validation - Oversized Document",
       "success": false,
       "message": "Expected 400/422, got 200",
-      "timestamp": "2025-08-17T23:31:53.588796",
+      "timestamp": "2025-08-17T23:32:45.870128",
       "details": {
-        "response": "{\"success\":false,\"registration\":null,\"message\":\"External validation failed\",\"validation_errors\":[\"Booking validation error: All connection attempts failed\",\"Receipt validation error: All connection attempts failed\"],\"driver_record_id\":null}"
+        "response": "{\"success\":false,\"registration\":null,\"message\":\"External validation failed\",\"validation_errors\":[\"Failed to validate booking: HTTP 503\",\"Failed to validate receipt: HTTP 503\"],\"driver_record_id\":null}"
       }
     },
     {
       "test": "External Service Validation",
       "success": true,
       "message": "External service validation handled gracefully with status 200",
-      "timestamp": "2025-08-17T23:31:53.663206",
+      "timestamp": "2025-08-17T23:32:45.958926",
       "details": {
         "status": 200,
         "success": false,
@@ -278,14 +278,14 @@
       "test": "Manager Override Functionality",
       "success": false,
       "message": "Manager override failed: External validation failed",
-      "timestamp": "2025-08-17T23:31:53.737319",
+      "timestamp": "2025-08-17T23:32:46.034212",
       "details": {
         "success": false,
         "registration": null,
         "message": "External validation failed",
         "validation_errors": [
-          "Booking validation error: All connection attempts failed",
-          "Receipt validation error: All connection attempts failed"
+          "Failed to validate booking: HTTP 503",
+          "Failed to validate receipt: HTTP 503"
         ],
         "driver_record_id": null
       }
@@ -294,14 +294,14 @@
       "test": "Registration Retrieval",
       "success": false,
       "message": "No registration ID provided",
-      "timestamp": "2025-08-17T23:31:53.737385",
+      "timestamp": "2025-08-17T23:32:46.034275",
       "details": {}
     },
     {
       "test": "Main Backend Integration - Health Check",
       "success": false,
       "message": "Health check failed with status 502",
-      "timestamp": "2025-08-17T23:31:53.797949",
+      "timestamp": "2025-08-17T23:32:46.125235",
       "details": {
         "response": ""
       }
@@ -310,7 +310,7 @@
       "test": "Main Backend Integration - Dependencies Check",
       "success": false,
       "message": "Dependencies check failed with status 502",
-      "timestamp": "2025-08-17T23:31:53.809338",
+      "timestamp": "2025-08-17T23:32:46.132270",
       "details": {
         "response": ""
       }
@@ -319,7 +319,7 @@
       "test": "Main Backend Integration - Events Status",
       "success": false,
       "message": "Events status failed with status 502",
-      "timestamp": "2025-08-17T23:31:53.820723",
+      "timestamp": "2025-08-17T23:32:46.139240",
       "details": {
         "response": ""
       }
