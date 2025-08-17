@@ -104,7 +104,12 @@
 
 user_problem_statement: "Generate /modules/calendar Tables: hubs, slots, bookings.
 Endpoints: GET /api/v1/slots?hub=X&date=Y POST /api/v1/bookings (reserve slot) Publish BookingCreated.
-Lock slot for 15 min on reservation."
+Lock slot for 15 min on reservation.
+
+Generate /modules/receipt Table: receipts (receipt_no PK, issue_date, location, amount, used_flag).
+Endpoint: POST /api/v1/receipts/validate
+Return 200 OK or 409 Duplicate.
+Publish ReceiptValidated."
 
 backend:
   - task: "Calendar Microservice - Tables Implementation"
