@@ -25,7 +25,7 @@ class Candidate(Base):
     last_name = Column(String(100), nullable=False)
     is_verified = Column(Boolean, default=False, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
-    metadata = Column(Text, nullable=True)  # JSON string for additional data
+    additional_data = Column(Text, nullable=True)  # JSON string for additional data
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     
