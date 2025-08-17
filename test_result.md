@@ -237,6 +237,114 @@ backend:
         agent: "main"
         comment: "Generated complete OpenAPI 3.0 specification with detailed schemas and examples"
 
+  - task: "Calendar Microservice Health Check"
+    implemented: true
+    working: true
+    file: "/modules/calendar/app.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Calendar service running on port 8002, health endpoint working, service status healthy with database fallback and in-memory event storage"
+
+  - task: "Calendar Service Direct API - GET /api/v1/slots"
+    implemented: true
+    working: true
+    file: "/modules/calendar/routes/slots.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "GET /api/v1/slots endpoint working correctly, returns mock data when database unavailable, proper date validation and hub parameter handling"
+
+  - task: "Calendar Service Direct API - POST /api/v1/bookings"
+    implemented: true
+    working: false
+    file: "/modules/calendar/routes/bookings.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "POST /api/v1/bookings endpoint creates bookings but has validation issues: accepts invalid email formats, accepts non-existent slot IDs, and slot locking mechanism not working properly. Service returns mock data without proper validation when database unavailable."
+
+  - task: "Calendar Service 15-Minute Slot Locking"
+    implemented: true
+    working: false
+    file: "/modules/calendar/routes/bookings.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "Slot locking mechanism not working correctly - multiple bookings can be created for the same slot without proper conflict detection. Expected 409 error for locked slots but got 201 success."
+
+  - task: "Calendar Service Event Publishing - BookingCreated"
+    implemented: true
+    working: true
+    file: "/modules/calendar/services/event_service.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Event service initialized and working with fallback in-memory storage. BookingCreated events are being published successfully when RabbitMQ is unavailable."
+
+  - task: "Main Backend Calendar Integration - Health Check"
+    implemented: true
+    working: true
+    file: "/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Main backend calendar health check endpoint working correctly, successfully communicates with calendar service on port 8002"
+
+  - task: "Main Backend Calendar Integration - GET /api/calendar/slots"
+    implemented: true
+    working: true
+    file: "/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Main backend calendar slots endpoint working correctly, successfully retrieves slots from calendar service and returns proper response format"
+
+  - task: "Main Backend Calendar Integration - POST /api/calendar/bookings"
+    implemented: true
+    working: true
+    file: "/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Main backend calendar bookings endpoint working correctly, successfully creates bookings via calendar service integration"
+
+  - task: "Calendar Service Database Integration"
+    implemented: true
+    working: false
+    file: "/modules/calendar/database.py"
+    stuck_count: 1
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "Database connection failing (PostgreSQL not available), service falls back to mock data. GET booking endpoints return 503 errors due to database unavailability."
+
 metadata:
   created_by: "main_agent"
   version: "1.0"
