@@ -1,0 +1,1067 @@
+openapi: 3.0.3
+info:
+  title: Island Traffic Authority - Identity & Profile API
+  description: |
+    Comprehensive candidate management system for driver license applications.
+    
+    This API handles the complete candidate lifecycle from initial registration 
+    through verification and profile management for the Island Traffic Authority's
+    driver licensing platform.
+    
+    ## Features
+    
+    - **Candidate Registration**: Secure registration with data validation
+    - **OTP Verification**: Multi-channel verification (email + SMS)
+    - **Event Publishing**: Real-time event streaming for system integration
+    - **Profile Management**: Complete candidate profile lifecycle
+    - **Security**: Enterprise-grade security with rate limiting and audit trails
+    
+    ## Authentication Flow
+    
+    1. Candidate registers via `POST /candidates`
+    2. System sends OTP to email and phone
+    3. Candidate verifies both OTPs via `POST /candidates/{id}/verify-otp`
+    4. Once verified, candidate sets password via `POST /candidates/{id}/set-password`
+    5. Account becomes active and ready for license applications
+    
+    ## Event System
+    
+    The API publishes events to RabbitMQ for system integration:
+    
+    - `CandidateCreated`: When new candidate registers
+    - `OTPSent`: When OTP is sent via email/SMS
+    - `OTPVerified`: When OTP verification succeeds
+    - `CandidateVerified`: When verification process completes
+    - `PasswordSet`: When candidate activates account
+    
+  version: 1.0.0
+  contact:
+    name: Island Traffic Authority IT Department
+    email: it-support@ita.gov
+    url: https://ita.gov/support
+  license:
+    name: Proprietary
+    identifier: ITA-LICENSE-1.0
+    
+servers:
+  - url: https://api.ita.gov/v1
+    description: Production API server
+  - url: https://staging-api.ita.gov/v1
+    description: Staging API server
+  - url: http://localhost:8000/api/v1
+    description: Development server
+    
+paths:
+  /candidates:
+    post:
+      summary: Create New Candidate
+      description: |
+        Register a new candidate for driver's license application.
+        
+        This endpoint creates a new candidate record and initiates the verification 
+        process by sending OTP codes to the provided email and phone number.
+        
+        **Process:**
+        1. Validates candidate information against business rules
+        2. Creates candidate record with PENDING_VERIFICATION status  
+        3. Generates and sends OTP codes to email and phone
+        4. Publishes CandidateCreated event to message queue
+        5. Returns candidate information and verification instructions
+        
+        **Validation Rules:**
+        - Email must be unique and valid format
+        - Phone must be valid Bermuda format (+1-441-XXX-XXXX)
+        - Date of birth must indicate candidate is 16+ years old
+        - National ID must be unique if provided
+        - All required fields must be present and properly formatted
+        
+      operationId: createCandidate
+      tags: [Candidates]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CandidateCreateRequest'
+            examples:
+              bermuda_resident:
+                summary: Bermuda Resident Application
+                value:
+                  email: "john.smith@example.com"
+                  first_name: "John"
+                  last_name: "Smith"
+                  phone: "4412345678"
+                  date_of_birth: "1995-03-15"
+                  national_id: "BDA123456789"
+                  street_address: "123 Front Street"
+                  city: "Hamilton"
+                  postal_code: "HM01"
+                  country: "Bermuda"
+                  preferred_language: "en"
+                  timezone: "Atlantic/Bermuda"
+              visitor_application:
+                summary: Visitor/Tourist Application  
+                value:
+                  email: "jane.doe@gmail.com"
+                  first_name: "Jane"
+                  last_name: "Doe"
+                  phone: "4419876543"
+                  date_of_birth: "1988-07-22"
+                  passport_number: "US123456789"
+                  country: "United States"
+                  preferred_language: "en"
+                  timezone: "Atlantic/Bermuda"
+      responses:
+        '201':
+          description: Candidate created successfully
+          headers:
+            X-Correlation-ID:
+              description: Unique request identifier for tracing
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateCreateResponse'
+              examples:
+                success_both_otp:
+                  summary: Both OTPs sent successfully
+                  value:
+                    candidate:
+                      id: "550e8400-e29b-41d4-a716-446655440000"
+                      email: "john.smith@example.com"
+                      first_name: "John"
+                      last_name: "Smith"
+                      full_name: "John Smith"
+                      phone: "4412345678"
+                      status: "pending_verification"
+                      is_active: false
+                      is_phone_verified: false
+                      is_email_verified: false
+                      is_fully_verified: false
+                      profile_completion_percentage: 85
+                      created_at: "2025-01-27T10:30:00Z"
+                      updated_at: "2025-01-27T10:30:00Z"
+                    otp_sent:
+                      email: true
+                      phone: true
+                    message: "Candidate created successfully. Please verify your email and phone number."
+                    next_steps:
+                      - "Verify your email address using the OTP sent to your email"
+                      - "Verify your phone number using the OTP sent via SMS"
+                partial_otp_failure:
+                  summary: One OTP failed to send
+                  value:
+                    candidate:
+                      id: "550e8400-e29b-41d4-a716-446655440001"
+                      email: "jane.doe@gmail.com"
+                      first_name: "Jane"
+                      last_name: "Doe"
+                      full_name: "Jane Doe"
+                      status: "pending_verification"
+                    otp_sent:
+                      email: true
+                      phone: false
+                    message: "Candidate created successfully. Please verify your email and phone number."
+                    next_steps:
+                      - "Verify your email address using the OTP sent to your email"
+                      - "Contact support for assistance with phone verification"
+        '400':
+          description: Validation error or business rule violation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                duplicate_email:
+                  summary: Email already exists
+                  value:
+                    error: "validation_error"
+                    message: "Candidate with this email already exists"
+                    correlation_id: "550e8400-e29b-41d4-a716-446655440000"
+                    timestamp: "2025-01-27T10:30:00Z"
+                duplicate_phone:
+                  summary: Phone number already exists
+                  value:
+                    error: "validation_error" 
+                    message: "Candidate with this phone number already exists"
+                    correlation_id: "550e8400-e29b-41d4-a716-446655440001"
+                    timestamp: "2025-01-27T10:30:00Z"
+        '422':
+          description: Request validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      
+  /candidates/{candidateId}:
+    get:
+      summary: Get Candidate Information
+      description: |
+        Retrieve detailed information for a specific candidate.
+        
+        Returns comprehensive candidate profile including verification status,
+        profile completion percentage, and masked sensitive information.
+        
+        **Data Privacy:**
+        - National ID and passport numbers are masked in responses
+        - Full information available only to authorized personnel
+        - Audit trail maintained for all access requests
+        
+      operationId: getCandidate
+      tags: [Candidates]
+      parameters:
+        - name: candidateId
+          in: path
+          required: true
+          description: Unique candidate identifier
+          schema:
+            type: string
+            format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: Candidate information retrieved successfully
+          headers:
+            X-Correlation-ID:
+              description: Unique request identifier for tracing
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateResponse'
+              examples:
+                verified_candidate:
+                  summary: Fully verified active candidate
+                  value:
+                    id: "550e8400-e29b-41d4-a716-446655440000"
+                    email: "john.smith@example.com"
+                    first_name: "John"
+                    last_name: "Smith"
+                    full_name: "John Smith"
+                    phone: "4412345678"
+                    date_of_birth: "1995-03-15"
+                    national_id: "***456789"
+                    street_address: "123 Front Street"
+                    city: "Hamilton"
+                    postal_code: "HM01"
+                    country: "Bermuda"
+                    status: "active"
+                    is_active: true
+                    is_phone_verified: true
+                    is_email_verified: true
+                    is_identity_verified: true
+                    is_fully_verified: true
+                    profile_completion_percentage: 100
+                    created_at: "2025-01-27T10:30:00Z"
+                    updated_at: "2025-01-27T11:45:00Z"
+                    verified_at: "2025-01-27T11:00:00Z"
+                    preferred_language: "en"
+                    timezone: "Atlantic/Bermuda"
+                pending_candidate:
+                  summary: Candidate pending verification
+                  value:
+                    id: "550e8400-e29b-41d4-a716-446655440001"
+                    email: "jane.doe@gmail.com"
+                    first_name: "Jane"
+                    last_name: "Doe"
+                    full_name: "Jane Doe"
+                    phone: "4419876543"
+                    status: "pending_verification"
+                    is_active: false
+                    is_phone_verified: false
+                    is_email_verified: true
+                    is_identity_verified: false
+                    is_fully_verified: false
+                    profile_completion_percentage: 60
+                    created_at: "2025-01-27T09:15:00Z"
+                    updated_at: "2025-01-27T09:30:00Z"
+                    verified_at: null
+        '404':
+          description: Candidate not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "not_found"
+                message: "Candidate not found"
+                correlation_id: "550e8400-e29b-41d4-a716-446655440000"
+                timestamp: "2025-01-27T10:30:00Z"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+  /candidates/{candidateId}/verify-otp:
+    post:
+      summary: Verify OTP Code
+      description: |
+        Verify OTP (One-Time Password) for email or phone verification.
+        
+        **Verification Process:**
+        1. Validates the provided OTP code against stored attempt
+        2. Checks expiration (10-minute window) and attempt limits (3 max)
+        3. Marks email or phone as verified upon success
+        4. Updates candidate status if both verifications complete
+        5. Publishes verification events to message queue
+        
+        **OTP Rules:**
+        - 6-digit numeric code
+        - 10-minute expiration window
+        - Maximum 3 verification attempts per OTP
+        - New OTP required after expiration or exhausted attempts
+        - Rate limiting applied per IP address
+        
+      operationId: verifyOTP
+      tags: [Verification]
+      parameters:
+        - name: candidateId
+          in: path
+          required: true
+          description: Unique candidate identifier
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OTPVerificationRequest'
+            examples:
+              email_verification:
+                summary: Email OTP verification
+                value:
+                  candidate_id: "550e8400-e29b-41d4-a716-446655440000"
+                  otp_type: "email"
+                  otp_code: "123456"
+              phone_verification:
+                summary: Phone OTP verification
+                value:
+                  candidate_id: "550e8400-e29b-41d4-a716-446655440000"
+                  otp_type: "phone"
+                  otp_code: "654321"
+      responses:
+        '200':
+          description: OTP verification result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OTPVerificationResponse'
+              examples:
+                verification_success:
+                  summary: OTP verified successfully
+                  value:
+                    success: true
+                    message: "OTP verified successfully"
+                    candidate_id: "550e8400-e29b-41d4-a716-446655440000"
+                    verification_type: "email"
+                    next_step: null
+                complete_verification:
+                  summary: All verifications complete
+                  value:
+                    success: true
+                    message: "OTP verified successfully"
+                    candidate_id: "550e8400-e29b-41d4-a716-446655440000"
+                    verification_type: "phone"
+                    next_step: "set_password"
+                verification_failure:
+                  summary: Invalid OTP code
+                  value:
+                    success: false
+                    message: "Invalid OTP code. 2 attempts remaining"
+                    candidate_id: "550e8400-e29b-41d4-a716-446655440000"
+                    verification_type: "email"
+                    next_step: null
+        '400':
+          description: Validation error or verification failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Request validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+                
+  /candidates/{candidateId}/resend-otp:
+    post:
+      summary: Resend OTP Code
+      description: |
+        Resend OTP code to candidate's email or phone number.
+        
+        **Resend Rules:**
+        - 2-minute cooldown between resend requests
+        - Previous OTP becomes invalid when new one is sent  
+        - Rate limiting applied per IP address
+        - Maximum 5 resend attempts per hour per candidate
+        
+        **Security Features:**
+        - IP-based rate limiting to prevent abuse
+        - Cooldown periods to prevent spam
+        - Audit logging for all resend requests
+        
+      operationId: resendOTP
+      tags: [Verification]
+      parameters:
+        - name: candidateId
+          in: path
+          required: true
+          description: Unique candidate identifier
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OTPResendRequest'
+            examples:
+              resend_email:
+                summary: Resend email OTP
+                value:
+                  candidate_id: "550e8400-e29b-41d4-a716-446655440000"
+                  otp_type: "email"
+              resend_phone:
+                summary: Resend phone OTP
+                value:
+                  candidate_id: "550e8400-e29b-41d4-a716-446655440000"
+                  otp_type: "phone"
+      responses:
+        '200':
+          description: OTP resend successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "OTP sent successfully to j***n@example.com"
+                  candidate_id:
+                    type: string
+                    format: uuid
+                  otp_type:
+                    type: string
+                    enum: [email, phone]
+                  correlation_id:
+                    type: string
+                    format: uuid
+        '400':
+          description: Resend error (cooldown, rate limit, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                
+  /candidates/{candidateId}/set-password:
+    post:
+      summary: Set Candidate Password
+      description: |
+        Set password for candidate after completing email and phone verification.
+        
+        **Prerequisites:**
+        - Both email and phone must be verified
+        - No existing password set for the candidate
+        - Valid candidate ID and verification status
+        
+        **Password Requirements:**
+        - Minimum 8 characters length
+        - At least one uppercase letter (A-Z)
+        - At least one lowercase letter (a-z)
+        - At least one digit (0-9)
+        - At least one special character (!@#$%^&*()_+-=[]{}|;:,.<>?)
+        
+        **Process:**
+        1. Validates password meets security requirements
+        2. Confirms password and confirmation match
+        3. Hashes password using bcrypt
+        4. Activates candidate account
+        5. Updates status to ACTIVE
+        6. Publishes PasswordSet event
+        
+      operationId: setCandidatePassword
+      tags: [Authentication]
+      parameters:
+        - name: candidateId
+          in: path
+          required: true
+          description: Unique candidate identifier
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordSetRequest'
+            example:
+              candidate_id: "550e8400-e29b-41d4-a716-446655440000"
+              password: "SecurePass123!"
+              confirm_password: "SecurePass123!"
+      responses:
+        '200':
+          description: Password set successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Password set successfully. Your account is now active."
+                  candidate_id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    example: "active"
+                  correlation_id:
+                    type: string
+                    format: uuid
+        '400':
+          description: Validation error or prerequisites not met
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                not_verified:
+                  summary: Verification incomplete
+                  value:
+                    error: "validation_error"
+                    message: "Candidate must complete email and phone verification first"
+                    correlation_id: "550e8400-e29b-41d4-a716-446655440000"
+                password_exists:
+                  summary: Password already set
+                  value:
+                    error: "validation_error"
+                    message: "Password already set for this candidate"
+                    correlation_id: "550e8400-e29b-41d4-a716-446655440000"
+        '422':
+          description: Password validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  /candidates/{candidateId}/otp-status:
+    get:
+      summary: Get OTP Verification Status
+      description: |
+        Get current OTP verification status for candidate.
+        
+        **Status Values:**
+        - **not_sent**: No OTP has been sent for this type
+        - **pending**: OTP sent and awaiting verification
+        - **verified**: OTP successfully verified
+        - **expired**: OTP has expired (10+ minutes old)
+        - **exhausted**: Maximum verification attempts (3) reached
+        
+        **Use Cases:**
+        - Check verification progress in UI
+        - Determine if resend is needed
+        - Show appropriate verification state
+        - Guide user through verification process
+        
+      operationId: getOTPStatus
+      tags: [Verification]
+      parameters:
+        - name: candidateId
+          in: path
+          required: true
+          description: Unique candidate identifier
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OTP status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OTPStatusResponse'
+              examples:
+                partial_verification:
+                  summary: Email verified, phone pending
+                  value:
+                    candidate_id: "550e8400-e29b-41d4-a716-446655440000"
+                    email_otp_status: "verified"
+                    phone_otp_status: "pending"
+                    email_verified: true
+                    phone_verified: false
+                    can_set_password: false
+                complete_verification:
+                  summary: Both verifications complete
+                  value:
+                    candidate_id: "550e8400-e29b-41d4-a716-446655440000"
+                    email_otp_status: "verified"
+                    phone_otp_status: "verified" 
+                    email_verified: true
+                    phone_verified: true
+                    can_set_password: true
+        '404':
+          description: Candidate not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+                
+  /health:
+    get:
+      summary: Identity Module Health Check
+      description: |
+        Health check endpoint for the Identity & Profile module.
+        
+        Returns module status, available features, and endpoint information.
+        Used for monitoring, load balancer health checks, and system diagnostics.
+        
+      operationId: identityHealthCheck
+      tags: [System]
+      responses:
+        '200':
+          description: Module is healthy and operational
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  module:
+                    type: string
+                    example: "Identity & Profile Management"
+                  version:
+                    type: string
+                    example: "1.0.0"
+                  status:
+                    type: string
+                    example: "healthy"
+                  features:
+                    type: object
+                    properties:
+                      candidate_registration:
+                        type: string
+                        example: "available"
+                      otp_verification:
+                        type: string
+                        example: "available"
+                      event_publishing:
+                        type: string
+                        example: "available"
+                      profile_management:
+                        type: string
+                        example: "available"
+                  endpoints:
+                    type: object
+                    additionalProperties:
+                      type: string
+                    example:
+                      create_candidate: "POST /api/v1/candidates"
+                      get_candidate: "GET /api/v1/candidates/{id}"
+
+components:
+  schemas:
+    CandidateCreateRequest:
+      type: object
+      required:
+        - email
+        - first_name
+        - last_name
+        - phone
+      properties:
+        email:
+          type: string
+          format: email
+          description: Candidate's email address (will be username)
+          example: "john.smith@example.com"
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: Candidate's first name
+          example: "John"
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: Candidate's last name
+          example: "Smith"
+        phone:
+          type: string
+          description: Bermuda phone number for SMS verification
+          example: "4412345678"
+          pattern: '^(\+?1?441|441)?\d{7}$|^\d{7}$'
+        date_of_birth:
+          type: string
+          format: date
+          description: Date of birth (must be 16+ years old)
+          example: "1995-03-15"
+        national_id:
+          type: string
+          minLength: 5
+          maxLength: 50
+          description: Bermuda national ID number
+          example: "BDA123456789"
+        passport_number:
+          type: string
+          minLength: 5
+          maxLength: 20
+          description: Passport number (for visitors)
+          example: "US123456789"
+        street_address:
+          type: string
+          maxLength: 200
+          description: Street address
+          example: "123 Front Street"
+        city:
+          type: string
+          maxLength: 50
+          description: City
+          example: "Hamilton"
+        postal_code:
+          type: string
+          maxLength: 10
+          description: Postal code
+          example: "HM01"
+        country:
+          type: string
+          default: "Bermuda"
+          description: Country
+          example: "Bermuda"
+        preferred_language:
+          type: string
+          default: "en"
+          description: Preferred language code
+          example: "en"
+        timezone:
+          type: string
+          default: "Atlantic/Bermuda"
+          description: Preferred timezone
+          example: "Atlantic/Bermuda"
+          
+    CandidateResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Candidate's unique identifier
+        email:
+          type: string
+          description: Candidate's email address
+        first_name:
+          type: string
+          description: Candidate's first name
+        last_name:
+          type: string
+          description: Candidate's last name
+        full_name:
+          type: string
+          description: Candidate's full name
+        phone:
+          type: string
+          description: Candidate's phone number
+        date_of_birth:
+          type: string
+          format: date
+          nullable: true
+          description: Candidate's date of birth
+        national_id:
+          type: string
+          nullable: true
+          description: National ID number (masked)
+        passport_number:
+          type: string
+          nullable: true
+          description: Passport number (masked)
+        street_address:
+          type: string
+          nullable: true
+          description: Street address
+        city:
+          type: string
+          nullable: true
+          description: City
+        postal_code:
+          type: string
+          nullable: true
+          description: Postal code
+        country:
+          type: string
+          description: Country
+        status:
+          type: string
+          enum: [pending_verification, email_verified, phone_verified, fully_verified, active, suspended, inactive]
+          description: Candidate's current status
+        is_active:
+          type: boolean
+          description: Whether candidate account is active
+        is_phone_verified:
+          type: boolean
+          description: Whether phone is verified
+        is_email_verified:
+          type: boolean
+          description: Whether email is verified
+        is_identity_verified:
+          type: boolean
+          description: Whether identity is verified
+        is_fully_verified:
+          type: boolean
+          description: Whether candidate is fully verified
+        profile_completion_percentage:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Profile completion percentage
+        created_at:
+          type: string
+          format: date-time
+          description: Account creation timestamp
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+        verified_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Verification completion timestamp
+        preferred_language:
+          type: string
+          description: Preferred language code
+        timezone:
+          type: string
+          description: Preferred timezone
+          
+    CandidateCreateResponse:
+      type: object
+      properties:
+        candidate:
+          $ref: '#/components/schemas/CandidateResponse'
+        otp_sent:
+          type: object
+          properties:
+            email:
+              type: boolean
+              description: Whether email OTP was sent successfully
+            phone:
+              type: boolean
+              description: Whether phone OTP was sent successfully
+        message:
+          type: string
+          description: Response message
+        next_steps:
+          type: array
+          items:
+            type: string
+          description: Next steps for candidate
+          
+    OTPVerificationRequest:
+      type: object
+      required:
+        - candidate_id
+        - otp_type
+        - otp_code
+      properties:
+        candidate_id:
+          type: string
+          format: uuid
+          description: Candidate ID
+        otp_type:
+          type: string
+          enum: [email, phone]
+          description: Type of OTP (email or phone)
+        otp_code:
+          type: string
+          minLength: 4
+          maxLength: 6
+          pattern: '^\d+$'
+          description: OTP code (4-6 digits)
+          
+    OTPVerificationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether verification was successful
+        message:
+          type: string
+          description: Verification result message
+        candidate_id:
+          type: string
+          format: uuid
+          description: Candidate ID
+        verification_type:
+          type: string
+          enum: [email, phone]
+          description: Type of verification completed
+        next_step:
+          type: string
+          nullable: true
+          description: Next step if verification successful
+          
+    OTPResendRequest:
+      type: object
+      required:
+        - candidate_id
+        - otp_type
+      properties:
+        candidate_id:
+          type: string
+          format: uuid
+          description: Candidate ID
+        otp_type:
+          type: string
+          enum: [email, phone]
+          description: Type of OTP to resend
+          
+    PasswordSetRequest:
+      type: object
+      required:
+        - candidate_id
+        - password
+        - confirm_password
+      properties:
+        candidate_id:
+          type: string
+          format: uuid
+          description: Candidate ID
+        password:
+          type: string
+          minLength: 8
+          description: New password
+        confirm_password:
+          type: string
+          description: Password confirmation
+          
+    OTPStatusResponse:
+      type: object
+      properties:
+        candidate_id:
+          type: string
+          format: uuid
+          description: Candidate ID
+        email_otp_status:
+          type: string
+          enum: [not_sent, pending, verified, expired, exhausted]
+          description: Email OTP status
+        phone_otp_status:
+          type: string
+          enum: [not_sent, pending, verified, expired, exhausted]
+          description: Phone OTP status
+        email_verified:
+          type: boolean
+          description: Whether email is verified
+        phone_verified:
+          type: boolean
+          description: Whether phone is verified
+        can_set_password:
+          type: boolean
+          description: Whether candidate can set password
+          
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error type
+        message:
+          type: string
+          description: Error message
+        correlation_id:
+          type: string
+          format: uuid
+          description: Request correlation ID
+        timestamp:
+          type: string
+          format: date-time
+          description: Error timestamp
+          
+    ValidationErrorResponse:
+      type: object
+      properties:
+        detail:
+          type: array
+          items:
+            type: object
+            properties:
+              loc:
+                type: array
+                items:
+                  oneOf:
+                    - type: string
+                    - type: integer
+                description: Location of the error
+              msg:
+                type: string
+                description: Error message
+              type:
+                type: string
+                description: Error type
+              
+  parameters:
+    CandidateId:
+      name: candidateId
+      in: path
+      required: true
+      description: Unique candidate identifier
+      schema:
+        type: string
+        format: uuid
+        
+    CorrelationId:
+      name: X-Correlation-ID
+      in: header
+      required: false
+      description: Unique request identifier for tracing
+      schema:
+        type: string
+        format: uuid
+        
+  headers:
+    CorrelationId:
+      description: Unique request identifier for tracing
+      schema:
+        type: string
+        format: uuid
+        
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for authentication (future implementation)
+      
+security:
+  - BearerAuth: []
+  
+tags:
+  - name: Candidates
+    description: Candidate registration and profile management
+  - name: Verification
+    description: OTP verification and validation
+  - name: Authentication
+    description: Password and authentication management
+  - name: System
+    description: System health and monitoring endpoints
