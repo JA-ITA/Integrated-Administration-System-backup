@@ -105,7 +105,7 @@ class Registration(Base):
         if self.vehicle_category == VehicleCategory.B.value:
             return None  # No medical certificate required for Class B
         elif self.vehicle_category in [VehicleCategory.C.value, VehicleCategory.PPV.value]:
-            return DocumentType.MC2.value
+            return DocumentType.MC2.value  # MC2 required for ALL Class C/PPV tests including upgrades
         elif self.vehicle_category == VehicleCategory.SPECIAL.value:
             # For provisional (special case), MC1 is required
             return DocumentType.MC1.value
