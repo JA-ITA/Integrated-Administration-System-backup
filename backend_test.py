@@ -759,7 +759,7 @@ class IdentityServiceTester:
             correlation_id = f"test-correlation-{uuid.uuid4()}"
             
             response = self.session.post(
-                f"{self.base_url}/identity/v1/candidates",
+                f"{self.base_url}/candidates",
                 json=candidate_data,
                 headers={"X-Correlation-ID": correlation_id}
             )
