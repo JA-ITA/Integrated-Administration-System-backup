@@ -1,0 +1,434 @@
+openapi: 3.0.3
+info:
+  title: ITADIAS Identity Microservice
+  description: |
+    Identity and Profile management microservice for ITADIAS platform.
+    
+    This service provides candidate identity management including:
+    - Candidate registration and profile management
+    - Multi-channel OTP verification (Email & SMS)
+    - Event publishing for domain events
+    - RESTful APIs for candidate operations
+    
+    ## Authentication
+    Currently, the service operates without authentication for MVP purposes.
+    
+    ## Rate Limiting
+    Consider implementing rate limiting for production use.
+    
+  version: 1.0.0
+  contact:
+    name: ITADIAS Development Team
+    email: dev@itadias.com
+  license:
+    name: Proprietary
+    url: https://itadias.com/license
+
+servers:
+  - url: http://localhost:8001
+    description: Local development server
+  - url: https://api.itadias.com/identity
+    description: Production server
+
+paths:
+  /health:
+    get:
+      summary: Health Check
+      description: Check the health status of the microservice
+      operationId: healthCheck
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  service:
+                    type: string
+                    example: ITADIAS Identity Microservice
+                  version:
+                    type: string
+                    example: 1.0.0
+                  database:
+                    type: string
+                    example: connected
+                  events:
+                    type: string
+                    example: connected
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /:
+    get:
+      summary: Root Endpoint
+      description: Get basic service information
+      operationId: getRoot
+      tags:
+        - General
+      responses:
+        '200':
+          description: Service information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: ITADIAS Identity Microservice
+                  version:
+                    type: string
+                    example: 1.0.0
+                  docs:
+                    type: string
+                    example: /docs
+
+  /api/v1/candidates:
+    post:
+      summary: Create Candidate
+      description: |
+        Create a new candidate with optional OTP verification.
+        
+        The service will:
+        1. Validate candidate data
+        2. Check for existing email/phone
+        3. Create candidate record
+        4. Send OTP if requested
+        5. Publish CandidateCreated event
+        
+      operationId: createCandidate
+      tags:
+        - Candidates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CandidateCreate'
+            examples:
+              basic:
+                summary: Basic candidate creation
+                value:
+                  email: john.doe@example.com
+                  phone: "+1234567890"
+                  first_name: John
+                  last_name: Doe
+                  send_otp: true
+                  otp_channel: email
+              with_sms:
+                summary: Candidate with SMS OTP
+                value:
+                  email: jane.smith@example.com
+                  phone: "+1987654321"
+                  first_name: Jane
+                  last_name: Smith
+                  send_otp: true
+                  otp_channel: sms
+              no_otp:
+                summary: Candidate without OTP
+                value:
+                  email: no.otp@example.com
+                  first_name: No
+                  last_name: OTP
+                  send_otp: false
+      responses:
+        '201':
+          description: Candidate created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateCreateResponse'
+        '409':
+          description: Candidate already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      summary: List Candidates
+      description: Retrieve a paginated list of candidates
+      operationId: listCandidates
+      tags:
+        - Candidates
+      parameters:
+        - name: skip
+          in: query
+          description: Number of candidates to skip
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: limit
+          in: query
+          description: Maximum number of candidates to return
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+        - name: active_only
+          in: query
+          description: Filter for active candidates only
+          required: false
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: List of candidates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CandidateResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/candidates/{candidate_id}:
+    get:
+      summary: Get Candidate
+      description: Retrieve a specific candidate by ID
+      operationId: getCandidate
+      tags:
+        - Candidates
+      parameters:
+        - name: candidate_id
+          in: path
+          required: true
+          description: UUID of the candidate
+          schema:
+            type: string
+            format: uuid
+            example: 550e8400-e29b-41d4-a716-446655440000
+      responses:
+        '200':
+          description: Candidate details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateResponse'
+        '404':
+          description: Candidate not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Invalid UUID format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    CandidateCreate:
+      type: object
+      required:
+        - email
+        - first_name
+        - last_name
+      properties:
+        email:
+          type: string
+          format: email
+          description: Candidate's email address (must be unique)
+          example: john.doe@example.com
+        phone:
+          type: string
+          pattern: '^\+?[\d\s\-\(\)]+$'
+          description: Candidate's phone number (optional, must be unique if provided)
+          example: "+1234567890"
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Candidate's first name
+          example: John
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Candidate's last name
+          example: Doe
+        send_otp:
+          type: boolean
+          default: true
+          description: Whether to send OTP for verification
+        otp_channel:
+          type: string
+          enum: [email, sms, both]
+          default: email
+          description: OTP delivery channel
+
+    CandidateResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique candidate identifier
+          example: 550e8400-e29b-41d4-a716-446655440000
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        phone:
+          type: string
+          nullable: true
+          example: "+1234567890"
+        first_name:
+          type: string
+          example: John
+        last_name:
+          type: string
+          example: Doe
+        is_verified:
+          type: boolean
+          description: Whether the candidate has been verified via OTP
+          example: false
+        is_active:
+          type: boolean
+          description: Whether the candidate account is active
+          example: true
+        created_at:
+          type: string
+          format: date-time
+          description: When the candidate was created
+          example: 2024-01-15T10:30:00Z
+        updated_at:
+          type: string
+          format: date-time
+          description: When the candidate was last updated
+          example: 2024-01-15T10:30:00Z
+
+    CandidateCreateResponse:
+      type: object
+      properties:
+        candidate:
+          $ref: '#/components/schemas/CandidateResponse'
+        otp_sent:
+          type: boolean
+          description: Whether OTP was successfully sent
+          example: true
+        otp_channels:
+          type: array
+          items:
+            type: string
+          description: Channels through which OTP was sent
+          example: [email]
+        message:
+          type: string
+          description: Human-readable status message
+          example: "Candidate created successfully. OTP sent via email"
+
+    OTPVerificationRequest:
+      type: object
+      required:
+        - candidate_id
+        - otp_code
+        - channel
+      properties:
+        candidate_id:
+          type: string
+          format: uuid
+          description: UUID of the candidate
+          example: 550e8400-e29b-41d4-a716-446655440000
+        otp_code:
+          type: string
+          minLength: 4
+          maxLength: 10
+          description: OTP code to verify
+          example: "123456"
+        channel:
+          type: string
+          enum: [email, sms]
+          description: Channel used for OTP
+          example: email
+
+    OTPVerificationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether verification was successful
+          example: true
+        message:
+          type: string
+          description: Verification result message
+          example: "OTP verified successfully"
+        candidate_verified:
+          type: boolean
+          description: Whether the candidate is now verified
+          example: true
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error type or category
+          example: "Validation Error"
+        detail:
+          type: string
+          description: Detailed error message
+          example: "Candidate with email john.doe@example.com already exists"
+        code:
+          type: string
+          description: Application-specific error code
+          example: "CANDIDATE_ALREADY_EXISTS"
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authentication (future implementation)
+
+tags:
+  - name: Health
+    description: Service health and monitoring endpoints
+  - name: General
+    description: General service information
+  - name: Candidates
+    description: Candidate management operations
+
+externalDocs:
+  description: ITADIAS Documentation
+  url: https://docs.itadias.com/identity-service
