@@ -236,7 +236,8 @@ class UpdatedMedicalCertificateRulesTester:
                 vehicle_category="C", 
                 age_years=20.5, 
                 vehicle_weight=5000,  # Under 7000kg threshold
-                include_mc2=False  # Missing MC2 certificate
+                include_mc2=False,  # Missing MC2 certificate
+                use_manager_override=False  # Don't use manager override for this test
             )
             jwt_token = self.generate_test_jwt_token()
             
@@ -270,6 +271,44 @@ class UpdatedMedicalCertificateRulesTester:
                             "mc2_mentioned_in_error": mc2_mentioned
                         }
                     )
+                else:
+                    self.log_test(
+                        "Class C Light Vehicle (< 7000kg) - Missing MC2 Should Fail (NEW RULE)",
+                        False,
+                        f"Expected failure but got success",
+                        data
+                    )
+            elif response.status_code == 200:
+                # If it returns 200 but with success=false, check if it's due to medical certificate validation
+                data = response.json()
+                if not data.get("success", True):
+                    error_message = data.get("message", "").lower()
+                    validation_errors = data.get("validation_errors", [])
+                    
+                    # Check if it's failing due to medical certificate (which is what we want)
+                    mc2_mentioned = any("mc2" in str(error).lower() for error in validation_errors) or "mc2" in error_message
+                    medical_cert_error = any("medical" in str(error).lower() for error in validation_errors) or "medical" in error_message
+                    
+                    if mc2_mentioned or medical_cert_error:
+                        self.log_test(
+                            "Class C Light Vehicle (< 7000kg) - Missing MC2 Should Fail (NEW RULE)",
+                            True,
+                            f"Class C registration with 5000kg vehicle properly rejected for missing MC2: {data.get('message')}",
+                            {
+                                "vehicle_weight": 5000,
+                                "vehicle_category": "C",
+                                "validation_errors": validation_errors,
+                                "mc2_mentioned_in_error": mc2_mentioned,
+                                "medical_cert_error": medical_cert_error
+                            }
+                        )
+                    else:
+                        self.log_test(
+                            "Class C Light Vehicle (< 7000kg) - Missing MC2 Should Fail (NEW RULE)",
+                            False,
+                            f"Registration failed but not due to MC2 requirement: {data.get('message')}",
+                            data
+                        )
                 else:
                     self.log_test(
                         "Class C Light Vehicle (< 7000kg) - Missing MC2 Should Fail (NEW RULE)",
