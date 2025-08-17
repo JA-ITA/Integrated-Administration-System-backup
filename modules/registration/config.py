@@ -8,6 +8,11 @@ from typing import List
 @dataclass
 class DatabaseConfig:
     """Database configuration"""
+    # Use SQLite for compatibility in current environment
+    db_type: str = os.getenv("DB_TYPE", "sqlite")
+    sqlite_path: str = os.getenv("SQLITE_PATH", "/app/storage/registration/registration.db")
+    
+    # PostgreSQL config (for future use)
     host: str = os.getenv("DB_HOST", "localhost")
     port: int = int(os.getenv("DB_PORT", "5432"))
     name: str = os.getenv("DB_NAME", "itadias")
@@ -17,7 +22,10 @@ class DatabaseConfig:
     
     @property
     def url(self) -> str:
-        return f"postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.name}"
+        if self.db_type == "sqlite":
+            return f"sqlite+aiosqlite:///{self.sqlite_path}"
+        else:
+            return f"postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.name}"
 
 @dataclass
 class RabbitMQConfig:
