@@ -102,7 +102,12 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Generate /modules/calendar Tables: hubs, slots, bookings.
+user_problem_statement: "assess the repository and Create /modules/registration Tables: registrations, documents.
+Endpoint: POST /api/v1/registrations (bookingId, receiptNo, docs[])
+Enforce age & medical rules.
+Publish RegistrationCompleted.
+
+Generate /modules/calendar Tables: hubs, slots, bookings.
 Endpoints: GET /api/v1/slots?hub=X&date=Y POST /api/v1/bookings (reserve slot) Publish BookingCreated.
 Lock slot for 15 min on reservation.
 
