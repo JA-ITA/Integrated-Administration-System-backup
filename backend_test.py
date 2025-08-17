@@ -250,7 +250,7 @@ class IdentityServiceTester:
                 
                 # Try to create duplicate
                 response2 = self.session.post(
-                    f"{self.base_url}/identity/v1/candidates",
+                    f"{self.base_url}/candidates",
                     json=candidate_data
                 )
                 
