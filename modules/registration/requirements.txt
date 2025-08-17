@@ -1,0 +1,42 @@
+# ITADIAS Registration Microservice Dependencies
+
+# FastAPI and ASGI
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# Database
+sqlalchemy[asyncio]==2.0.23
+asyncpg==0.29.0
+
+# Async HTTP client
+httpx==0.25.2
+
+# Message Queue
+aio-pika==9.3.1
+
+# Data validation
+pydantic==2.5.0
+
+# JWT handling
+pyjwt==2.8.0
+
+# Date handling
+python-dateutil==2.8.2
+
+# Environment and configuration
+python-dotenv==1.0.0
+
+# Logging (already included in Python standard library)
+# logging
+
+# File handling and encoding (already included in Python standard library)
+# base64
+# hashlib
+# os
+# pathlib
+
+# UUID support (already included in Python standard library)
+# uuid
+
+# JSON support (already included in Python standard library)
+# json
