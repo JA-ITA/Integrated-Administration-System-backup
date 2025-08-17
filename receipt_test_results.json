@@ -4,7 +4,7 @@
     "passed_tests": 6,
     "failed_tests": 10,
     "success_rate": 37.5,
-    "test_timestamp": "2025-08-17T22:48:42.420693",
+    "test_timestamp": "2025-08-17T22:50:08.978675",
     "main_backend_url": "https://receipt-tracker-18.preview.emergentagent.com",
     "receipt_service_url": "http://localhost:8003"
   },
@@ -13,7 +13,7 @@
       "test": "Receipt Service Health Check",
       "success": true,
       "message": "Service healthy: healthy",
-      "timestamp": "2025-08-17T22:48:42.134968",
+      "timestamp": "2025-08-17T22:50:08.741459",
       "details": {
         "status": "healthy",
         "service": "ITADIAS Receipt Microservice",
@@ -31,7 +31,7 @@
       "test": "Main Backend Receipt Integration Health",
       "success": true,
       "message": "Integration healthy: healthy",
-      "timestamp": "2025-08-17T22:48:42.253572",
+      "timestamp": "2025-08-17T22:50:08.840103",
       "details": {
         "receipt_service": "healthy",
         "status": {
@@ -51,35 +51,35 @@
     {
       "test": "Valid Receipt Validation - Valid Receipt - TAJ Online",
       "success": false,
-      "message": "Expected 200, got 500",
-      "timestamp": "2025-08-17T22:48:42.276998",
+      "message": "Expected 200, got 409",
+      "timestamp": "2025-08-17T22:50:08.846334",
       "details": {
-        "response": "{\"success\":false,\"error\":\"Internal server error\",\"detail\":\"Object of type datetime is not JSON serializable\",\"code\":\"INTERNAL_ERROR\"}"
+        "response": "{\"success\":false,\"receipt_no\":\"ABC123DEF890\",\"message\":\"Receipt has already been used\",\"receipt\":null,\"validation_timestamp\":\"2025-08-17T22:50:08.845228+00:00\"}"
       }
     },
     {
       "test": "Valid Receipt Validation - Valid Receipt - TAJ Mumbai Office",
       "success": false,
-      "message": "Expected 200, got 500",
-      "timestamp": "2025-08-17T22:48:42.286862",
+      "message": "Expected 200, got 409",
+      "timestamp": "2025-08-17T22:50:08.851734",
       "details": {
-        "response": "{\"success\":false,\"error\":\"Internal server error\",\"detail\":\"Object of type datetime is not JSON serializable\",\"code\":\"INTERNAL_ERROR\"}"
+        "response": "{\"success\":false,\"receipt_no\":\"XYZ98765432\",\"message\":\"Receipt has already been used\",\"receipt\":null,\"validation_timestamp\":\"2025-08-17T22:50:08.850668+00:00\"}"
       }
     },
     {
       "test": "Valid Receipt Validation - Valid Receipt - Recent Date",
       "success": false,
-      "message": "Expected 200, got 500",
-      "timestamp": "2025-08-17T22:48:42.296784",
+      "message": "Expected 200, got 409",
+      "timestamp": "2025-08-17T22:50:08.856949",
       "details": {
-        "response": "{\"success\":false,\"error\":\"Internal server error\",\"detail\":\"Object of type datetime is not JSON serializable\",\"code\":\"INTERNAL_ERROR\"}"
+        "response": "{\"success\":false,\"receipt_no\":\"RECENT123456\",\"message\":\"Receipt has already been used\",\"receipt\":null,\"validation_timestamp\":\"2025-08-17T22:50:08.855941+00:00\"}"
       }
     },
     {
       "test": "Invalid Receipt Validation - Invalid Receipt Number Format",
       "success": false,
       "message": "Expected 400, got 422",
-      "timestamp": "2025-08-17T22:48:42.299555",
+      "timestamp": "2025-08-17T22:50:08.859780",
       "details": {
         "response_data": {
           "detail": [
@@ -104,7 +104,7 @@
       "test": "Invalid Receipt Validation - Receipt Number Too Short",
       "success": false,
       "message": "Expected 400, got 422",
-      "timestamp": "2025-08-17T22:48:42.301973",
+      "timestamp": "2025-08-17T22:50:08.862506",
       "details": {
         "response_data": {
           "detail": [
@@ -129,7 +129,7 @@
       "test": "Invalid Receipt Validation - Invalid Location",
       "success": false,
       "message": "Expected 400, got 422",
-      "timestamp": "2025-08-17T22:48:42.304323",
+      "timestamp": "2025-08-17T22:50:08.865157",
       "details": {
         "response_data": {
           "detail": [
@@ -154,7 +154,7 @@
       "test": "Invalid Receipt Validation - Old Receipt Date",
       "success": false,
       "message": "Expected 400, got 422",
-      "timestamp": "2025-08-17T22:48:42.306450",
+      "timestamp": "2025-08-17T22:50:08.868034",
       "details": {
         "response_data": {
           "detail": [
@@ -178,17 +178,17 @@
     {
       "test": "Duplicate Receipt Validation",
       "success": false,
-      "message": "First receipt validation failed with status 500",
-      "timestamp": "2025-08-17T22:48:42.315634",
+      "message": "First receipt validation failed with status 409",
+      "timestamp": "2025-08-17T22:50:08.873043",
       "details": {
-        "response": "{\"success\":false,\"error\":\"Internal server error\",\"detail\":\"Object of type datetime is not JSON serializable\",\"code\":\"INTERNAL_ERROR\"}"
+        "response": "{\"success\":false,\"receipt_no\":\"DUPLICATE123\",\"message\":\"Receipt has already been used\",\"receipt\":null,\"validation_timestamp\":\"2025-08-17T22:50:08.872122+00:00\"}"
       }
     },
     {
       "test": "Main Backend Receipt Validation",
       "success": false,
       "message": "Main backend validation returned success=false: No message",
-      "timestamp": "2025-08-17T22:48:42.362570",
+      "timestamp": "2025-08-17T22:50:08.918692",
       "details": {
         "success": false,
         "error": "Receipt service unavailable"
@@ -198,14 +198,14 @@
       "test": "Get Receipt Details",
       "success": false,
       "message": "No validated receipts available for testing",
-      "timestamp": "2025-08-17T22:48:42.362629",
+      "timestamp": "2025-08-17T22:50:08.918755",
       "details": {}
     },
     {
       "test": "Receipt Statistics - Main Backend",
       "success": true,
       "message": "Statistics retrieved successfully",
-      "timestamp": "2025-08-17T22:48:42.408802",
+      "timestamp": "2025-08-17T22:50:08.965658",
       "details": {
         "statistics": {
           "found": false,
@@ -217,11 +217,11 @@
       "test": "Receipt Statistics - Direct Service",
       "success": true,
       "message": "Statistics retrieved from service: success",
-      "timestamp": "2025-08-17T22:48:42.416687",
+      "timestamp": "2025-08-17T22:50:08.974094",
       "details": {
         "statistics": {
-          "total_receipts": 4,
-          "used_receipts": 4,
+          "total_receipts": 5,
+          "used_receipts": 5,
           "unused_receipts": 0,
           "usage_rate": 100.0
         }
@@ -231,7 +231,7 @@
       "test": "Error Handling - Malformed JSON",
       "success": true,
       "message": "Malformed JSON properly rejected",
-      "timestamp": "2025-08-17T22:48:42.418273",
+      "timestamp": "2025-08-17T22:50:08.975766",
       "details": {
         "status": 422
       }
@@ -240,7 +240,7 @@
       "test": "Error Handling - Missing Fields",
       "success": true,
       "message": "Missing required fields properly rejected",
-      "timestamp": "2025-08-17T22:48:42.420455",
+      "timestamp": "2025-08-17T22:50:08.978411",
       "details": {
         "status": 422
       }
