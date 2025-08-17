@@ -111,9 +111,14 @@ class CalendarClient:
     async def create_booking(self, booking_data: BookingRequest) -> BookingCreateResponse:
         """Create a new booking"""
         try:
+            # Convert UUIDs to strings for JSON serialization
+            booking_dict = booking_data.dict()
+            booking_dict["slot_id"] = str(booking_dict["slot_id"])
+            booking_dict["candidate_id"] = str(booking_dict["candidate_id"])
+            
             response = await self.client.post(
                 f"{self.base_url}/api/v1/bookings",
-                json=booking_data.dict()
+                json=booking_dict
             )
             response.raise_for_status()
             
