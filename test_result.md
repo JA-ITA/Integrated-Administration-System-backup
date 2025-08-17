@@ -353,14 +353,14 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Identity Microservice Structure Setup"
-    - "PostgreSQL Database Models and Schema"
-    - "REST API Endpoints - POST /api/v1/candidates"
-    - "REST API Endpoints - GET /api/v1/candidates/{id}"
-    - "OTP Service Implementation"
-    - "Event Publishing - CandidateCreated"
-  stuck_tasks: []
-  test_all: true
+    - "Calendar Service Direct API - POST /api/v1/bookings"
+    - "Calendar Service 15-Minute Slot Locking"
+    - "Calendar Service Database Integration"
+  stuck_tasks:
+    - "Calendar Service Direct API - POST /api/v1/bookings"
+    - "Calendar Service 15-Minute Slot Locking"
+    - "Calendar Service Database Integration"
+  test_all: false
   test_priority: "high_first"
 
 agent_communication:
