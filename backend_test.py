@@ -356,7 +356,7 @@ class IdentityServiceTester:
         try:
             fake_id = str(uuid.uuid4())
             response = self.session.get(
-                f"{self.base_url}/identity/v1/candidates/{fake_id}"
+                f"{self.base_url}/candidates/{fake_id}"
             )
             
             if response.status_code == 404:
