@@ -38,7 +38,8 @@ class DocumentType(str, enum.Enum):
 class Registration(Base):
     """Registration model for registration schema"""
     __tablename__ = "registrations"
-    __table_args__ = {"schema": config.db.schema}
+    # Only use schema for PostgreSQL, not SQLite
+    __table_args__ = {"schema": config.db.schema} if config.db.db_type != "sqlite" else {}
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     
