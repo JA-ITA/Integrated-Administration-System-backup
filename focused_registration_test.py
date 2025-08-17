@@ -29,7 +29,7 @@ def test_registration_with_valid_external_services():
     """Test registration with valid external service data"""
     
     # First, let's create a valid booking in the calendar service
-    calendar_response = requests.get("http://localhost:8002/api/v1/slots?hub_id=550e8400-e29b-41d4-a716-446655440000&date=2024-12-20")
+    calendar_response = requests.get("http://localhost:8002/api/v1/slots?hub_id=signup-system-2&date=2024-12-20")
     print(f"Calendar slots response: {calendar_response.status_code}")
     
     if calendar_response.status_code == 200:

@@ -6,7 +6,7 @@
     "success_rate": 40.0,
     "test_timestamp": "2025-08-17T23:16:22.321131",
     "registration_service_url": "http://localhost:8004",
-    "main_backend_url": "https://signup-service.preview.emergentagent.com"
+    "main_backend_url": "https://signup-system-2.preview.emergentagent.com"
   },
   "test_results": [
     {

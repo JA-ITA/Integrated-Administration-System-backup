@@ -23,7 +23,7 @@ def test_step_by_step():
     """Test the registration process step by step"""
     
     print("Step 1: Get available slots from Calendar service")
-    slots_response = requests.get("http://localhost:8002/api/v1/slots?hub=550e8400-e29b-41d4-a716-446655440000&date=2024-12-20")
+    slots_response = requests.get("http://localhost:8002/api/v1/slots?hub=signup-system-2&date=2024-12-20")
     print(f"Slots response: {slots_response.status_code}")
     
     if slots_response.status_code == 200:
