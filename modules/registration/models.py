@@ -58,8 +58,8 @@ class Registration(Base):
     vehicle_weight_kg = Column(Integer, nullable=False)
     vehicle_category = Column(String(10), nullable=False)  # Store as string for flexibility
     
-    # Document storage (JSONB array)
-    docs = Column(JSONB, nullable=False, default=list)
+    # Document storage (JSON for SQLite, JSONB for PostgreSQL)
+    docs = Column(JSON if config.db.db_type == "sqlite" else JSONB, nullable=False, default=list)
     
     # Registration status
     status = Column(String(20), nullable=False, default=RegistrationStatus.REGISTERED.value)
