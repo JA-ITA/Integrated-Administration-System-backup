@@ -89,21 +89,21 @@ class IdentityServiceTester:
                     {"response": response.text}
                 )
             
-            # Test identity module health endpoint
-            response = self.session.get(f"{self.base_url}/identity/v1/health")
+            # Test root endpoint
+            response = self.session.get(f"{BACKEND_URL}/")
             if response.status_code == 200:
                 data = response.json()
                 self.log_test(
-                    "Health Check - Identity Module",
+                    "Root Endpoint",
                     True,
-                    f"Identity module healthy: {data.get('status', 'unknown')}",
+                    f"Root endpoint accessible: {data.get('message', 'unknown')}",
                     data
                 )
             else:
                 self.log_test(
-                    "Health Check - Identity Module",
+                    "Root Endpoint",
                     False,
-                    f"Identity health check failed with status {response.status_code}",
+                    f"Root endpoint failed with status {response.status_code}",
                     {"response": response.text}
                 )
                 
