@@ -396,7 +396,7 @@ class IdentityServiceTester:
         try:
             invalid_id = "not-a-valid-uuid"
             response = self.session.get(
-                f"{self.base_url}/identity/v1/candidates/{invalid_id}"
+                f"{self.base_url}/candidates/{invalid_id}"
             )
             
             # Should return 422 for invalid UUID format or 404
