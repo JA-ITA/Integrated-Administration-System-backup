@@ -53,8 +53,9 @@ async def init_db():
         logger.info("Database initialized successfully")
         
     except Exception as e:
-        logger.error(f"Failed to initialize database: {e}")
-        raise
+        logger.warning(f"Failed to initialize database: {e}")
+        logger.info("Service will continue without database connectivity")
+        # Don't raise the exception, allow service to start
 
 def get_db_engine():
     """Get database engine"""
