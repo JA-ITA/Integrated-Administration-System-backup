@@ -69,9 +69,11 @@ async def validate_receipt(
         
         logger.info(f"Receipt validation completed: {validation_request.receipt_no}, status: {status_code}")
         
+        # Use FastAPI's built-in JSON serialization
+        from fastapi.encoders import jsonable_encoder
         return JSONResponse(
             status_code=status_code,
-            content=response.dict()
+            content=jsonable_encoder(response.dict())
         )
         
     except ValidationError as e:
