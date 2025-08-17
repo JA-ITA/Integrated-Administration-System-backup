@@ -1,473 +1,486 @@
 """
-Identity Module Service Layer
-Business logic for user management, authentication, and authorization.
+Identity Module Service Layer - Enhanced for Candidate Management
+Business logic for candidate management, OTP verification, and profile management.
 """
 
 import uuid
-import secrets
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import List, Optional, Tuple, Dict, Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update
+from sqlalchemy import select, update, func, and_, or_
 from sqlalchemy.orm import selectinload
 from passlib.context import CryptContext
-from jose import JWTError, jwt
 
 from core.config import settings
-from core.exceptions import AuthenticationError, AuthorizationError, ValidationError
+from core.exceptions import ValidationError, AuthenticationError, DatabaseError
 from core.logging_config import get_logger
-from .models import User, Role, Permission, UserRole
-from .schemas import UserCreate, UserUpdate, TokenPayload, LoginResponse, TokenResponse
+from .models import Candidate, OTPAttempt, CandidateDocument, CandidateEvent
+from .schemas import (
+    CandidateCreateRequest, 
+    CandidateResponse,
+    CandidateCreateResponse,
+    OTPType,
+    CandidateStatus,
+    PasswordSetRequest
+)
+from .otp_service import OTPService
+from .events import publish_candidate_created_event, publish_candidate_verified_event
 
 logger = get_logger("identity.service")
 
 
-class IdentityService:
-    """Service class for identity and authentication operations."""
+class CandidateService:
+    """Service class for candidate management operations."""
     
     def __init__(self, db: AsyncSession):
         self.db = db
         self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        self.otp_service = OTPService(db)
     
-    # User Management
-    async def create_user(self, user_data: UserCreate) -> User:
-        """Create a new user account."""
-        logger.info(f"Creating new user: {user_data.email}")
+    # Candidate Management
+    async def create_candidate(
+        self,
+        candidate_data: CandidateCreateRequest,
+        correlation_id: Optional[str] = None,
+        ip_address: Optional[str] = None,
+        user_agent: Optional[str] = None
+    ) -> CandidateCreateResponse:
+        """
+        Create a new candidate with OTP verification.
         
-        # Check if user already exists
-        existing_user = await self.get_user_by_email(user_data.email)
-        if existing_user:
-            raise ValidationError("User with this email already exists")
+        Args:
+            candidate_data: Candidate creation request data
+            correlation_id: Optional correlation ID for tracing
+            ip_address: Client IP address
+            user_agent: Client user agent
+            
+        Returns:
+            CandidateCreateResponse with candidate info and OTP status
+        """
+        logger.info(f"Creating candidate: {candidate_data.email}")
+        
+        # Check if candidate already exists
+        existing_candidate = await self.get_candidate_by_email(candidate_data.email)
+        if existing_candidate:
+            raise ValidationError("Candidate with this email already exists")
+        
+        # Check for duplicate phone number
+        phone_query = select(Candidate).where(Candidate.phone == candidate_data.phone)
+        phone_result = await self.db.execute(phone_query)
+        if phone_result.scalar_one_or_none():
+            raise ValidationError("Candidate with this phone number already exists")
+        
+        # Check for duplicate national ID if provided
+        if candidate_data.national_id:
+            national_id_query = select(Candidate).where(Candidate.national_id == candidate_data.national_id)
+            national_id_result = await self.db.execute(national_id_query)
+            if national_id_result.scalar_one_or_none():
+                raise ValidationError("Candidate with this national ID already exists")
+        
+        try:
+            # Create candidate record
+            candidate_id = str(uuid.uuid4())
+            candidate = Candidate(
+                id=candidate_id,
+                email=candidate_data.email,
+                first_name=candidate_data.first_name,
+                last_name=candidate_data.last_name,
+                phone=candidate_data.phone,
+                date_of_birth=candidate_data.date_of_birth,
+                national_id=candidate_data.national_id,
+                passport_number=candidate_data.passport_number,
+                street_address=candidate_data.street_address,
+                city=candidate_data.city,
+                postal_code=candidate_data.postal_code,
+                country=candidate_data.country,
+                preferred_language=candidate_data.preferred_language,
+                timezone=candidate_data.timezone,
+                status=CandidateStatus.PENDING_VERIFICATION.value,
+                is_active=False,  # Will be activated after verification
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow(),
+            )
+            
+            # Calculate initial profile completion
+            candidate.calculate_profile_completion()
+            
+            self.db.add(candidate)
+            await self.db.commit()
+            await self.db.refresh(candidate)
+            
+            # Send OTP codes
+            otp_sent_status = {
+                "email": False,
+                "phone": False
+            }
+            
+            # Send Email OTP
+            try:
+                email_otp_code, email_attempt_id = await self.otp_service.create_otp_attempt(
+                    candidate_id=candidate.id,
+                    otp_type=OTPType.EMAIL,
+                    recipient=candidate.email,
+                    ip_address=ip_address,
+                    user_agent=user_agent
+                )
+                
+                email_sent = await self.otp_service.send_email_otp(
+                    email=candidate.email,
+                    otp_code=email_otp_code,
+                    candidate_name=candidate.full_name
+                )
+                
+                otp_sent_status["email"] = email_sent
+                
+            except Exception as e:
+                logger.error(f"Failed to send email OTP: {str(e)}")
+            
+            # Send Phone OTP
+            try:
+                phone_otp_code, phone_attempt_id = await self.otp_service.create_otp_attempt(
+                    candidate_id=candidate.id,
+                    otp_type=OTPType.PHONE,
+                    recipient=candidate.phone,
+                    ip_address=ip_address,
+                    user_agent=user_agent
+                )
+                
+                phone_sent = await self.otp_service.send_sms_otp(
+                    phone=candidate.phone,
+                    otp_code=phone_otp_code,
+                    candidate_name=candidate.full_name
+                )
+                
+                otp_sent_status["phone"] = phone_sent
+                
+            except Exception as e:
+                logger.error(f"Failed to send phone OTP: {str(e)}")
+            
+            # Log candidate creation event
+            await self._log_candidate_event(
+                candidate_id=candidate.id,
+                event_type="CandidateCreated",
+                event_data={
+                    "email": candidate.email,
+                    "phone": self._mask_phone(candidate.phone),
+                    "full_name": candidate.full_name,
+                    "otp_sent": otp_sent_status
+                },
+                correlation_id=correlation_id,
+                ip_address=ip_address,
+                user_agent=user_agent
+            )
+            
+            # Publish CandidateCreated event
+            await publish_candidate_created_event(
+                candidate_id=candidate.id,
+                candidate_data={
+                    "email": candidate.email,
+                    "full_name": candidate.full_name,
+                    "phone": candidate.phone,
+                    "status": candidate.status,
+                    "created_at": candidate.created_at.isoformat()
+                },
+                correlation_id=correlation_id
+            )
+            
+            # Prepare response
+            candidate_response = await self._candidate_to_response(candidate)
+            
+            next_steps = []
+            if otp_sent_status["email"]:
+                next_steps.append("Verify your email address using the OTP sent to your email")
+            if otp_sent_status["phone"]:
+                next_steps.append("Verify your phone number using the OTP sent via SMS")
+            if not any(otp_sent_status.values()):
+                next_steps.append("Contact support for assistance with verification")
+            
+            logger.info(f"Candidate created successfully: {candidate.email}")
+            
+            return CandidateCreateResponse(
+                candidate=candidate_response,
+                otp_sent=otp_sent_status,
+                message="Candidate created successfully. Please verify your email and phone number.",
+                next_steps=next_steps
+            )
+            
+        except Exception as e:
+            await self.db.rollback()
+            logger.error(f"Error creating candidate: {str(e)}")
+            raise DatabaseError(f"Failed to create candidate: {str(e)}")
+    
+    async def get_candidate_by_id(self, candidate_id: str) -> Optional[Candidate]:
+        """Get candidate by ID with related data."""
+        query = select(Candidate).where(Candidate.id == candidate_id).options(
+            selectinload(Candidate.otp_attempts),
+            selectinload(Candidate.profile_documents)
+        )
+        result = await self.db.execute(query)
+        return result.scalar_one_or_none()
+    
+    async def get_candidate_by_email(self, email: str) -> Optional[Candidate]:
+        """Get candidate by email."""
+        query = select(Candidate).where(Candidate.email == email)
+        result = await self.db.execute(query)
+        return result.scalar_one_or_none()
+    
+    async def get_candidate_by_phone(self, phone: str) -> Optional[Candidate]:
+        """Get candidate by phone number."""
+        query = select(Candidate).where(Candidate.phone == phone)
+        result = await self.db.execute(query)
+        return result.scalar_one_or_none()
+    
+    async def verify_candidate_otp(
+        self,
+        candidate_id: str,
+        otp_type: OTPType,
+        otp_code: str,
+        correlation_id: Optional[str] = None
+    ) -> Tuple[bool, str]:
+        """
+        Verify OTP for candidate.
+        
+        Returns:
+            Tuple of (success, message)
+        """
+        success, message = await self.otp_service.verify_otp(
+            candidate_id=candidate_id,
+            otp_type=otp_type,
+            otp_code=otp_code
+        )
+        
+        if success:
+            # Publish verification event
+            await publish_candidate_verified_event(
+                candidate_id=candidate_id,
+                verification_type=otp_type.value,
+                correlation_id=correlation_id
+            )
+            
+            # Log event
+            await self._log_candidate_event(
+                candidate_id=candidate_id,
+                event_type=f"OTPVerified",
+                event_data={
+                    "otp_type": otp_type.value,
+                    "verified_at": datetime.utcnow().isoformat()
+                },
+                correlation_id=correlation_id
+            )
+        
+        return success, message
+    
+    async def resend_otp(
+        self,
+        candidate_id: str,
+        otp_type: OTPType,
+        ip_address: Optional[str] = None,
+        user_agent: Optional[str] = None
+    ) -> Tuple[bool, str]:
+        """Resend OTP to candidate."""
+        return await self.otp_service.resend_otp(
+            candidate_id=candidate_id,
+            otp_type=otp_type,
+            ip_address=ip_address,
+            user_agent=user_agent
+        )
+    
+    async def set_candidate_password(
+        self,
+        candidate_id: str,
+        password: str,
+        correlation_id: Optional[str] = None
+    ) -> bool:
+        """
+        Set password for candidate after full verification.
+        
+        Returns:
+            True if password was set successfully
+        """
+        candidate = await self.get_candidate_by_id(candidate_id)
+        if not candidate:
+            raise ValidationError("Candidate not found")
+        
+        if not candidate.is_fully_verified:
+            raise ValidationError("Candidate must complete email and phone verification first")
+        
+        if candidate.hashed_password:
+            raise ValidationError("Password already set for this candidate")
         
         # Hash password
-        hashed_password = self.pwd_context.hash(user_data.password)
+        hashed_password = self.pwd_context.hash(password)
         
-        # Create user
-        user = User(
-            id=str(uuid.uuid4()),
-            email=user_data.email,
+        # Update candidate
+        query = update(Candidate).where(Candidate.id == candidate_id).values(
             hashed_password=hashed_password,
-            first_name=user_data.first_name,
-            last_name=user_data.last_name,
-            phone=user_data.phone,
-            user_type=user_data.user_type,
-            status="pending_verification",
             is_active=True,
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow(),
+            status=CandidateStatus.ACTIVE.value,
+            updated_at=datetime.utcnow()
         )
-        
-        self.db.add(user)
+        await self.db.execute(query)
         await self.db.commit()
-        await self.db.refresh(user)
         
-        # Assign default role based on user type
-        await self._assign_default_role(user)
-        
-        logger.info(f"User created successfully: {user.email}")
-        return user
-    
-    async def get_user_by_id(self, user_id: str) -> Optional[User]:
-        """Get user by ID with roles and permissions."""
-        query = select(User).where(User.id == user_id).options(
-            selectinload(User.roles).selectinload(UserRole.role).selectinload(Role.permissions)
+        # Log event
+        await self._log_candidate_event(
+            candidate_id=candidate_id,
+            event_type="PasswordSet",
+            event_data={
+                "password_set_at": datetime.utcnow().isoformat()
+            },
+            correlation_id=correlation_id
         )
-        result = await self.db.execute(query)
-        return result.scalar_one_or_none()
-    
-    async def get_user_by_email(self, email: str) -> Optional[User]:
-        """Get user by email with roles and permissions."""
-        query = select(User).where(User.email == email).options(
-            selectinload(User.roles).selectinload(UserRole.role).selectinload(Role.permissions)
-        )
-        result = await self.db.execute(query)
-        return result.scalar_one_or_none()
-    
-    async def update_user(self, user_id: str, user_data: UserUpdate) -> User:
-        """Update user profile information."""
-        user = await self.get_user_by_id(user_id)
-        if not user:
-            raise ValidationError("User not found")
         
-        update_data = user_data.dict(exclude_unset=True)
-        if update_data:
-            update_data["updated_at"] = datetime.utcnow()
-            
-            query = update(User).where(User.id == user_id).values(**update_data)
-            await self.db.execute(query)
-            await self.db.commit()
-            
-            # Refresh user object
-            await self.db.refresh(user)
-        
-        logger.info(f"User profile updated: {user.email}")
-        return user
+        logger.info(f"Password set for candidate: {candidate_id}")
+        return True
     
-    async def list_users(
-        self, 
-        page: int = 1, 
-        limit: int = 20, 
-        user_type: Optional[str] = None
-    ) -> List[User]:
-        """List users with pagination and filtering."""
+    async def get_otp_status(self, candidate_id: str) -> Dict[str, Any]:
+        """Get OTP verification status for candidate."""
+        return await self.otp_service.get_otp_status(candidate_id)
+    
+    async def list_candidates(
+        self,
+        page: int = 1,
+        limit: int = 20,
+        status_filter: Optional[str] = None,
+        verified_filter: Optional[bool] = None
+    ) -> Tuple[List[Candidate], int]:
+        """
+        List candidates with pagination and filtering.
+        
+        Returns:
+            Tuple of (candidates, total_count)
+        """
         offset = (page - 1) * limit
         
-        query = select(User).offset(offset).limit(limit).options(
-            selectinload(User.roles).selectinload(UserRole.role)
+        # Base query
+        query = select(Candidate)
+        count_query = select(func.count(Candidate.id))
+        
+        # Apply filters
+        if status_filter:
+            query = query.where(Candidate.status == status_filter)
+            count_query = count_query.where(Candidate.status == status_filter)
+        
+        if verified_filter is not None:
+            if verified_filter:
+                # Fully verified candidates
+                query = query.where(
+                    and_(
+                        Candidate.is_email_verified == True,
+                        Candidate.is_phone_verified == True
+                    )
+                )
+                count_query = count_query.where(
+                    and_(
+                        Candidate.is_email_verified == True,
+                        Candidate.is_phone_verified == True
+                    )
+                )
+            else:
+                # Not fully verified candidates
+                query = query.where(
+                    or_(
+                        Candidate.is_email_verified == False,
+                        Candidate.is_phone_verified == False
+                    )
+                )
+                count_query = count_query.where(
+                    or_(
+                        Candidate.is_email_verified == False,
+                        Candidate.is_phone_verified == False
+                    )
+                )
+        
+        # Apply pagination and execute
+        query = query.offset(offset).limit(limit).order_by(Candidate.created_at.desc())
+        
+        candidates_result = await self.db.execute(query)
+        count_result = await self.db.execute(count_query)
+        
+        candidates = candidates_result.scalars().all()
+        total_count = count_result.scalar()
+        
+        return list(candidates), total_count
+    
+    # Helper Methods
+    async def _candidate_to_response(self, candidate: Candidate) -> CandidateResponse:
+        """Convert Candidate model to CandidateResponse."""
+        return CandidateResponse(
+            id=candidate.id,
+            email=candidate.email,
+            first_name=candidate.first_name,
+            last_name=candidate.last_name,
+            full_name=candidate.full_name,
+            phone=candidate.phone,
+            date_of_birth=candidate.date_of_birth,
+            national_id=self._mask_national_id(candidate.national_id),
+            passport_number=self._mask_passport(candidate.passport_number),
+            street_address=candidate.street_address,
+            city=candidate.city,
+            postal_code=candidate.postal_code,
+            country=candidate.country,
+            status=CandidateStatus(candidate.status),
+            is_active=candidate.is_active,
+            is_phone_verified=candidate.is_phone_verified,
+            is_email_verified=candidate.is_email_verified,
+            is_identity_verified=candidate.is_identity_verified,
+            is_fully_verified=candidate.is_fully_verified,
+            profile_completion_percentage=candidate.profile_completion_percentage,
+            created_at=candidate.created_at,
+            updated_at=candidate.updated_at,
+            verified_at=candidate.verified_at,
+            preferred_language=candidate.preferred_language,
+            timezone=candidate.timezone
         )
-        
-        if user_type:
-            query = query.where(User.user_type == user_type)
-        
-        result = await self.db.execute(query)
-        return result.scalars().all()
     
-    async def update_user_status(self, user_id: str, is_active: bool) -> Optional[User]:
-        """Update user active status."""
-        user = await self.get_user_by_id(user_id)
-        if not user:
-            return None
-        
-        query = update(User).where(User.id == user_id).values(
-            is_active=is_active,
-            updated_at=datetime.utcnow()
-        )
-        await self.db.execute(query)
-        await self.db.commit()
-        
-        await self.db.refresh(user)
-        logger.info(f"User status updated: {user.email} - Active: {is_active}")
-        return user
-    
-    # Authentication
-    async def authenticate_user(self, email: str, password: str) -> LoginResponse:
-        """Authenticate user and return tokens."""
-        user = await self.get_user_by_email(email)
-        
-        if not user or not self.verify_password(password, user.hashed_password):
-            logger.warning(f"Failed login attempt for email: {email}")
-            await self._handle_failed_login(email)
-            raise AuthenticationError("Invalid email or password")
-        
-        if not user.is_active:
-            raise AuthenticationError("Account is deactivated")
-        
-        if user.status == "suspended":
-            raise AuthenticationError("Account is suspended")
-        
-        # Check if account is locked
-        if user.locked_until and user.locked_until > datetime.utcnow():
-            raise AuthenticationError("Account is temporarily locked")
-        
-        # Reset failed login attempts and update last login
-        await self._reset_failed_login_attempts(user.id)
-        await self._update_last_login(user.id)
-        
-        # Generate tokens
-        tokens = await self._generate_tokens(user)
-        
-        logger.info(f"Successful login: {user.email}")
-        return LoginResponse(
-            user=user,
-            tokens=tokens,
-            message="Login successful"
-        )
-    
-    async def refresh_access_token(self, refresh_token: str) -> LoginResponse:
-        """Refresh access token using refresh token."""
-        try:
-            payload = jwt.decode(
-                refresh_token, 
-                settings.SECRET_KEY, 
-                algorithms=[settings.ALGORITHM]
-            )
-            
-            if payload.get("type") != "refresh":
-                raise AuthenticationError("Invalid token type")
-            
-            user_id = payload.get("user_id")
-            if not user_id:
-                raise AuthenticationError("Invalid token")
-            
-            user = await self.get_user_by_id(user_id)
-            if not user or not user.is_active:
-                raise AuthenticationError("User not found or inactive")
-            
-            # Generate new tokens
-            tokens = await self._generate_tokens(user)
-            
-            return LoginResponse(
-                user=user,
-                tokens=tokens,
-                message="Token refreshed successfully"
-            )
-            
-        except JWTError as e:
-            logger.warning(f"Invalid refresh token: {str(e)}")
-            raise AuthenticationError("Invalid or expired refresh token")
-    
-    async def logout_user(self, access_token: str):
-        """Logout user and invalidate token."""
-        # In a production system, you would add the token to a blacklist
-        # For now, we'll just log the logout
-        try:
-            payload = jwt.decode(
-                access_token,
-                settings.SECRET_KEY,
-                algorithms=[settings.ALGORITHM]
-            )
-            user_id = payload.get("user_id")
-            logger.info(f"User logged out: {user_id}")
-        except JWTError:
-            pass  # Invalid token, but logout should still succeed
-    
-    # Password Management
-    def verify_password(self, plain_password: str, hashed_password: str) -> bool:
-        """Verify password against hash."""
-        return self.pwd_context.verify(plain_password, hashed_password)
-    
-    async def change_password(
-        self, 
-        user_id: str, 
-        current_password: str, 
-        new_password: str
+    async def _log_candidate_event(
+        self,
+        candidate_id: str,
+        event_type: str,
+        event_data: Dict[str, Any],
+        correlation_id: Optional[str] = None,
+        ip_address: Optional[str] = None,
+        user_agent: Optional[str] = None
     ):
-        """Change user password."""
-        user = await self.get_user_by_id(user_id)
-        if not user:
-            raise ValidationError("User not found")
-        
-        if not self.verify_password(current_password, user.hashed_password):
-            raise AuthenticationError("Current password is incorrect")
-        
-        hashed_password = self.pwd_context.hash(new_password)
-        
-        query = update(User).where(User.id == user_id).values(
-            hashed_password=hashed_password,
-            updated_at=datetime.utcnow()
-        )
-        await self.db.execute(query)
-        await self.db.commit()
-        
-        logger.info(f"Password changed for user: {user.email}")
-    
-    async def request_password_reset(self, email: str):
-        """Request password reset token."""
-        user = await self.get_user_by_email(email)
-        if not user:
-            return  # Don't reveal if email exists
-        
-        reset_token = secrets.token_urlsafe(32)
-        reset_expires = datetime.utcnow() + timedelta(hours=1)
-        
-        query = update(User).where(User.id == user.id).values(
-            password_reset_token=reset_token,
-            password_reset_expires=reset_expires,
-            updated_at=datetime.utcnow()
-        )
-        await self.db.execute(query)
-        await self.db.commit()
-        
-        # TODO: Send password reset email
-        logger.info(f"Password reset requested for: {email}")
-    
-    async def reset_password(self, reset_token: str, new_password: str):
-        """Reset password using reset token."""
-        query = select(User).where(
-            User.password_reset_token == reset_token,
-            User.password_reset_expires > datetime.utcnow()
-        )
-        result = await self.db.execute(query)
-        user = result.scalar_one_or_none()
-        
-        if not user:
-            raise AuthenticationError("Invalid or expired reset token")
-        
-        hashed_password = self.pwd_context.hash(new_password)
-        
-        update_query = update(User).where(User.id == user.id).values(
-            hashed_password=hashed_password,
-            password_reset_token=None,
-            password_reset_expires=None,
-            updated_at=datetime.utcnow()
-        )
-        await self.db.execute(update_query)
-        await self.db.commit()
-        
-        logger.info(f"Password reset completed for: {user.email}")
-    
-    # Role Management
-    async def assign_role_to_user(self, user_id: str, role_name: str):
-        """Assign role to user."""
-        user = await self.get_user_by_id(user_id)
-        if not user:
-            raise ValidationError("User not found")
-        
-        role_query = select(Role).where(Role.name == role_name)
-        role_result = await self.db.execute(role_query)
-        role = role_result.scalar_one_or_none()
-        
-        if not role:
-            raise ValidationError("Role not found")
-        
-        # Check if user already has this role
-        existing_query = select(UserRole).where(
-            UserRole.user_id == user_id,
-            UserRole.role_id == role.id
-        )
-        existing_result = await self.db.execute(existing_query)
-        existing = existing_result.scalar_one_or_none()
-        
-        if existing:
-            return  # User already has this role
-        
-        user_role = UserRole(
-            user_id=user_id,
-            role_id=role.id,
-            assigned_at=datetime.utcnow()
-        )
-        self.db.add(user_role)
-        await self.db.commit()
-        
-        logger.info(f"Role '{role_name}' assigned to user: {user.email}")
-    
-    async def remove_role_from_user(self, user_id: str, role_name: str):
-        """Remove role from user."""
-        role_query = select(Role).where(Role.name == role_name)
-        role_result = await self.db.execute(role_query)
-        role = role_result.scalar_one_or_none()
-        
-        if not role:
-            raise ValidationError("Role not found")
-        
-        user_role_query = select(UserRole).where(
-            UserRole.user_id == user_id,
-            UserRole.role_id == role.id
-        )
-        user_role_result = await self.db.execute(user_role_query)
-        user_role = user_role_result.scalar_one_or_none()
-        
-        if user_role:
-            await self.db.delete(user_role)
+        """Log candidate event to database."""
+        try:
+            event = CandidateEvent(
+                id=str(uuid.uuid4()),
+                candidate_id=candidate_id,
+                event_type=event_type,
+                event_data=str(event_data),  # Convert to JSON string
+                event_source="candidate_service",
+                ip_address=ip_address,
+                user_agent=user_agent,
+                correlation_id=correlation_id,
+                created_at=datetime.utcnow()
+            )
+            
+            self.db.add(event)
             await self.db.commit()
-            logger.info(f"Role '{role_name}' removed from user: {user_id}")
+            
+        except Exception as e:
+            logger.error(f"Failed to log candidate event: {str(e)}")
     
-    # Private Methods
-    async def _generate_tokens(self, user: User) -> TokenResponse:
-        """Generate access and refresh tokens for user."""
-        now = datetime.utcnow()
-        
-        # Get user permissions
-        permissions = await self._get_user_permissions(user)
-        roles = [ur.role.name for ur in user.roles]
-        
-        # Access token payload
-        access_payload = TokenPayload(
-            user_id=user.id,
-            email=user.email,
-            user_type=user.user_type,
-            roles=roles,
-            permissions=permissions,
-            exp=int((now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)).timestamp()),
-            iat=int(now.timestamp()),
-            type="access"
-        )
-        
-        # Refresh token payload
-        refresh_payload = TokenPayload(
-            user_id=user.id,
-            email=user.email,
-            user_type=user.user_type,
-            roles=roles,
-            permissions=permissions,
-            exp=int((now + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)).timestamp()),
-            iat=int(now.timestamp()),
-            type="refresh"
-        )
-        
-        # Generate tokens
-        access_token = jwt.encode(
-            access_payload.dict(),
-            settings.SECRET_KEY,
-            algorithm=settings.ALGORITHM
-        )
-        
-        refresh_token = jwt.encode(
-            refresh_payload.dict(),
-            settings.SECRET_KEY,
-            algorithm=settings.ALGORITHM
-        )
-        
-        return TokenResponse(
-            access_token=access_token,
-            refresh_token=refresh_token,
-            token_type="bearer",
-            expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
-        )
+    def _mask_national_id(self, national_id: Optional[str]) -> Optional[str]:
+        """Mask national ID for response."""
+        if not national_id:
+            return None
+        if len(national_id) > 4:
+            return "*" * (len(national_id) - 4) + national_id[-4:]
+        return "*" * len(national_id)
     
-    async def _get_user_permissions(self, user: User) -> List[str]:
-        """Get all permissions for a user based on their roles."""
-        permissions = set()
-        
-        for user_role in user.roles:
-            role = user_role.role
-            for permission in role.permissions:
-                permissions.add(permission.name)
-        
-        return list(permissions)
+    def _mask_passport(self, passport: Optional[str]) -> Optional[str]:
+        """Mask passport number for response."""
+        if not passport:
+            return None
+        if len(passport) > 3:
+            return "*" * (len(passport) - 3) + passport[-3:]
+        return "*" * len(passport)
     
-    async def _assign_default_role(self, user: User):
-        """Assign default role based on user type."""
-        role_mapping = {
-            "driver": "driver_role",
-            "examiner": "examiner_role", 
-            "admin": "admin_role",
-            "super_admin": "super_admin_role"
-        }
-        
-        default_role = role_mapping.get(user.user_type)
-        if default_role:
-            try:
-                await self.assign_role_to_user(user.id, default_role)
-            except ValidationError:
-                logger.warning(f"Default role '{default_role}' not found for user type: {user.user_type}")
-    
-    async def _handle_failed_login(self, email: str):
-        """Handle failed login attempt."""
-        user = await self.get_user_by_email(email)
-        if not user:
-            return
-        
-        failed_attempts = user.failed_login_attempts + 1
-        update_data = {
-            "failed_login_attempts": failed_attempts,
-            "updated_at": datetime.utcnow()
-        }
-        
-        # Lock account after 5 failed attempts
-        if failed_attempts >= 5:
-            update_data["locked_until"] = datetime.utcnow() + timedelta(minutes=30)
-        
-        query = update(User).where(User.id == user.id).values(**update_data)
-        await self.db.execute(query)
-        await self.db.commit()
-    
-    async def _reset_failed_login_attempts(self, user_id: str):
-        """Reset failed login attempts counter."""
-        query = update(User).where(User.id == user_id).values(
-            failed_login_attempts=0,
-            locked_until=None,
-            updated_at=datetime.utcnow()
-        )
-        await self.db.execute(query)
-        await self.db.commit()
-    
-    async def _update_last_login(self, user_id: str):
-        """Update user's last login timestamp."""
-        query = update(User).where(User.id == user_id).values(
-            last_login=datetime.utcnow(),
-            updated_at=datetime.utcnow()
-        )
-        await self.db.execute(query)
-        await self.db.commit()
+    def _mask_phone(self, phone: str) -> str:
+        """Mask phone number for logging."""
+        if len(phone) > 4:
+            return "*" * (len(phone) - 4) + phone[-4:]
+        return "*" * len(phone)
