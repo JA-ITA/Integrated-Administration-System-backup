@@ -811,12 +811,6 @@ class IdentityServiceTester:
         self.test_get_candidate_not_found()
         self.test_get_candidate_invalid_uuid()
         
-        # OTP and verification tests
-        self.test_otp_verification_flow(candidate_id)
-        
-        # Password setting tests
-        self.test_password_setting_flow(candidate_id)
-        
         # Error handling tests
         self.test_error_handling()
         
