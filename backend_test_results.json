@@ -5,7 +5,7 @@
     "failed_tests": 15,
     "success_rate": 6.25,
     "test_timestamp": "2025-08-17T20:30:31.477168",
-    "backend_url": "https://identity-service.preview.emergentagent.com"
+    "backend_url": "https://profile-manager-12.preview.emergentagent.com"
   },
   "test_results": [
     {

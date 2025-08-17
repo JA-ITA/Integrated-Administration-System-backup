@@ -15,7 +15,7 @@ import os
 import sys
 
 # Test configuration
-BACKEND_URL = "https://identity-service.preview.emergentagent.com"
+BACKEND_URL = "https://profile-manager-12.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 class IdentityServiceTester:
