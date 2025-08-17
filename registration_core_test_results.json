@@ -1,0 +1,125 @@
+{
+  "summary": {
+    "total_tests": 9,
+    "passed_tests": 9,
+    "failed_tests": 0,
+    "success_rate": 100.0,
+    "test_timestamp": "2025-08-17T23:35:42.537766",
+    "registration_service_url": "http://localhost:8004"
+  },
+  "test_results": [
+    {
+      "test": "Service Health Check",
+      "success": true,
+      "message": "Service healthy: healthy",
+      "timestamp": "2025-08-17T23:35:42.393029",
+      "details": {
+        "database": "connected",
+        "events": "connected",
+        "dependencies_available": true
+      }
+    },
+    {
+      "test": "Configuration Endpoint",
+      "success": true,
+      "message": "Configuration retrieved successfully",
+      "timestamp": "2025-08-17T23:35:42.394897",
+      "details": {
+        "min_age_provisional": 16.5,
+        "min_age_class_b": 17,
+        "min_age_class_c_ppv": 20,
+        "weight_threshold_class_c": 7000
+      }
+    },
+    {
+      "test": "Event Publishing Structure",
+      "success": true,
+      "message": "Event publishing service properly configured",
+      "timestamp": "2025-08-17T23:35:42.396380",
+      "details": {
+        "event_service_connected": false,
+        "fallback_events_count": 0,
+        "has_fallback_mechanism": true
+      }
+    },
+    {
+      "test": "Authentication - Missing Token",
+      "success": true,
+      "message": "Missing authorization properly rejected",
+      "timestamp": "2025-08-17T23:35:42.398237",
+      "details": {
+        "status": 401
+      }
+    },
+    {
+      "test": "Authentication - Invalid Token Format",
+      "success": true,
+      "message": "Invalid token format properly rejected",
+      "timestamp": "2025-08-17T23:35:42.400179",
+      "details": {
+        "status": 401
+      }
+    },
+    {
+      "test": "Business Rules Structure",
+      "success": true,
+      "message": "All business rules properly configured",
+      "timestamp": "2025-08-17T23:35:42.458367",
+      "details": {
+        "provisional_age": 16.5,
+        "class_b_age": 17,
+        "class_c_ppv_age": 20,
+        "weight_threshold": 7000
+      }
+    },
+    {
+      "test": "Document Format Validation Structure",
+      "success": true,
+      "message": "Document format validation properly configured",
+      "timestamp": "2025-08-17T23:35:42.460182",
+      "details": {
+        "photo_formats": [
+          "jpeg",
+          "jpg",
+          "png"
+        ],
+        "medical_formats": [
+          "pdf"
+        ],
+        "id_proof_formats": [
+          "jpeg",
+          "jpg",
+          "png",
+          "pdf"
+        ],
+        "other_formats": [
+          "pdf"
+        ]
+      }
+    },
+    {
+      "test": "Document Validation - Missing Required Documents",
+      "success": true,
+      "message": "Missing required documents properly rejected",
+      "timestamp": "2025-08-17T23:35:42.462407",
+      "details": {
+        "status": 422
+      }
+    },
+    {
+      "test": "External Service Integration Handling",
+      "success": true,
+      "message": "External service validation handled gracefully with proper error message",
+      "timestamp": "2025-08-17T23:35:42.537539",
+      "details": {
+        "status": 200,
+        "success": false,
+        "message": "External validation failed",
+        "validation_errors": [
+          "Failed to validate booking: HTTP 503",
+          "Failed to validate receipt: HTTP 503"
+        ]
+      }
+    }
+  ]
+}
