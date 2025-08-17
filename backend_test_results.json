@@ -4,7 +4,7 @@
     "passed_tests": 5,
     "failed_tests": 9,
     "success_rate": 35.714285714285715,
-    "test_timestamp": "2025-08-17T21:00:12.302222",
+    "test_timestamp": "2025-08-17T21:01:34.830673",
     "backend_url": "http://localhost:8002"
   },
   "test_results": [
@@ -12,7 +12,7 @@
       "test": "Health Check - Main",
       "success": true,
       "message": "Service healthy: healthy",
-      "timestamp": "2025-08-17T21:00:12.195826",
+      "timestamp": "2025-08-17T21:01:34.783163",
       "details": {
         "status": "healthy",
         "service": "ITADIAS Identity Microservice",
@@ -25,7 +25,7 @@
       "test": "Root Endpoint",
       "success": true,
       "message": "Root endpoint accessible: ITADIAS Identity Microservice",
-      "timestamp": "2025-08-17T21:00:12.197446",
+      "timestamp": "2025-08-17T21:01:34.784800",
       "details": {
         "message": "ITADIAS Identity Microservice",
         "version": "1.0.0",
@@ -36,7 +36,7 @@
       "test": "Create Candidate - Success",
       "success": false,
       "message": "Expected 201, got 500",
-      "timestamp": "2025-08-17T21:00:12.271395",
+      "timestamp": "2025-08-17T21:01:34.801036",
       "details": {
         "response": "{\"detail\":\"Internal server error\"}"
       }
@@ -45,7 +45,7 @@
       "test": "Create Candidate - Invalid Email",
       "success": true,
       "message": "Expected 422, got 422",
-      "timestamp": "2025-08-17T21:00:12.273982",
+      "timestamp": "2025-08-17T21:01:34.803383",
       "details": {
         "response_data": {
           "detail": [
@@ -69,7 +69,7 @@
       "test": "Create Candidate - Missing Required Fields",
       "success": true,
       "message": "Expected 422, got 422",
-      "timestamp": "2025-08-17T21:00:12.276332",
+      "timestamp": "2025-08-17T21:01:34.805746",
       "details": {
         "response_data": {
           "detail": [
@@ -105,7 +105,7 @@
       "test": "Create Candidate - Invalid Phone Format",
       "success": false,
       "message": "Expected 422, got 500",
-      "timestamp": "2025-08-17T21:00:12.282601",
+      "timestamp": "2025-08-17T21:01:34.811249",
       "details": {
         "response_data": {
           "detail": "Internal server error"
@@ -116,7 +116,7 @@
       "test": "Create Candidate - Underage Candidate",
       "success": false,
       "message": "Expected 422, got 500",
-      "timestamp": "2025-08-17T21:00:12.288021",
+      "timestamp": "2025-08-17T21:01:34.816985",
       "details": {
         "response_data": {
           "detail": "Internal server error"
@@ -127,23 +127,23 @@
       "test": "Create Candidate - Duplicate Prevention",
       "success": false,
       "message": "Failed to create first candidate: 422",
-      "timestamp": "2025-08-17T21:00:12.290167",
+      "timestamp": "2025-08-17T21:01:34.819216",
       "details": {
-        "response": "{\"detail\":[{\"type\":\"string_pattern_mismatch\",\"loc\":[\"body\",\"phone\"],\"msg\":\"String should match pattern '^\\\\+?[\\\\d\\\\s\\\\-\\\\(\\\\)]+$'\",\"input\":\"441555cate\",\"ctx\":{\"pattern\":\"^\\\\+?[\\\\d\\\\s\\\\-\\\\(\\\\)]+$\"},\"url\":\"https://errors.pydantic.dev/2.5/v/string_pattern_mismatch\"}]}"
+        "response": "{\"detail\":[{\"type\":\"string_pattern_mismatch\",\"loc\":[\"body\",\"phone\"],\"msg\":\"String should match pattern '^\\\\+?[\\\\d\\\\s\\\\-\\\\(\\\\)]+$'\",\"input\":\"+1441555cate\",\"ctx\":{\"pattern\":\"^\\\\+?[\\\\d\\\\s\\\\-\\\\(\\\\)]+$\"},\"url\":\"https://errors.pydantic.dev/2.5/v/string_pattern_mismatch\"}]}"
       }
     },
     {
       "test": "Get Candidate - Success",
       "success": false,
       "message": "No candidate ID provided",
-      "timestamp": "2025-08-17T21:00:12.290209",
+      "timestamp": "2025-08-17T21:01:34.819264",
       "details": {}
     },
     {
       "test": "Get Candidate - Not Found",
       "success": false,
       "message": "Expected 404, got 500",
-      "timestamp": "2025-08-17T21:00:12.295114",
+      "timestamp": "2025-08-17T21:01:34.824067",
       "details": {
         "response": "{\"detail\":\"Internal server error\"}"
       }
@@ -152,7 +152,7 @@
       "test": "Get Candidate - Invalid UUID",
       "success": true,
       "message": "Invalid UUID properly handled with status 422",
-      "timestamp": "2025-08-17T21:00:12.296791",
+      "timestamp": "2025-08-17T21:01:34.825809",
       "details": {
         "response": {
           "detail": [
@@ -177,7 +177,7 @@
       "test": "Error Handling - Malformed JSON",
       "success": false,
       "message": "Expected 422, got 404",
-      "timestamp": "2025-08-17T21:00:12.298029",
+      "timestamp": "2025-08-17T21:01:34.827135",
       "details": {
         "response": "{\"detail\":\"Not Found\"}"
       }
@@ -186,7 +186,7 @@
       "test": "Error Handling - Wrong Content Type",
       "success": false,
       "message": "Unexpected status 404",
-      "timestamp": "2025-08-17T21:00:12.299340",
+      "timestamp": "2025-08-17T21:01:34.828533",
       "details": {
         "response": "{\"detail\":\"Not Found\"}"
       }
@@ -195,9 +195,9 @@
       "test": "Correlation ID Handling",
       "success": false,
       "message": "Expected 201, got 422",
-      "timestamp": "2025-08-17T21:00:12.301961",
+      "timestamp": "2025-08-17T21:01:34.830416",
       "details": {
-        "response": "{\"detail\":[{\"type\":\"string_pattern_mismatch\",\"loc\":[\"body\",\"phone\"],\"msg\":\"String should match pattern '^\\\\+?[\\\\d\\\\s\\\\-\\\\(\\\\)]+$'\",\"input\":\"441555tion\",\"ctx\":{\"pattern\":\"^\\\\+?[\\\\d\\\\s\\\\-\\\\(\\\\)]+$\"},\"url\":\"https://errors.pydantic.dev/2.5/v/string_pattern_mismatch\"}]}"
+        "response": "{\"detail\":[{\"type\":\"string_pattern_mismatch\",\"loc\":[\"body\",\"phone\"],\"msg\":\"String should match pattern '^\\\\+?[\\\\d\\\\s\\\\-\\\\(\\\\)]+$'\",\"input\":\"+1441555tion\",\"ctx\":{\"pattern\":\"^\\\\+?[\\\\d\\\\s\\\\-\\\\(\\\\)]+$\"},\"url\":\"https://errors.pydantic.dev/2.5/v/string_pattern_mismatch\"}]}"
       }
     }
   ],
