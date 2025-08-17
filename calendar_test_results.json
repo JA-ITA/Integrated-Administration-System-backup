@@ -6,7 +6,7 @@
     "success_rate": 66.66666666666666,
     "test_timestamp": "2025-08-17T22:26:11.956169",
     "calendar_service_url": "http://localhost:8002",
-    "main_backend_url": "https://signup-system-2.preview.emergentagent.com"
+    "main_backend_url": "https://quiz-api.preview.emergentagent.com"
   },
   "test_results": [
     {
