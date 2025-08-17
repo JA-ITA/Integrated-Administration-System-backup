@@ -44,10 +44,10 @@ class RabbitMQConfig:
 class RegistrationConfig:
     """Registration business rules configuration"""
     # Age limits (in years)
-    min_age_provisional: float = 16.5
-    min_age_class_b: int = 17
-    min_age_class_c_ppv: int = 20
-    weight_threshold_class_c: int = 7000  # kg
+    min_age_provisional: float = 16.5  # MC1 required
+    min_age_class_b: int = 17  # No medical certificate required
+    min_age_class_c_ppv: int = 20  # MC2 required for ALL Class C/PPV tests (including upgrades)
+    weight_threshold_class_c: int = 7000  # kg (kept for reference, MC2 now required regardless of weight)
     
     # Document size limits (in bytes)
     max_document_size: int = 5 * 1024 * 1024  # 5MB
