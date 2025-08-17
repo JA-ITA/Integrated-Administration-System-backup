@@ -120,10 +120,9 @@ class Registration(Base):
                 return False, f"Minimum age for Class B is {config.registration.min_age_class_b} years. Current age: {age:.1f} years"
         
         elif self.vehicle_category in [VehicleCategory.C.value, VehicleCategory.PPV.value]:
-            # For Class C and PPV, check weight and age
-            if self.vehicle_weight_kg > config.registration.weight_threshold_class_c:
-                if age < config.registration.min_age_class_c_ppv and not self.manager_override:
-                    return False, f"Minimum age for Class C/PPV (>7000kg) is {config.registration.min_age_class_c_ppv} years. Current age: {age:.1f} years"
+            # For Class C and PPV, age requirement applies to ALL tests (including upgrades)
+            if age < config.registration.min_age_class_c_ppv and not self.manager_override:
+                return False, f"Minimum age for Class C/PPV is {config.registration.min_age_class_c_ppv} years. Current age: {age:.1f} years"
         
         elif self.vehicle_category == VehicleCategory.SPECIAL.value:
             # Provisional license
