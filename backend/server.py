@@ -226,6 +226,88 @@ async def get_receipt_statistics():
         logger.error(f"Error getting receipt statistics: {e}")
         return {"error": str(e)}
 
+# Test Engine service integration endpoints
+@api_router.get("/test-engine/health")
+async def check_test_engine_service():
+    """Check if test engine service is healthy"""
+    health = await test_engine_client.health_check()
+    return {
+        "test_engine_service": health.get("status", "unavailable"),
+        "status": health
+    }
+
+@api_router.get("/test-engine/config")
+async def get_test_engine_config():
+    """Get test configuration from test engine service"""
+    try:
+        config = await test_engine_client.get_config()
+        return config
+    except Exception as e:
+        logger.error(f"Error getting test engine config: {e}")
+        return {"error": str(e)}
+
+@api_router.post("/test-engine/tests/start")
+async def start_test(test_data: dict):
+    """Start a new test via test engine service"""
+    try:
+        driver_record_id = uuid.UUID(test_data["driver_record_id"])
+        module = test_data["module"]
+        
+        result = await test_engine_client.start_test(driver_record_id, module)
+        return {
+            "success": True,
+            "test_id": result["test_id"],
+            "questions": result["questions"],
+            "time_limit_minutes": result["time_limit_minutes"],
+            "start_time": result["start_time"],
+            "expires_at": result["expires_at"]
+        }
+    except Exception as e:
+        logger.error(f"Error starting test: {e}")
+        return {"success": False, "error": str(e)}
+
+@api_router.post("/test-engine/tests/{test_id}/submit")
+async def submit_test(test_id: str, submission_data: dict):
+    """Submit test answers via test engine service"""
+    try:
+        test_uuid = uuid.UUID(test_id)
+        answers = submission_data["answers"]
+        
+        result = await test_engine_client.submit_test(test_uuid, answers)
+        return {
+            "success": True,
+            "test_id": result["test_id"],
+            "score": result["score"],
+            "passed": result["passed"],
+            "correct_answers": result["correct_answers"],
+            "total_questions": result["total_questions"],
+            "submitted_at": result["submitted_at"]
+        }
+    except Exception as e:
+        logger.error(f"Error submitting test: {e}")
+        return {"success": False, "error": str(e)}
+
+@api_router.get("/test-engine/tests/{test_id}/status")
+async def get_test_status(test_id: str):
+    """Get test status and time remaining"""
+    try:
+        test_uuid = uuid.UUID(test_id)
+        status = await test_engine_client.get_test_status(test_uuid)
+        return status
+    except Exception as e:
+        logger.error(f"Error getting test status: {e}")
+        return {"error": str(e)}
+
+@api_router.get("/test-engine/statistics")
+async def get_test_engine_statistics():
+    """Get test statistics from test engine service"""
+    try:
+        stats = await test_engine_client.get_statistics()
+        return stats
+    except Exception as e:
+        logger.error(f"Error getting test engine statistics: {e}")
+        return {"error": str(e)}
+
 # Include the router in the main app
 app.include_router(api_router)
 
