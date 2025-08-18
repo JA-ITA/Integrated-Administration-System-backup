@@ -20,12 +20,12 @@ router = APIRouter()
 
 async def get_event_service():
     """Dependency to get event service"""
-    from main import app
+    from app import app
     return app.state.event_service
 
 async def get_question_service():
     """Dependency to get question service"""
-    from main import app
+    from app import app
     return app.state.question_service
 
 @router.get("/modules", response_model=List[QuestionModuleResponse])
