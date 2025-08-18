@@ -4,7 +4,7 @@
     "passed_tests": 4,
     "failed_tests": 7,
     "success_rate": 36.36363636363637,
-    "test_timestamp": "2025-08-18T01:37:43.769665",
+    "test_timestamp": "2025-08-18T01:39:12.812428",
     "main_backend_url": "https://cert-generator-2.preview.emergentagent.com",
     "certificate_service_url": "http://localhost:8006",
     "focus": "ITADIAS Certificate Microservice with Handlebars + PDF-lib"
@@ -14,7 +14,7 @@
       "test": "Certificate Service Health Check (via Main Backend)",
       "success": true,
       "message": "Certificate service is healthy: healthy",
-      "timestamp": "2025-08-18T01:37:43.385690",
+      "timestamp": "2025-08-18T01:39:12.577559",
       "details": {
         "service_status": "healthy",
         "status_details": {
@@ -27,7 +27,7 @@
           "event_details": {
             "connected": false,
             "exchange": "certificate_events",
-            "fallback_events_count": 0,
+            "fallback_events_count": 1,
             "max_fallback_events": 1000
           },
           "storage_details": {
@@ -43,7 +43,7 @@
       "test": "Certificate Service Direct Health Check",
       "success": true,
       "message": "Service healthy: healthy",
-      "timestamp": "2025-08-18T01:37:43.389137",
+      "timestamp": "2025-08-18T01:39:12.580706",
       "details": {
         "service": "ITADIAS Certificate Microservice",
         "version": "1.0.0",
@@ -55,7 +55,7 @@
       "test": "Certificate Service Configuration",
       "success": false,
       "message": "Configuration missing expected fields: ['service', 'version', 'storage', 'pdf_service']",
-      "timestamp": "2025-08-18T01:37:43.391228",
+      "timestamp": "2025-08-18T01:39:12.582516",
       "details": {
         "storage_backend": "minio",
         "supported_formats": [
@@ -73,11 +73,11 @@
     {
       "test": "Certificate Generation (via Main Backend)",
       "success": false,
-      "message": "Certificate generation failed: Certificate generation failed: PDF service error: PDF generation failed",
-      "timestamp": "2025-08-18T01:37:43.673263",
+      "message": "Certificate generation failed: Certificate generation failed: 'NoneType' object has no attribute 'id'",
+      "timestamp": "2025-08-18T01:39:12.709197",
       "details": {
         "success": false,
-        "error": "Certificate generation failed: PDF service error: PDF generation failed",
+        "error": "Certificate generation failed: 'NoneType' object has no attribute 'id'",
         "status_code": 500
       }
     },
@@ -85,44 +85,44 @@
       "test": "Certificate Download by Driver Record",
       "success": false,
       "message": "No certificates available for testing (generation may have failed)",
-      "timestamp": "2025-08-18T01:37:43.673349",
+      "timestamp": "2025-08-18T01:39:12.709260",
       "details": {}
     },
     {
       "test": "Certificate Download by Certificate ID",
       "success": false,
       "message": "No certificates available for testing (generation may have failed)",
-      "timestamp": "2025-08-18T01:37:43.673358",
+      "timestamp": "2025-08-18T01:39:12.709268",
       "details": {}
     },
     {
       "test": "Certificate Verification",
       "success": false,
       "message": "No certificates available for testing (generation may have failed)",
-      "timestamp": "2025-08-18T01:37:43.673364",
+      "timestamp": "2025-08-18T01:39:12.709274",
       "details": {}
     },
     {
       "test": "Certificate Status",
       "success": false,
       "message": "No certificates available for testing (generation may have failed)",
-      "timestamp": "2025-08-18T01:37:43.673371",
+      "timestamp": "2025-08-18T01:39:12.709281",
       "details": {}
     },
     {
       "test": "Driver Certificates List",
       "success": false,
       "message": "No certificates available for testing (generation may have failed)",
-      "timestamp": "2025-08-18T01:37:43.673378",
+      "timestamp": "2025-08-18T01:39:12.709287",
       "details": {}
     },
     {
       "test": "Error Handling - Non-existent Certificate",
       "success": true,
       "message": "Properly handled non-existent certificate: Certificate not found",
-      "timestamp": "2025-08-18T01:37:43.721245",
+      "timestamp": "2025-08-18T01:39:12.762769",
       "details": {
-        "non_existent_id": "69cebb6c-d5d8-4459-bc43-e4d426da78cb",
+        "non_existent_id": "cd8a395d-8e58-4423-adab-dda523c76e05",
         "error": "Certificate not found",
         "status_code": 404
       }
@@ -131,7 +131,7 @@
       "test": "Error Handling - Invalid Verification Token",
       "success": true,
       "message": "Properly handled invalid verification token: Certificate verification failed",
-      "timestamp": "2025-08-18T01:37:43.769393",
+      "timestamp": "2025-08-18T01:39:12.812145",
       "details": {
         "invalid_token": "invalid-token-12345",
         "error": "Certificate verification failed",
