@@ -66,7 +66,36 @@ class AuditServiceTester:
         
         return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
     
-    async def test_audit_service_health(self):
+    async def test_database_structure_verification(self):
+        """Test database structure by checking health endpoint response"""
+        try:
+            response = await self.client.get(f"{AUDIT_SERVICE_URL}/health")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Verify database connection and schema
+                db_info = data.get("database", {})
+                if (db_info.get("status") == "connected" and 
+                    db_info.get("schema") == "audit" and
+                    db_info.get("host") == "localhost" and
+                    db_info.get("port") == 5432):
+                    
+                    self.log_test("Database Structure Verification", True, 
+                                f"PostgreSQL connected with 'audit' schema on {db_info.get('host')}:{db_info.get('port')}")
+                    return True
+                else:
+                    self.log_test("Database Structure Verification", False, 
+                                f"Database configuration issue: {db_info}")
+                    return False
+            else:
+                self.log_test("Database Structure Verification", False, 
+                            f"Health check failed: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            self.log_test("Database Structure Verification", False, f"Exception: {str(e)}")
+            return False
         """Test audit service health endpoint"""
         try:
             response = await self.client.get(f"{AUDIT_SERVICE_URL}/health")
