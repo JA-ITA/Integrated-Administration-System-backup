@@ -18,7 +18,7 @@ import sys
 # Test configuration
 SPECIAL_ADMIN_SERVICE_URL = "http://localhost:8007"
 TEST_ENGINE_SERVICE_URL = "http://localhost:8005"
-MAIN_BACKEND_URL = "https://test-template-config.preview.emergentagent.com"
+MAIN_BACKEND_URL = "https://cranky-tharp.preview.emergentagent.com"
 
 class SpecialAdminTester:
     """Comprehensive tester for Special Admin microservice and integration."""

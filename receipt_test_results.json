@@ -5,7 +5,7 @@
     "failed_tests": 10,
     "success_rate": 37.5,
     "test_timestamp": "2025-08-17T22:50:08.978675",
-    "main_backend_url": "https://test-template-config.preview.emergentagent.com",
+    "main_backend_url": "https://cranky-tharp.preview.emergentagent.com",
     "receipt_service_url": "http://localhost:8003"
   },
   "test_results": [

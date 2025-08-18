@@ -17,7 +17,7 @@ import sys
 
 # Test configuration
 REGISTRATION_SERVICE_URL = "http://localhost:8004"
-MAIN_BACKEND_URL = "https://test-template-config.preview.emergentagent.com"
+MAIN_BACKEND_URL = "https://cranky-tharp.preview.emergentagent.com"
 API_BASE = f"{REGISTRATION_SERVICE_URL}/api/v1"
 
 class UpdatedMedicalCertificateRulesTester:
