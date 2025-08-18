@@ -106,13 +106,13 @@ async def generate_certificate(
                 )
         
         # Fetch certificate data from other services
-        certificate_data = await certificate_service.fetch_certificate_data(
+        cert_data = await certificate_service.fetch_certificate_data(
             request.driver_record_id
         )
         
         # Generate PDF certificate
         pdf_bytes, pdf_metadata = await certificate_service.generate_certificate_pdf(
-            request.driver_record_id, certificate_data
+            request.driver_record_id, cert_data
         )
         
         # Generate file name
@@ -131,7 +131,7 @@ async def generate_certificate(
         )
         
         # Determine certificate type and expiry
-        licence_endorsement = certificate_data.get("licence_endorsement", "Driver Licence")
+        licence_endorsement = cert_data.get("licence_endorsement", "Driver Licence")
         issue_date = datetime.now(timezone.utc)
         
         if "class" in licence_endorsement.lower():
@@ -154,8 +154,8 @@ async def generate_certificate(
                 driver_record_id=request.driver_record_id,
                 certificate_type=cert_type,
                 licence_endorsement=licence_endorsement,
-                candidate_name=certificate_data.get("candidate_name", "Unknown"),
-                service_hub=certificate_data.get("service_hub", "Unknown Hub"),
+                candidate_name=cert_data.get("candidate_name", "Unknown"),
+                service_hub=cert_data.get("service_hub", "Unknown Hub"),
                 issue_date=issue_date,
                 expiry_date=expiry_date,
                 file_url=upload_result["file_url"],
@@ -181,8 +181,8 @@ async def generate_certificate(
                 driver_record_id=request.driver_record_id,
                 certificate_type=cert_type,
                 licence_endorsement=licence_endorsement,
-                candidate_name=certificate_data.get("candidate_name", "Unknown"),
-                service_hub=certificate_data.get("service_hub", "Unknown Hub"),
+                candidate_name=cert_data.get("candidate_name", "Unknown"),
+                service_hub=cert_data.get("service_hub", "Unknown Hub"),
                 file_url=upload_result["file_url"],
                 file_size=upload_result["file_size"],
                 file_hash=upload_result["file_hash"],
