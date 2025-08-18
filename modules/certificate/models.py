@@ -52,7 +52,7 @@ class Certificate(Base):
     verification_token = Column(String(100), nullable=True, unique=True)
     
     # Metadata
-    metadata = Column(JSON, nullable=True)  # Additional certificate data
+    certificate_metadata = Column(JSON, nullable=True)  # Additional certificate data
     template_used = Column(String(50), nullable=True)
     
     # Timestamps
