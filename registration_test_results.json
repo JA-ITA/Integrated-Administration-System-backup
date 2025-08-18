@@ -6,7 +6,7 @@
     "success_rate": 28.000000000000004,
     "test_timestamp": "2025-08-17T23:32:46.139642",
     "registration_service_url": "http://localhost:8004",
-    "main_backend_url": "https://cert-download-api.preview.emergentagent.com"
+    "main_backend_url": "https://driver-cert-system.preview.emergentagent.com"
   },
   "test_results": [
     {
