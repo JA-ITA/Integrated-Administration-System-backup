@@ -1,10 +1,10 @@
 {
   "summary": {
-    "total_tests": 14,
-    "passed_tests": 8,
-    "failed_tests": 6,
-    "success_rate": 57.14285714285714,
-    "test_timestamp": "2025-08-18T00:12:21.970071",
+    "total_tests": 20,
+    "passed_tests": 20,
+    "failed_tests": 0,
+    "success_rate": 100.0,
+    "test_timestamp": "2025-08-18T00:14:02.639010",
     "test_engine_service_url": "http://localhost:8005",
     "main_backend_url": "https://quiz-api.preview.emergentagent.com",
     "focus": "Complete Test Engine microservice and integration testing"
@@ -14,7 +14,7 @@
       "test": "Test Engine Health Check",
       "success": true,
       "message": "Service healthy: healthy",
-      "timestamp": "2025-08-18T00:12:21.671282",
+      "timestamp": "2025-08-18T00:14:02.181859",
       "details": {
         "database": "connected",
         "events": "connected",
@@ -29,7 +29,7 @@
       "test": "Test Engine Configuration",
       "success": true,
       "message": "Configuration endpoint working with expected values: 20 questions, 25 min, 75.0% pass",
-      "timestamp": "2025-08-18T00:12:21.673160",
+      "timestamp": "2025-08-18T00:14:02.183629",
       "details": {
         "questions_per_test": 20,
         "time_limit_minutes": 25,
@@ -47,7 +47,7 @@
       "test": "Test Statistics",
       "success": true,
       "message": "Statistics endpoint working",
-      "timestamp": "2025-08-18T00:12:21.684995",
+      "timestamp": "2025-08-18T00:14:02.195710",
       "details": {
         "statistics": {
           "total_tests": 0,
@@ -61,7 +61,7 @@
       "test": "Events Status",
       "success": true,
       "message": "Events status endpoint working",
-      "timestamp": "2025-08-18T00:12:21.686729",
+      "timestamp": "2025-08-18T00:14:02.197386",
       "details": {
         "events_status": {
           "rabbitmq_connected": false,
@@ -74,21 +74,21 @@
       "test": "Start Test - Provisional",
       "success": true,
       "message": "Test started successfully with 20 questions, 25 min limit",
-      "timestamp": "2025-08-18T00:12:21.707533",
+      "timestamp": "2025-08-18T00:14:02.215344",
       "details": {
-        "test_id": "5ba1dfa6-0076-4537-aa10-2009658ff7f2",
-        "driver_record_id": "fb84b436-faa6-467b-ac39-b6e2975afaf8",
+        "test_id": "057396e0-018f-4da9-923d-8bd54f53faa2",
+        "driver_record_id": "2e57a90e-2c02-44af-b920-2cb2618b41a6",
         "module": "Provisional",
         "questions_count": 20,
         "first_question_structure": {
-          "id": "b9011e41-2255-4e1b-bbed-3020cd3ebb00",
+          "id": "cbfd3e52-7869-409b-b9e6-d642d44b135b",
           "question_type": "multiple_choice",
-          "text": "When turning left, you should:",
+          "text": "What is the maximum speed limit in residential areas?",
           "options": [
-            "Turn from the right lane",
-            "Signal and turn from the left lane",
-            "Not signal if no traffic",
-            "Turn quickly"
+            "30 km/h",
+            "40 km/h",
+            "50 km/h",
+            "60 km/h"
           ]
         }
       }
@@ -97,64 +97,170 @@
       "test": "Get Test Status",
       "success": true,
       "message": "Test status retrieved: in_progress, 1499s remaining",
-      "timestamp": "2025-08-18T00:12:21.712413",
+      "timestamp": "2025-08-18T00:14:02.219646",
       "details": {
-        "test_id": "5ba1dfa6-0076-4537-aa10-2009658ff7f2",
+        "test_id": "057396e0-018f-4da9-923d-8bd54f53faa2",
         "status": "in_progress",
         "time_remaining_seconds": 1499,
-        "expires_at": "2025-08-18T00:37:21.698180+00:00"
+        "expires_at": "2025-08-18T00:39:02.206780+00:00"
       }
     },
     {
       "test": "Start Test - Class-B",
-      "success": false,
-      "message": "Start test failed with status 400",
-      "timestamp": "2025-08-18T00:12:21.719774",
+      "success": true,
+      "message": "Test started successfully with 20 questions, 25 min limit",
+      "timestamp": "2025-08-18T00:14:02.230319",
       "details": {
-        "response": "{\"detail\":\"Not enough questions available for TestModule.CLASS_B. Need 20, have 1\"}"
+        "test_id": "0aeb92a7-ca03-4d70-b6e0-70e77eac1c26",
+        "driver_record_id": "f6ac2536-0f9a-4a89-815d-d9e245945765",
+        "module": "Class-B",
+        "questions_count": 20,
+        "first_question_structure": {
+          "id": "ef437e10-51be-49ad-8844-8c68402f2ab7",
+          "question_type": "multiple_choice",
+          "text": "Class-B Question 13: What is the proper procedure for merging?",
+          "options": [
+            "Option A",
+            "Option B",
+            "Option C",
+            "Option D"
+          ]
+        }
+      }
+    },
+    {
+      "test": "Get Test Status",
+      "success": true,
+      "message": "Test status retrieved: in_progress, 1499s remaining",
+      "timestamp": "2025-08-18T00:14:02.234116",
+      "details": {
+        "test_id": "0aeb92a7-ca03-4d70-b6e0-70e77eac1c26",
+        "status": "in_progress",
+        "time_remaining_seconds": 1499,
+        "expires_at": "2025-08-18T00:39:02.225273+00:00"
       }
     },
     {
       "test": "Start Test - Class-C",
-      "success": false,
-      "message": "Start test failed with status 400",
-      "timestamp": "2025-08-18T00:12:21.726741",
+      "success": true,
+      "message": "Test started successfully with 20 questions, 25 min limit",
+      "timestamp": "2025-08-18T00:14:02.244614",
       "details": {
-        "response": "{\"detail\":\"Not enough questions available for TestModule.CLASS_C. Need 20, have 1\"}"
+        "test_id": "c4c673ff-e4ff-4e54-9893-be6e262d3aa6",
+        "driver_record_id": "a4e5162d-82a0-4348-b204-2802b02b7d17",
+        "module": "Class-C",
+        "questions_count": 20,
+        "first_question_structure": {
+          "id": "cc7ac717-8fc7-4d38-9627-9cc4740969b9",
+          "question_type": "multiple_choice",
+          "text": "Class-C Question 8: What is the proper procedure for heavy vehicle braking?",
+          "options": [
+            "Option A",
+            "Option B",
+            "Option C",
+            "Option D"
+          ]
+        }
+      }
+    },
+    {
+      "test": "Get Test Status",
+      "success": true,
+      "message": "Test status retrieved: in_progress, 1499s remaining",
+      "timestamp": "2025-08-18T00:14:02.248168",
+      "details": {
+        "test_id": "c4c673ff-e4ff-4e54-9893-be6e262d3aa6",
+        "status": "in_progress",
+        "time_remaining_seconds": 1499,
+        "expires_at": "2025-08-18T00:39:02.239422+00:00"
       }
     },
     {
       "test": "Start Test - PPV",
-      "success": false,
-      "message": "Start test failed with status 400",
-      "timestamp": "2025-08-18T00:12:21.734173",
+      "success": true,
+      "message": "Test started successfully with 20 questions, 25 min limit",
+      "timestamp": "2025-08-18T00:14:02.257908",
       "details": {
-        "response": "{\"detail\":\"Not enough questions available for TestModule.PPV. Need 20, have 1\"}"
+        "test_id": "85379b9b-518a-41b8-8bd8-6e0df7ac6a3c",
+        "driver_record_id": "6d8902ec-70cb-4f16-b12d-61eb109132f9",
+        "module": "PPV",
+        "questions_count": 20,
+        "first_question_structure": {
+          "id": "e3d3f241-19b0-415b-82c5-d50920495712",
+          "question_type": "multiple_choice",
+          "text": "PPV Question 15: What is the proper procedure for passenger vehicle maintenance?",
+          "options": [
+            "Option A",
+            "Option B",
+            "Option C",
+            "Option D"
+          ]
+        }
+      }
+    },
+    {
+      "test": "Get Test Status",
+      "success": true,
+      "message": "Test status retrieved: in_progress, 1499s remaining",
+      "timestamp": "2025-08-18T00:14:02.261355",
+      "details": {
+        "test_id": "85379b9b-518a-41b8-8bd8-6e0df7ac6a3c",
+        "status": "in_progress",
+        "time_remaining_seconds": 1499,
+        "expires_at": "2025-08-18T00:39:02.253078+00:00"
       }
     },
     {
       "test": "Start Test - HAZMAT",
-      "success": false,
-      "message": "Start test failed with status 400",
-      "timestamp": "2025-08-18T00:12:21.740818",
+      "success": true,
+      "message": "Test started successfully with 20 questions, 25 min limit",
+      "timestamp": "2025-08-18T00:14:02.271200",
       "details": {
-        "response": "{\"detail\":\"Not enough questions available for TestModule.HAZMAT. Need 20, have 1\"}"
+        "test_id": "cfcc36eb-3dd0-4b11-822a-1f279e8c860e",
+        "driver_record_id": "5a34a93e-f1cc-4bc1-b612-1b13e298a87b",
+        "module": "HAZMAT",
+        "questions_count": 20,
+        "first_question_structure": {
+          "id": "0cc037df-1b96-42d1-851b-427c89002d16",
+          "question_type": "multiple_choice",
+          "text": "HAZMAT Question 9: What is the proper procedure for hazardous material disposal?",
+          "options": [
+            "Option A",
+            "Option B",
+            "Option C",
+            "Option D"
+          ]
+        }
+      }
+    },
+    {
+      "test": "Get Test Status",
+      "success": true,
+      "message": "Test status retrieved: in_progress, 1499s remaining",
+      "timestamp": "2025-08-18T00:14:02.274743",
+      "details": {
+        "test_id": "cfcc36eb-3dd0-4b11-822a-1f279e8c860e",
+        "status": "in_progress",
+        "time_remaining_seconds": 1499,
+        "expires_at": "2025-08-18T00:39:02.266313+00:00"
       }
     },
     {
       "test": "Duplicate Test Prevention",
-      "success": false,
-      "message": "Could not start first test: 400",
-      "timestamp": "2025-08-18T00:12:21.747655",
+      "success": true,
+      "message": "Duplicate test properly prevented with 409 conflict",
+      "timestamp": "2025-08-18T00:14:02.288673",
       "details": {
-        "response": "{\"detail\":\"Not enough questions available for TestModule.HAZMAT. Need 20, have 1\"}"
+        "first_test_id": "e5cc50a6-4ba6-45a8-b5fa-3c54ebd5dfbf",
+        "driver_record_id": "302c0b75-b469-4c56-a49f-6a7c72088db3",
+        "module": "HAZMAT"
       }
     },
     {
       "test": "Main Backend - Test Engine Health Check",
       "success": true,
       "message": "Test engine health via main backend: healthy",
-      "timestamp": "2025-08-18T00:12:21.852172",
+      "timestamp": "2025-08-18T00:14:02.389003",
       "details": {
         "health_response": {
           "test_engine_service": "healthy",
@@ -175,30 +281,61 @@
     },
     {
       "test": "Main Backend - Start Test",
-      "success": false,
-      "message": "Test start via main backend failed: {'success': False, 'error': ''}",
-      "timestamp": "2025-08-18T00:12:21.916997",
+      "success": true,
+      "message": "Test started via main backend: f22ea40a-91d8-4e14-b899-ef9e574b562e",
+      "timestamp": "2025-08-18T00:14:02.443904",
       "details": {
-        "success": false,
-        "error": ""
+        "test_id": "f22ea40a-91d8-4e14-b899-ef9e574b562e",
+        "driver_record_id": "540d5dba-24fb-4169-b446-166ca62e34f8",
+        "questions_count": 20
+      }
+    },
+    {
+      "test": "Main Backend - Submit Test",
+      "success": true,
+      "message": "Test submitted via main backend: score=0.0%",
+      "timestamp": "2025-08-18T00:14:02.499911",
+      "details": {
+        "test_id": "f22ea40a-91d8-4e14-b899-ef9e574b562e",
+        "score": 0.0,
+        "passed": false
+      }
+    },
+    {
+      "test": "Main Backend - Test Status",
+      "success": true,
+      "message": "Test status retrieved via main backend: completed",
+      "timestamp": "2025-08-18T00:14:02.553629",
+      "details": {
+        "test_id": "f22ea40a-91d8-4e14-b899-ef9e574b562e",
+        "status": "completed",
+        "time_remaining": 1499
       }
     },
     {
       "test": "Main Backend - Statistics",
       "success": true,
       "message": "Statistics retrieved via main backend",
-      "timestamp": "2025-08-18T00:12:21.969800",
+      "timestamp": "2025-08-18T00:14:02.638744",
       "details": {
         "statistics": {
-          "total_tests": 0,
+          "total_tests": 1,
           "pass_rate": 0.0,
           "average_score": 0.0,
+          "passed_tests": 0,
+          "failed_tests": 1,
           "module": "All"
         }
       }
     }
   ],
   "created_tests": [
-    "5ba1dfa6-0076-4537-aa10-2009658ff7f2"
+    "057396e0-018f-4da9-923d-8bd54f53faa2",
+    "0aeb92a7-ca03-4d70-b6e0-70e77eac1c26",
+    "c4c673ff-e4ff-4e54-9893-be6e262d3aa6",
+    "85379b9b-518a-41b8-8bd8-6e0df7ac6a3c",
+    "cfcc36eb-3dd0-4b11-822a-1f279e8c860e",
+    "e5cc50a6-4ba6-45a8-b5fa-3c54ebd5dfbf",
+    "f22ea40a-91d8-4e14-b899-ef9e574b562e"
   ]
 }
