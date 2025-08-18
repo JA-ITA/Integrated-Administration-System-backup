@@ -120,7 +120,7 @@ class CertificateClient:
         try:
             async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=False) as client:
                 response = await client.get(
-                    f"{self.service_url}/api/v1/certificates/{certificate_id}/download"
+                    f"{self.service_url}/api/v1/certificates/by-id/{certificate_id}/download"
                 )
                 
                 if response.status_code == 302:
