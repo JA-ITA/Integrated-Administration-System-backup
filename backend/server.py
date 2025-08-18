@@ -309,6 +309,152 @@ async def get_test_engine_statistics():
         logger.error(f"Error getting test engine statistics: {e}")
         return {"error": str(e)}
 
+# Certificate service integration endpoints
+@api_router.get("/certificates/health")
+async def check_certificate_service():
+    """Check if certificate service is healthy"""
+    health = await certificate_client.health_check()
+    return {
+        "certificate_service": health.get("status", "unavailable"),
+        "status": health
+    }
+
+@api_router.post("/certificates/generate")
+async def generate_certificate(certificate_data: dict):
+    """Generate a new certificate via certificate service"""
+    try:
+        driver_record_id = uuid.UUID(certificate_data["driver_record_id"])
+        
+        result = await certificate_client.generate_certificate(driver_record_id)
+        if result["success"]:
+            return {
+                "success": True,
+                "certificate_id": result["data"]["certificate_id"],
+                "download_url": result["data"]["download_url"],
+                "verification_token": result["data"]["verification_token"],
+                "qr_code": result["data"].get("qr_code"),
+                "issue_date": result["data"]["issue_date"],
+                "expiry_date": result["data"].get("expiry_date"),
+                "metadata": result["data"]["metadata"]
+            }
+        else:
+            return {
+                "success": False,
+                "error": result["error"],
+                "status_code": result.get("status_code", 500)
+            }
+    except Exception as e:
+        logger.error(f"Error generating certificate: {e}")
+        return {"success": False, "error": str(e)}
+
+@api_router.get("/certificates/{driver_record_id}/download")
+async def download_certificate_by_driver_record(driver_record_id: str):
+    """Get certificate download URL by driver record ID"""
+    try:
+        driver_uuid = uuid.UUID(driver_record_id)
+        
+        result = await certificate_client.download_certificate_by_driver_record(driver_uuid)
+        if result["success"]:
+            return {
+                "success": True,
+                "download_url": result["download_url"]
+            }
+        else:
+            return {
+                "success": False,
+                "error": result["error"],
+                "status_code": result.get("status_code", 500)
+            }
+    except Exception as e:
+        logger.error(f"Error getting certificate download URL: {e}")
+        return {"success": False, "error": str(e)}
+
+@api_router.get("/certificates/download/{certificate_id}")
+async def download_certificate_by_id(certificate_id: str):
+    """Get certificate download URL by certificate ID"""
+    try:
+        cert_uuid = uuid.UUID(certificate_id)
+        
+        result = await certificate_client.download_certificate_by_id(cert_uuid)
+        if result["success"]:
+            return {
+                "success": True,
+                "download_url": result["download_url"]
+            }
+        else:
+            return {
+                "success": False,
+                "error": result["error"],
+                "status_code": result.get("status_code", 500)
+            }
+    except Exception as e:
+        logger.error(f"Error getting certificate download URL: {e}")
+        return {"success": False, "error": str(e)}
+
+@api_router.get("/certificates/verify/{verification_token}")
+async def verify_certificate(verification_token: str):
+    """Verify certificate authenticity"""
+    try:
+        result = await certificate_client.verify_certificate(verification_token)
+        if result["success"]:
+            return {
+                "success": True,
+                "verification": result["data"]
+            }
+        else:
+            return {
+                "success": False,
+                "error": result["error"],
+                "status_code": result.get("status_code", 500)
+            }
+    except Exception as e:
+        logger.error(f"Error verifying certificate: {e}")
+        return {"success": False, "error": str(e)}
+
+@api_router.get("/certificates/status/{certificate_id}")
+async def get_certificate_status(certificate_id: str):
+    """Get certificate status and metadata"""
+    try:
+        cert_uuid = uuid.UUID(certificate_id)
+        
+        result = await certificate_client.get_certificate_status(cert_uuid)
+        if result["success"]:
+            return {
+                "success": True,
+                "certificate": result["data"]
+            }
+        else:
+            return {
+                "success": False,
+                "error": result["error"],
+                "status_code": result.get("status_code", 500)
+            }
+    except Exception as e:
+        logger.error(f"Error getting certificate status: {e}")
+        return {"success": False, "error": str(e)}
+
+@api_router.get("/certificates/driver/{driver_record_id}")
+async def get_driver_certificates(driver_record_id: str):
+    """Get all certificates for a driver record"""
+    try:
+        driver_uuid = uuid.UUID(driver_record_id)
+        
+        result = await certificate_client.get_driver_certificates(driver_uuid)
+        if result["success"]:
+            return {
+                "success": True,
+                "data": result["data"]
+            }
+        else:
+            return {
+                "success": False,
+                "error": result["error"],
+                "status_code": result.get("status_code", 500)
+            }
+    except Exception as e:
+        logger.error(f"Error getting driver certificates: {e}")
+        return {"success": False, "error": str(e)}
+
 # Include the router in the main app
 app.include_router(api_router)
 
