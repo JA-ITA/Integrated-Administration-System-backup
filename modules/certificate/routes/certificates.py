@@ -225,13 +225,13 @@ async def generate_certificate(
         })
         
         return CertificateGenerateResponse(
-            certificate_id=certificate.id,
+            certificate_id=certificate_id,
             download_url=download_url,
-            verification_token=certificate.verification_token,
-            qr_code=certificate.qr_code,
-            issue_date=certificate.issue_date,
-            expiry_date=certificate.expiry_date,
-            metadata=certificate.certificate_metadata or {}
+            verification_token=certificate.verification_token if certificate else certificate_data["verification_token"],
+            qr_code=certificate.qr_code if certificate else certificate_data["qr_code"],
+            issue_date=certificate.issue_date if certificate else datetime.fromisoformat(certificate_data["issue_date"].replace('Z', '+00:00')),
+            expiry_date=certificate.expiry_date if certificate else (datetime.fromisoformat(certificate_data["expiry_date"].replace('Z', '+00:00')) if certificate_data["expiry_date"] else None),
+            metadata=certificate.certificate_metadata if certificate else certificate_data["certificate_metadata"] or {}
         )
         
     except HTTPException:
@@ -243,7 +243,7 @@ async def generate_certificate(
             "driver_record_id": str(request.driver_record_id)
         })
         
-        # Rollback database transaction
+        # Rollback database transaction if applicable
         if db:
             await db.rollback()
         
