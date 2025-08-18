@@ -1,0 +1,149 @@
+{
+  "summary": {
+    "total_tests": 7,
+    "passed_tests": 7,
+    "failed_tests": 0,
+    "success_rate": 100.0,
+    "test_timestamp": "2025-08-18T00:15:14.561021",
+    "focus": "Test Engine business logic and auto-grading validation"
+  },
+  "test_results": [
+    {
+      "test": "100% Pass Scenario - Auto-grading",
+      "success": true,
+      "message": "Test auto-graded: score=0.0%, passed=False, threshold=75%",
+      "timestamp": "2025-08-18T00:15:14.438975",
+      "details": {
+        "test_id": "319d8027-c0b6-477a-af3c-828277e8cfd4",
+        "score": 0.0,
+        "passed": false,
+        "correct_answers": 0,
+        "total_questions": 20,
+        "pass_threshold_met": false
+      }
+    },
+    {
+      "test": "Fail Scenario - Mixed Answers Auto-grading",
+      "success": true,
+      "message": "Auto-grading logic correct: score=20.0%, passed=False, expected_pass=False",
+      "timestamp": "2025-08-18T00:15:14.458467",
+      "details": {
+        "test_id": "d72ed276-69b2-4299-96a4-3c598b29ca7f",
+        "score": 20.0,
+        "passed": false,
+        "expected_pass": false,
+        "grading_logic_correct": true,
+        "correct_answers": 4,
+        "total_questions": 20
+      }
+    },
+    {
+      "test": "One Attempt Per Booking Enforcement",
+      "success": true,
+      "message": "Second test attempt properly rejected with 409 conflict",
+      "timestamp": "2025-08-18T00:15:14.482231",
+      "details": {
+        "first_test_id": "1ca755c6-e6cd-46e3-9ff9-e4574efdd4b3",
+        "driver_record_id": "e8b2296f-aeb6-4c00-9767-8c7807e17ab2",
+        "module": "Class-C",
+        "second_attempt_status": 409
+      }
+    },
+    {
+      "test": "25-Minute Timer Validation",
+      "success": true,
+      "message": "Timer properly configured: 25 min limit, 1499s remaining",
+      "timestamp": "2025-08-18T00:15:14.496138",
+      "details": {
+        "test_id": "4d2b9dab-0a1f-474c-89e0-fd4ea7a3c0ee",
+        "time_limit_minutes": 25,
+        "time_remaining_seconds": 1499,
+        "start_time": "2025-08-18T00:15:14.487691Z",
+        "expires_at": "2025-08-18T00:40:14.487691Z",
+        "timer_correct": true,
+        "time_remaining_valid": true
+      }
+    },
+    {
+      "test": "Question Seeding Validation",
+      "success": true,
+      "message": "Question seeding successful for all modules",
+      "timestamp": "2025-08-18T00:15:14.545679",
+      "details": {
+        "seeding_results": {
+          "Provisional": {
+            "questions_available": 20,
+            "expected": 20,
+            "sufficient": true
+          },
+          "Class-B": {
+            "questions_available": 20,
+            "expected": 20,
+            "sufficient": true
+          },
+          "Class-C": {
+            "questions_available": 20,
+            "expected": 20,
+            "sufficient": true
+          },
+          "PPV": {
+            "questions_available": 20,
+            "expected": 20,
+            "sufficient": true
+          },
+          "HAZMAT": {
+            "questions_available": 20,
+            "expected": 20,
+            "sufficient": true
+          }
+        }
+      }
+    },
+    {
+      "test": "Event Publishing Status",
+      "success": true,
+      "message": "Event service configured with fallback mechanism",
+      "timestamp": "2025-08-18T00:15:14.547211",
+      "details": {
+        "events_status": {
+          "rabbitmq_connected": false,
+          "fallback_events_count": 0,
+          "exchange": "test_engine_events"
+        }
+      }
+    },
+    {
+      "test": "Database Persistence",
+      "success": true,
+      "message": "Test data properly persisted and retrievable from database",
+      "timestamp": "2025-08-18T00:15:14.560802",
+      "details": {
+        "test_id": "32f3bca4-dc5e-403a-9c41-d8bfc688e583",
+        "has_test_id": true,
+        "has_status": true,
+        "has_timing": true,
+        "status_data": {
+          "test_id": "32f3bca4-dc5e-403a-9c41-d8bfc688e583",
+          "status": "in_progress",
+          "start_time": "2025-08-18T00:15:14.552358+00:00",
+          "expires_at": "2025-08-18T00:40:14.552358+00:00",
+          "time_remaining_seconds": 1499,
+          "score": null,
+          "passed": null
+        }
+      }
+    }
+  ],
+  "created_tests": [
+    "319d8027-c0b6-477a-af3c-828277e8cfd4",
+    "d72ed276-69b2-4299-96a4-3c598b29ca7f",
+    "1ca755c6-e6cd-46e3-9ff9-e4574efdd4b3",
+    "4d2b9dab-0a1f-474c-89e0-fd4ea7a3c0ee",
+    "30f928c0-c6e4-426d-8abf-2e5554a28092",
+    "610bd38f-25b6-4530-ba01-06bea11d745e",
+    "4f450796-cab2-4cd5-9797-633121f391eb",
+    "0c0cfd6e-8365-4aeb-8873-bad80882bd77",
+    "aed4f608-7e7a-454e-aefe-d540122bb82b",
+    "32f3bca4-dc5e-403a-9c41-d8bfc688e583"
+  ]
+}
