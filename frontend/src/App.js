@@ -82,6 +82,14 @@ function App() {
             <Route path="certificates" element={<CertificateDesigner />} />
           </Route>
           
+          {/* Examiner Tablet Module Routes */}
+          <Route path="/ui/examiner-tablet" element={<ExaminerTabletLayout />}>
+            <Route index element={<ActiveChecklists />} />
+            <Route path="new" element={<NewChecklist />} />
+            <Route path="checklist/:checklistId" element={<ChecklistDetail />} />
+            <Route path="history" element={<ChecklistHistory />} />
+          </Route>
+          
           {/* Fallback route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
