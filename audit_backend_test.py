@@ -96,7 +96,8 @@ class AuditServiceTester:
         except Exception as e:
             self.log_test("Database Structure Verification", False, f"Exception: {str(e)}")
             return False
-        """Test audit service health endpoint"""
+    
+    async def test_audit_service_health(self):
         try:
             response = await self.client.get(f"{AUDIT_SERVICE_URL}/health")
             
