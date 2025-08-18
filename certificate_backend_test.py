@@ -15,7 +15,7 @@ from typing import Dict, Any, Optional, List
 import sys
 
 # Test configuration
-MAIN_BACKEND_URL = "https://offline-inspector-1.preview.emergentagent.com"
+MAIN_BACKEND_URL = "https://compliance-trace.preview.emergentagent.com"
 CERTIFICATE_SERVICE_URL = "http://localhost:8006"  # Direct service URL for health checks
 API_BASE = f"{MAIN_BACKEND_URL}/api"
 

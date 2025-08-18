@@ -18,7 +18,7 @@ import sys
 # Test configuration
 SPECIAL_ADMIN_SERVICE_URL = "http://localhost:8007"
 TEST_ENGINE_SERVICE_URL = "http://localhost:8005"
-MAIN_BACKEND_URL = "https://offline-inspector-1.preview.emergentagent.com"
+MAIN_BACKEND_URL = "https://compliance-trace.preview.emergentagent.com"
 
 class SpecialAdminTester:
     """Comprehensive tester for Special Admin microservice and integration."""
