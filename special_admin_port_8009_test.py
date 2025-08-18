@@ -1172,24 +1172,24 @@ class SpecialAdminPort8009Tester:
             if response.status_code == 200:
                 data = response.json()
                 
-                if data.get("success", False):
-                    preview_result = data.get("data", {})
+                # Check if response has expected fields (preview_html and compiled_template)
+                if "preview_html" in data and "compiled_template" in data:
                     self.log_test(
                         "POST Template Preview",
                         True,
                         f"Template preview generated successfully",
                         {
-                            "has_compiled_html": "compiled_html" in preview_result,
-                            "has_css": "css" in preview_result,
-                            "preview_length": len(preview_result.get("compiled_html", ""))
+                            "has_preview_html": "preview_html" in data,
+                            "has_compiled_template": "compiled_template" in data,
+                            "preview_length": len(data.get("preview_html", ""))
                         }
                     )
                 else:
                     self.log_test(
                         "POST Template Preview",
                         False,
-                        f"Preview generation failed: {data.get('error', 'Unknown error')}",
-                        data
+                        f"Preview response missing expected fields",
+                        {"response_keys": list(data.keys())}
                     )
             else:
                 self.log_test(
