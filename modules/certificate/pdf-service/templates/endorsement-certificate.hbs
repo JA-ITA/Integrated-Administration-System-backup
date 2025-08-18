@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITADIAS Endorsement Certificate</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', 'Noto Sans', sans-serif;
+            background: white;
+            width: 595px; /* A4 width in pixels at 72 DPI */
+            height: 842px; /* A4 height in pixels at 72 DPI */
+            padding: 40px;
+            position: relative;
+        }
+        
+        .certificate-container {
+            width: 100%;
+            height: 100%;
+            border: 4px solid #006B54;
+            border-radius: 8px;
+            padding: 30px;
+            position: relative;
+            background: linear-gradient(135deg, #f8fffe 0%, #ffffff 100%);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #006B54;
+            padding-bottom: 15px;
+        }
+        
+        .authority-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #006B54;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .authority-subtitle {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .certificate-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #006B54;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .certificate-subtitle {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 25px;
+            text-align: center;
+            font-style: italic;
+        }
+        
+        .recipient-section {
+            text-align: center;
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(0, 107, 84, 0.05);
+            border-radius: 5px;
+        }
+        
+        .recipient-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .recipient-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #006B54;
+            margin-bottom: 15px;
+            text-decoration: underline;
+            text-decoration-color: #006B54;
+        }
+        
+        .endorsement-type {
+            font-size: 20px;
+            font-weight: bold;
+            color: #d32f2f;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .certificate-content {
+            text-align: center;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #333;
+            margin: 25px 0;
+            padding: 0 20px;
+        }
+        
+        .endorsement-description {
+            background: rgba(211, 47, 47, 0.05);
+            padding: 15px;
+            border-left: 4px solid #d32f2f;
+            margin: 20px 0;
+            font-size: 12px;
+            color: #333;
+            text-align: left;
+        }
+        
+        .certificate-details {
+            width: 100%;
+            margin: 25px 0;
+            border-collapse: collapse;
+        }
+        
+        .certificate-details td {
+            padding: 8px 15px;
+            border-bottom: 1px solid #eee;
+            font-size: 12px;
+        }
+        
+        .certificate-details td:first-child {
+            font-weight: bold;
+            color: #006B54;
+            width: 40%;
+        }
+        
+        .certificate-details td:last-child {
+            color: #333;
+        }
+        
+        .warning-section {
+            background: #fff3e0;
+            border: 1px solid #ff9800;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 11px;
+            color: #e65100;
+        }
+        
+        .warning-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #d84315;
+        }
+        
+        .footer {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            right: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        
+        .signature-section {
+            text-align: center;
+            width: 200px;
+        }
+        
+        .signature-line {
+            width: 180px;
+            height: 1px;
+            background: #333;
+            margin: 0 auto 5px;
+        }
+        
+        .signature-label {
+            font-size: 10px;
+            color: #666;
+            font-weight: bold;
+        }
+        
+        .signature-name {
+            font-size: 11px;
+            color: #333;
+            margin-top: 3px;
+        }
+        
+        .qr-section {
+            text-align: center;
+            width: 100px;
+        }
+        
+        .qr-code {
+            width: 80px;
+            height: 80px;
+            border: 1px solid #ccc;
+            margin: 0 auto 5px;
+            background: #f9f9f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            color: #666;
+        }
+        
+        .qr-label {
+            font-size: 8px;
+            color: #666;
+        }
+        
+        .certificate-seal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border: 2px solid #d32f2f;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            font-size: 8px;
+            color: #d32f2f;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 42px;
+            color: rgba(211, 47, 47, 0.05);
+            font-weight: bold;
+            z-index: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="certificate-container">
+        <!-- Watermark -->
+        <div class="watermark">SPECIAL ENDORSEMENT</div>
+        
+        <!-- Official Seal -->
+        <div class="certificate-seal">
+            SPECIAL<br>PERMIT
+        </div>
+        
+        <!-- Header -->
+        <div class="header">
+            <div class="authority-name">Island Traffic Authority</div>
+            <div class="authority-subtitle">Special Endorsements & Permits Division</div>
+        </div>
+        
+        <!-- Certificate Title -->
+        <div class="certificate-title">Special Endorsement Certificate</div>
+        <div class="certificate-subtitle">Authorization for specialized vehicle operation</div>
+        
+        <!-- Recipient Section -->
+        <div class="recipient-section">
+            <div class="recipient-label">This endorsement is granted to</div>
+            <div class="recipient-name">{{candidateName}}</div>
+            <div class="endorsement-type">{{licenceEndorsement}}</div>
+        </div>
+        
+        <!-- Certificate Content -->
+        <div class="certificate-content">
+            has successfully completed specialized training and assessment requirements
+            and is hereby authorized to operate vehicles requiring this specific endorsement
+            in accordance with all applicable regulations and safety standards.
+        </div>
+        
+        <!-- Endorsement Description -->
+        <div class="endorsement-description">
+            <strong>Endorsement Authorization:</strong> This certificate authorizes the holder to operate vehicles 
+            and transport materials as specified under {{licenceEndorsement}} classification, subject to all 
+            relevant safety regulations, periodic renewals, and continuing education requirements as mandated 
+            by the Island Traffic Authority.
+        </div>
+        
+        <!-- Certificate Details -->
+        <table class="certificate-details">
+            <tr>
+                <td>Driver Record Number</td>
+                <td>{{driverRecordNumber}}</td>
+            </tr>
+            <tr>
+                <td>Endorsement Type</td>
+                <td>{{licenceEndorsement}}</td>
+            </tr>
+            <tr>
+                <td>Issue Date</td>
+                <td>{{formatDate issueDate}}</td>
+            </tr>
+            <tr>
+                <td>Expiry Date</td>
+                <td>{{formatExpiryDate expiryDate}}</td>
+            </tr>
+            <tr>
+                <td>Service Hub</td>
+                <td>{{serviceHub}}</td>
+            </tr>
+            <tr>
+                <td>Certificate ID</td>
+                <td>{{certificateId}}</td>
+            </tr>
+            {{#if testScore}}
+            <tr>
+                <td>Assessment Score</td>
+                <td>{{testScore}}%</td>
+            </tr>
+            {{/if}}
+            {{#if testDate}}
+            <tr>
+                <td>Assessment Date</td>
+                <td>{{formatDate testDate}}</td>
+            </tr>
+            {{/if}}
+        </table>
+        
+        <!-- Warning Section -->
+        <div class="warning-section">
+            <div class="warning-title">IMPORTANT NOTICE:</div>
+            This endorsement must be carried with a valid driver's licence at all times when operating 
+            authorized vehicles. Violation of endorsement conditions may result in suspension or revocation. 
+            Regular recertification is required as specified by current regulations.
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <div class="signature-section">
+                <div class="signature-line"></div>
+                <div class="signature-label">ENDORSEMENT EXAMINER</div>
+                <div class="signature-name">Sarah Thompson</div>
+            </div>
+            
+            <div class="signature-section">
+                <div class="signature-line"></div>
+                <div class="signature-label">DIVISION DIRECTOR</div>
+                <div class="signature-name">Michael Chen</div>
+            </div>
+            
+            <div class="qr-section">
+                {{#if qrCodeImage}}
+                <div class="qr-code">
+                    <!-- QR Code would be embedded here -->
+                    QR CODE
+                </div>
+                {{/if}}
+                <div class="qr-label">Scan to Verify</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
