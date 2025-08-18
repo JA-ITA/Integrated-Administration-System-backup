@@ -663,6 +663,122 @@ async def get_questions_csv_template():
         logger.error(f"Error getting CSV template: {e}")
         return {"success": False, "error": str(e)}
 
+# Audit service integration endpoints
+@api_router.get("/audit/health")
+async def check_audit_service():
+    """Check if audit service is healthy"""
+    health = await audit_client.health_check()
+    return {
+        "audit_service": health.status if health else "unavailable",
+        "status": health.dict() if health else None
+    }
+
+@api_router.post("/audit/overrides")
+async def create_override(override_data: dict):
+    """Create an override with RD authentication"""
+    try:
+        # Extract RD token from Authorization header
+        rd_token = override_data.get("rd_token")
+        if not rd_token:
+            return {
+                "success": False,
+                "error": "RD authentication token required"
+            }
+        
+        # Create override request
+        override_request = AuditOverrideRequest(
+            resource_type=override_data["resource_type"],
+            resource_id=override_data["resource_id"],
+            new_status=override_data["new_status"],
+            reason=override_data["reason"],
+            old_status=override_data.get("old_status"),
+            metadata=override_data.get("metadata")
+        )
+        
+        result = await audit_client.create_override(override_request, rd_token)
+        if result:
+            return result.dict()
+        else:
+            return {
+                "success": False,
+                "error": "Failed to create override"
+            }
+    except Exception as e:
+        logger.error(f"Error creating override: {e}")
+        return {"success": False, "error": str(e)}
+
+@api_router.get("/audit/resource/{resource_type}/{resource_id}")
+async def get_resource_audit_history(resource_type: str, resource_id: str, rd_token: str):
+    """Get audit history for a specific resource"""
+    try:
+        audit_logs = await audit_client.get_resource_audit_history(
+            resource_type, resource_id, rd_token
+        )
+        return {
+            "success": True,
+            "data": [log.dict() for log in audit_logs],
+            "count": len(audit_logs)
+        }
+    except Exception as e:
+        logger.error(f"Error getting resource audit history: {e}")
+        return {"success": False, "error": str(e)}
+
+@api_router.get("/audit/actor/{actor_id}")
+async def get_actor_audit_history(
+    actor_id: str, 
+    rd_token: str,
+    action: Optional[str] = None,
+    limit: int = 100,
+    offset: int = 0
+):
+    """Get audit history for a specific actor"""
+    try:
+        audit_logs = await audit_client.get_actor_audit_history(
+            actor_id, rd_token, action, limit, offset
+        )
+        return {
+            "success": True,
+            "data": [log.dict() for log in audit_logs],
+            "count": len(audit_logs)
+        }
+    except Exception as e:
+        logger.error(f"Error getting actor audit history: {e}")
+        return {"success": False, "error": str(e)}
+
+@api_router.get("/audit/logs")
+async def get_audit_logs(
+    rd_token: str,
+    resource_type: Optional[str] = None,
+    resource_id: Optional[str] = None,
+    actor_id: Optional[str] = None,
+    action: Optional[str] = None,
+    limit: int = 100,
+    offset: int = 0
+):
+    """Get audit logs with filters"""
+    try:
+        audit_logs = await audit_client.get_audit_logs(
+            rd_token, resource_type, resource_id, actor_id, action, limit, offset
+        )
+        return {
+            "success": True,
+            "data": [log.dict() for log in audit_logs],
+            "count": len(audit_logs)
+        }
+    except Exception as e:
+        logger.error(f"Error getting audit logs: {e}")
+        return {"success": False, "error": str(e)}
+
+@api_router.get("/audit/statistics")
+async def get_audit_statistics(rd_token: str):
+    """Get audit statistics"""
+    try:
+        stats = await audit_client.get_audit_statistics(rd_token)
+        return {"success": True, "data": stats} if stats else {"success": False, "error": "Service unavailable"}
+    except Exception as e:
+        logger.error(f"Error getting audit statistics: {e}")
+        return {"success": False, "error": str(e)}
+
 # Checklist Management Endpoints
 def generate_default_checklist_items(test_type: str, test_category: str) -> List[ChecklistItem]:
     """Generate default checklist items based on test type and category"""
