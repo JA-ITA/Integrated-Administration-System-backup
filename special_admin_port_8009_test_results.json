@@ -1,10 +1,10 @@
 {
   "summary": {
     "total_tests": 22,
-    "passed_tests": 19,
-    "failed_tests": 3,
-    "success_rate": 86.36363636363636,
-    "test_timestamp": "2025-08-18T03:26:44.394018",
+    "passed_tests": 18,
+    "failed_tests": 4,
+    "success_rate": 81.81818181818183,
+    "test_timestamp": "2025-08-18T03:27:54.852246",
     "service_url": "http://localhost:8009",
     "focus": "Special Admin microservice backend testing on port 8009"
   },
@@ -13,7 +13,7 @@
       "test": "Service Health Check",
       "success": true,
       "message": "Service healthy with database connectivity",
-      "timestamp": "2025-08-18T03:26:44.247613",
+      "timestamp": "2025-08-18T03:27:54.676562",
       "details": {
         "database_status": "connected",
         "database_schema": "config",
@@ -29,7 +29,7 @@
       "test": "Database Connectivity Check",
       "success": true,
       "message": "PostgreSQL 'config' schema connectivity confirmed",
-      "timestamp": "2025-08-18T03:26:44.249198",
+      "timestamp": "2025-08-18T03:27:54.678203",
       "details": {
         "schema": "config",
         "host": "localhost",
@@ -41,7 +41,7 @@
       "test": "Service Components Check",
       "success": true,
       "message": "All service components operational",
-      "timestamp": "2025-08-18T03:26:44.250660",
+      "timestamp": "2025-08-18T03:27:54.679673",
       "details": {
         "events_service": "connected",
         "templates_service": "connected",
@@ -51,20 +51,41 @@
     {
       "test": "GET Special Types",
       "success": true,
-      "message": "Retrieved 0 special test types",
-      "timestamp": "2025-08-18T03:26:44.260440",
+      "message": "Retrieved 1 special test types",
+      "timestamp": "2025-08-18T03:27:54.684104",
       "details": {
-        "count": 0,
-        "sample": []
+        "count": 1,
+        "sample": [
+          {
+            "name": "Advanced Defensive Driving Test - Updated",
+            "description": "Updated comprehensive test for advanced defensive driving techniques",
+            "fee": 175.0,
+            "validity_months": 48,
+            "required_docs": [
+              "photo",
+              "id_proof",
+              "medical_certificate",
+              "driving_record"
+            ],
+            "pass_percentage": 85,
+            "time_limit_minutes": 50,
+            "questions_count": 30,
+            "status": "active",
+            "id": "27bfdc6c-6e95-4333-b83e-b6746f8031ea",
+            "created_by": "Test Administrator",
+            "created_at": "2025-08-18T03:26:44.268038Z",
+            "updated_at": "2025-08-18T03:26:44.285404Z"
+          }
+        ]
       }
     },
     {
       "test": "POST Create Special Type",
       "success": true,
       "message": "Special type created successfully: Advanced Defensive Driving Test",
-      "timestamp": "2025-08-18T03:26:44.276246",
+      "timestamp": "2025-08-18T03:27:54.692131",
       "details": {
-        "id": "27bfdc6c-6e95-4333-b83e-b6746f8031ea",
+        "id": "03b2516a-af01-41b6-8568-08f38e710dc9",
         "name": "Advanced Defensive Driving Test",
         "fee": 150.0,
         "validity_months": 36,
@@ -75,9 +96,9 @@
       "test": "GET Special Type by ID",
       "success": true,
       "message": "Retrieved special type: Advanced Defensive Driving Test",
-      "timestamp": "2025-08-18T03:26:44.280981",
+      "timestamp": "2025-08-18T03:27:54.695619",
       "details": {
-        "id": "27bfdc6c-6e95-4333-b83e-b6746f8031ea",
+        "id": "03b2516a-af01-41b6-8568-08f38e710dc9",
         "name": "Advanced Defensive Driving Test",
         "status": "active",
         "fee": 150.0
@@ -85,104 +106,129 @@
     },
     {
       "test": "PUT Update Special Type",
-      "success": true,
-      "message": "Special type updated successfully: Advanced Defensive Driving Test - Updated",
-      "timestamp": "2025-08-18T03:26:44.290853",
+      "success": false,
+      "message": "Update failed with status 500",
+      "timestamp": "2025-08-18T03:27:54.701431",
       "details": {
-        "id": "27bfdc6c-6e95-4333-b83e-b6746f8031ea",
-        "name": "Advanced Defensive Driving Test - Updated",
-        "fee": 175.0,
-        "validity_months": 48
+        "response": "{\"detail\":\"Failed to update special test type: (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.UniqueViolationError'>: duplicate key value violates unique constraint \\\"special_test_types_name_key\\\"\\nDETAIL:  Key (name)=(Advanced Defensive Driving Test - Updated) already exists.\\n[SQL: UPDATE config.special_test_types SET name=$1::VARCHAR, description=$2::VARCHAR, fee=$3::NUMERIC(10, 2), validity_months=$4::INTEGER, status=$5::VARCHAR, pass_percentage=$6::INTEGER, time_limit_minutes=$7::INTEGER, updated_at=$8::TIMESTAMP WITH TIME ZONE WHERE config.special_test_types.id = $9::UUID]\\n[parameters: ('Advanced Defensive Driving Test - Updated', 'Updated comprehensive test for advanced defensive driving techniques', 175.0, 48, <TestTypeStatus.ACTIVE: 'active'>, 85, 50, datetime.datetime(2025, 8, 18, 3, 27, 54, 698787, tzinfo=datetime.timezone.utc), UUID('03b2516a-af01-41b6-8568-08f38e710dc9'))]\\n(Background on this error at: https://sqlalche.me/e/20/gkpj)\"}"
       }
     },
     {
       "test": "DELETE Special Type",
       "success": true,
       "message": "Special type deleted successfully and verified",
-      "timestamp": "2025-08-18T03:26:44.308604",
+      "timestamp": "2025-08-18T03:27:54.721027",
       "details": {
-        "deleted_id": "c343ceb1-a1dd-43fb-b0d6-b2819d55c228",
+        "deleted_id": "75f4b35f-7393-4d2c-a98f-859d4dce2287",
         "name": "Temporary Test Type for Deletion"
       }
     },
     {
       "test": "GET Question Modules",
       "success": true,
-      "message": "Retrieved 0 question modules",
-      "timestamp": "2025-08-18T03:26:44.313778",
+      "message": "Retrieved 1 question modules",
+      "timestamp": "2025-08-18T03:27:54.724264",
       "details": {
-        "count": 0,
-        "sample": []
+        "count": 1,
+        "sample": [
+          {
+            "code": "SPECIAL-HAZMAT",
+            "description": "Updated questions for hazardous materials transport certification",
+            "category": null,
+            "status": "active",
+            "id": "2012933f-364a-4d46-a383-64b0d6284305",
+            "question_count": 0,
+            "created_by": "Test Administrator",
+            "created_at": "2025-08-18T03:26:44.318537Z",
+            "updated_at": "2025-08-18T03:26:44.332406Z"
+          }
+        ]
       }
     },
     {
       "test": "POST Create Question Module",
-      "success": true,
-      "message": "Question module created successfully: None",
-      "timestamp": "2025-08-18T03:26:44.324903",
+      "success": false,
+      "message": "Creation failed with status 400",
+      "timestamp": "2025-08-18T03:27:54.727749",
       "details": {
-        "id": "2012933f-364a-4d46-a383-64b0d6284305",
-        "code": "SPECIAL-HAZMAT",
-        "name": null,
-        "difficulty_level": null,
-        "status": "active"
+        "response": "{\"detail\":\"Module with code 'SPECIAL-HAZMAT' already exists\"}"
       }
     },
     {
       "test": "GET Module by ID",
-      "success": true,
-      "message": "Retrieved module: None",
-      "timestamp": "2025-08-18T03:26:44.328936",
-      "details": {
-        "id": "2012933f-364a-4d46-a383-64b0d6284305",
-        "code": "SPECIAL-HAZMAT",
-        "name": null,
-        "status": "active"
-      }
+      "success": false,
+      "message": "No modules created to test with",
+      "timestamp": "2025-08-18T03:27:54.727795",
+      "details": {}
     },
     {
       "test": "PUT Update Module",
       "success": false,
-      "message": "Update data not reflected in response",
-      "timestamp": "2025-08-18T03:26:44.337598",
-      "details": {
-        "code": "SPECIAL-HAZMAT",
-        "description": "Updated questions for hazardous materials transport certification",
-        "category": null,
-        "status": "active",
-        "id": "2012933f-364a-4d46-a383-64b0d6284305",
-        "question_count": 0,
-        "created_by": "Test Administrator",
-        "created_at": "2025-08-18T03:26:44.318537Z",
-        "updated_at": "2025-08-18T03:26:44.332406Z"
-      }
+      "message": "No modules created to test with",
+      "timestamp": "2025-08-18T03:27:54.727803",
+      "details": {}
     },
     {
       "test": "POST CSV Question Upload",
-      "success": false,
-      "message": "Upload failed with status 405",
-      "timestamp": "2025-08-18T03:26:44.339079",
+      "success": true,
+      "message": "Questions uploaded successfully: 0 questions",
+      "timestamp": "2025-08-18T03:27:54.800785",
       "details": {
-        "response": "{\"detail\":\"Method Not Allowed\"}"
+        "questions_created": 0,
+        "questions_updated": 0,
+        "errors": [
+          "Error processing question: All connection attempts failed",
+          "Error processing question: All connection attempts failed",
+          "Error processing question: All connection attempts failed",
+          "Error processing question: All connection attempts failed",
+          "Error processing question: All connection attempts failed"
+        ],
+        "module_code": "SPECIAL-HAZMAT"
       }
     },
     {
       "test": "GET Certificate Templates",
       "success": true,
-      "message": "Retrieved 0 certificate templates",
-      "timestamp": "2025-08-18T03:26:44.344112",
+      "message": "Retrieved 1 certificate templates",
+      "timestamp": "2025-08-18T03:27:54.805475",
       "details": {
-        "count": 0,
-        "sample": []
+        "count": 1,
+        "sample": [
+          {
+            "name": "Special Test Certificate Template - Updated",
+            "type": "special_test",
+            "description": "Updated template for special driving test certificates",
+            "hbs_content": "\n                <div class=\"certificate\">\n                    <div class=\"header\">\n                        <h1>Certificate of Completion</h1>\n                        <div class=\"logo\">ITADIAS</div>\n                    </div>\n                    <div class=\"content\">\n                        <p class=\"recipient\">This certifies that <strong>{{candidate_name}}</strong></p>\n                        <p class=\"achievement\">has successfully completed the <strong>{{test_type}}</strong></p>\n                        <p class=\"date\">on {{completion_date}}</p>\n                        <div class=\"score-section\">\n                            <p>Score: <strong>{{score}}%</strong></p>\n                            <p>Result: <strong>{{result}}</strong></p>\n                        </div>\n                        <p class=\"validity\">Valid until: {{expiry_date}}</p>\n                    </div>\n                    <div class=\"footer\">\n                        <div class=\"signature\">\n                            <p>Authorized Signature</p>\n                        </div>\n                        <div class=\"qr-code\">\n                            <p>Verification Code: {{verification_code}}</p>\n                        </div>\n                    </div>\n                </div>\n                ",
+            "css_content": "\n                .certificate {\n                    width: 800px;\n                    margin: 0 auto;\n                    padding: 40px;\n                    border: 3px solid #2c3e50;\n                    font-family: 'Times New Roman', serif;\n                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);\n                }\n                .header {\n                    text-align: center;\n                    margin-bottom: 30px;\n                    border-bottom: 2px solid #34495e;\n                    padding-bottom: 20px;\n                }\n                .header h1 {\n                    color: #2c3e50;\n                    font-size: 36px;\n                    margin: 0;\n                }\n                .logo {\n                    color: #e74c3c;\n                    font-size: 18px;\n                    font-weight: bold;\n                    margin-top: 10px;\n                }\n                .content {\n                    text-align: center;\n                    margin: 30px 0;\n                    line-height: 1.8;\n                }\n                .recipient {\n                    font-size: 20px;\n                    margin: 20px 0;\n                }\n                .achievement {\n                    font-size: 18px;\n                    margin: 20px 0;\n                }\n                .date {\n                    font-size: 16px;\n                    color: #7f8c8d;\n                }\n                .score-section {\n                    margin: 25px 0;\n                    padding: 15px;\n                    background: #ecf0f1;\n                    border-radius: 5px;\n                }\n                .validity {\n                    font-size: 14px;\n                    color: #e74c3c;\n                    font-weight: bold;\n                }\n                .footer {\n                    display: flex;\n                    justify-content: space-between;\n                    margin-top: 40px;\n                    border-top: 2px solid #34495e;\n                    padding-top: 20px;\n                }\n                .signature, .qr-code {\n                    text-align: center;\n                    font-size: 12px;\n                }\n                ",
+            "json_config": {
+              "page_size": "A4",
+              "orientation": "landscape",
+              "margins": {
+                "top": 20,
+                "bottom": 20,
+                "left": 20,
+                "right": 20
+              },
+              "quality": "high"
+            },
+            "status": "active",
+            "is_default": false,
+            "id": "eb1976dd-0f57-4c47-a34c-57258aaa4445",
+            "preview_html": "\n<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Certificate Preview</title>\n    <style>\n        \n                .certificate {\n                    width: 800px;\n                    margin: 0 auto;\n                    padding: 40px;\n                    border: 3px solid #2c3e50;\n                    font-family: 'Times New Roman', serif;\n                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);\n                }\n                .header {\n                    text-align: center;\n                    margin-bottom: 30px;\n                    border-bottom: 2px solid #34495e;\n                    padding-bottom: 20px;\n                }\n                .header h1 {\n                    color: #2c3e50;\n                    font-size: 36px;\n                    margin: 0;\n                }\n                .logo {\n                    color: #e74c3c;\n                    font-size: 18px;\n                    font-weight: bold;\n                    margin-top: 10px;\n                }\n                .content {\n                    text-align: center;\n                    margin: 30px 0;\n                    line-height: 1.8;\n                }\n                .recipient {\n                    font-size: 20px;\n                    margin: 20px 0;\n                }\n                .achievement {\n                    font-size: 18px;\n                    margin: 20px 0;\n                }\n                .date {\n                    font-size: 16px;\n                    color: #7f8c8d;\n                }\n                .score-section {\n                    margin: 25px 0;\n                    padding: 15px;\n                    background: #ecf0f1;\n                    border-radius: 5px;\n                }\n                .validity {\n                    font-size: 14px;\n                    color: #e74c3c;\n                    font-weight: bold;\n                }\n                .footer {\n                    display: flex;\n                    justify-content: space-between;\n                    margin-top: 40px;\n                    border-top: 2px solid #34495e;\n                    padding-top: 20px;\n                }\n                .signature, .qr-code {\n                    text-align: center;\n                    font-size: 12px;\n                }\n                \n    </style>\n</head>\n<body>\n    \n                <div class=\"certificate\">\n                    <div class=\"header\">\n                        <h1>Certificate of Completion</h1>\n                        <div class=\"logo\">ITADIAS</div>\n                    </div>\n                    <div class=\"content\">\n                        <p class=\"recipient\">This certifies that <strong>John Doe</strong></p>\n                        <p class=\"achievement\">has successfully completed the <strong></strong></p>\n                        <p class=\"date\">on </p>\n                        <div class=\"score-section\">\n                            <p>Score: <strong>%</strong></p>\n                            <p>Result: <strong></strong></p>\n                        </div>\n                        <p class=\"validity\">Valid until: December 15, 2027</p>\n                    </div>\n                    <div class=\"footer\">\n                        <div class=\"signature\">\n                            <p>Authorized Signature</p>\n                        </div>\n                        <div class=\"qr-code\">\n                            <p>Verification Code: </p>\n                        </div>\n                    </div>\n                </div>\n                \n</body>\n</html>\n",
+            "created_by": "Test Administrator",
+            "created_at": "2025-08-18T03:26:44.349440Z",
+            "updated_at": "2025-08-18T03:26:44.365573Z"
+          }
+        ]
       }
     },
     {
       "test": "POST Create Certificate Template",
       "success": true,
       "message": "Template created successfully: Special Test Certificate Template",
-      "timestamp": "2025-08-18T03:26:44.357145",
+      "timestamp": "2025-08-18T03:27:54.815192",
       "details": {
-        "id": "eb1976dd-0f57-4c47-a34c-57258aaa4445",
+        "id": "9cc20b9f-777f-49bd-b3f4-685c9f58b6dd",
         "name": "Special Test Certificate Template",
         "type": "special_test",
         "status": "active"
@@ -192,9 +238,9 @@
       "test": "GET Template by ID",
       "success": true,
       "message": "Retrieved template: Special Test Certificate Template",
-      "timestamp": "2025-08-18T03:26:44.361932",
+      "timestamp": "2025-08-18T03:27:54.819461",
       "details": {
-        "id": "eb1976dd-0f57-4c47-a34c-57258aaa4445",
+        "id": "9cc20b9f-777f-49bd-b3f4-685c9f58b6dd",
         "name": "Special Test Certificate Template",
         "type": "special_test",
         "status": "active"
@@ -204,9 +250,9 @@
       "test": "PUT Update Template",
       "success": true,
       "message": "Template updated successfully: Special Test Certificate Template - Updated",
-      "timestamp": "2025-08-18T03:26:44.370670",
+      "timestamp": "2025-08-18T03:27:54.828067",
       "details": {
-        "id": "eb1976dd-0f57-4c47-a34c-57258aaa4445",
+        "id": "9cc20b9f-777f-49bd-b3f4-685c9f58b6dd",
         "name": "Special Test Certificate Template - Updated",
         "type": "special_test",
         "status": "active"
@@ -216,28 +262,28 @@
       "test": "DELETE Template",
       "success": true,
       "message": "Template deleted successfully and verified",
-      "timestamp": "2025-08-18T03:26:44.386379",
+      "timestamp": "2025-08-18T03:27:54.844681",
       "details": {
-        "deleted_id": "89d539fa-ab09-4e24-b8ec-df4616ae7592",
+        "deleted_id": "a1c1abaa-a14b-451a-b53a-90ff6069fcd6",
         "name": "Temporary Template for Deletion"
       }
     },
     {
       "test": "POST Template Preview",
-      "success": false,
-      "message": "Preview generation failed: Unknown error",
-      "timestamp": "2025-08-18T03:26:44.389246",
+      "success": true,
+      "message": "Template preview generated successfully",
+      "timestamp": "2025-08-18T03:27:54.847538",
       "details": {
-        "preview_html": "\n<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Certificate Preview</title>\n    <style>\n        \n                .preview-certificate {\n                    background: #f8f9fa;\n                    padding: 20px;\n                    border: 2px solid #007bff;\n                    border-radius: 10px;\n                    text-align: center;\n                    font-family: Arial, sans-serif;\n                }\n                h2 { color: #007bff; }\n                p { margin: 10px 0; }\n                \n    </style>\n</head>\n<body>\n    \n                <div class=\"preview-certificate\">\n                    <h2>Preview Certificate</h2>\n                    <p>Candidate: John Smith</p>\n                    <p>Test Type: Advanced Defensive Driving</p>\n                    <p>Date: 2024-12-15</p>\n                    <p>Score: 92%</p>\n                    <p>Result: PASS</p>\n                </div>\n                \n</body>\n</html>\n",
-        "compiled_template": "\n                <div class=\"preview-certificate\">\n                    <h2>Preview Certificate</h2>\n                    <p>Candidate: John Smith</p>\n                    <p>Test Type: Advanced Defensive Driving</p>\n                    <p>Date: 2024-12-15</p>\n                    <p>Score: 92%</p>\n                    <p>Result: PASS</p>\n                </div>\n                ",
-        "status": "success"
+        "has_preview_html": true,
+        "has_compiled_template": true,
+        "preview_length": 949
       }
     },
     {
       "test": "OpenAPI Documentation",
       "success": true,
       "message": "API documentation accessible at /docs",
-      "timestamp": "2025-08-18T03:26:44.390621",
+      "timestamp": "2025-08-18T03:27:54.848839",
       "details": {
         "content_length": 966,
         "has_swagger": true,
@@ -248,7 +294,7 @@
       "test": "REST Conventions Check",
       "success": true,
       "message": "Service follows REST conventions with proper root endpoint",
-      "timestamp": "2025-08-18T03:26:44.392026",
+      "timestamp": "2025-08-18T03:27:54.850263",
       "details": {
         "service_name": "ITADIAS Special Admin Microservice",
         "version": "1.0.0",
@@ -259,7 +305,7 @@
       "test": "Request/Response Schema Validation",
       "success": true,
       "message": "Schema validation working correctly, rejected invalid data",
-      "timestamp": "2025-08-18T03:26:44.393775",
+      "timestamp": "2025-08-18T03:27:54.851973",
       "details": {
         "status_code": 422,
         "error_structure": [
@@ -270,13 +316,11 @@
   ],
   "created_resources": {
     "special_types": [
-      "27bfdc6c-6e95-4333-b83e-b6746f8031ea"
+      "03b2516a-af01-41b6-8568-08f38e710dc9"
     ],
     "templates": [
-      "eb1976dd-0f57-4c47-a34c-57258aaa4445"
+      "9cc20b9f-777f-49bd-b3f4-685c9f58b6dd"
     ],
-    "modules": [
-      "2012933f-364a-4d46-a383-64b0d6284305"
-    ]
+    "modules": []
   }
 }
