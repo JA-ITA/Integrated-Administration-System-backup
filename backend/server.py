@@ -14,6 +14,7 @@ from receipt_client import receipt_client, ReceiptValidationRequest
 from registration_routes import router as registration_router
 from test_engine_client import test_engine_client
 from certificate_client import certificate_client
+from special_admin_client import special_admin_client
 
 
 ROOT_DIR = Path(__file__).parent
