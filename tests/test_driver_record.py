@@ -129,7 +129,7 @@ def sample_theory_attempt():
             "Driving Laws"
         ]),
         score=fake.random_int(min=10, max=20),
-        pass=fake.boolean(),
+        passed=fake.boolean(),
         attempt_date=fake.date_this_year()
     )
 
