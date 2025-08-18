@@ -47,13 +47,20 @@ const Home = () => {
         </a>
         <p className="mt-5">Building something incredible ~!</p>
         
-        {/* Quick Navigation to Special Admin */}
-        <div className="mt-8">
+        {/* Quick Navigation */}
+        <div className="mt-8 space-y-4">
           <a
             href="/modules/special-admin"
-            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mr-4"
           >
             Access Special Admin Module
+          </a>
+          
+          <a
+            href="/ui/examiner-tablet"
+            className="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            Access Examiner Tablet
           </a>
         </div>
       </header>
