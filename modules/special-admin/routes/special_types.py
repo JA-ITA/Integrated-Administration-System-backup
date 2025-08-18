@@ -20,7 +20,7 @@ router = APIRouter()
 async def get_event_service():
     """Dependency to get event service"""
     # This will be injected from the main app
-    from main import app
+    from app import app
     return app.state.event_service
 
 @router.post("/special-types", response_model=SpecialTestTypeResponse, status_code=status.HTTP_201_CREATED)
