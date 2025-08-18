@@ -206,13 +206,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Test Engine Microservice - Tables Implementation"
-    - "POST /api/v1/tests/start Endpoint"
-    - "POST /api/v1/tests/{id}/submit Endpoint with Auto-grading"
-    - "Sample Questions Seeding (60 per module)"
-    - "TestCompleted Event Publishing"
-    - "Test Engine Service Independence (Port 8005)"
-    - "Main Backend Test Engine Integration"
+    - "Special Admin Microservice - Database and Service Setup"
+    - "Special Admin API Endpoints (Special Types, Templates, Modules)"  
+    - "Test Engine Extension - Support for SPECIAL-TEST Module"
+    - "Main Backend Special Admin Integration"
+    - "React Admin Interface for Special Admin Features"
   stuck_tasks: []
   test_all: true
   test_priority: "high_first"
