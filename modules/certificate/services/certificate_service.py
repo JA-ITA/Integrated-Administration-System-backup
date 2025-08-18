@@ -190,6 +190,20 @@ class CertificateService:
         """Generate PDF using external PDF service"""
         
         try:
+            # Debug: Check for non-serializable objects in context
+            import json
+            try:
+                json.dumps(context)
+            except TypeError as e:
+                logger.error(f"Context serialization error: {e}")
+                logger.error(f"Context keys: {list(context.keys())}")
+                for key, value in context.items():
+                    try:
+                        json.dumps(value)
+                    except TypeError:
+                        logger.error(f"Non-serializable value for key '{key}': {type(value)} - {value}")
+                raise
+            
             request_data = {
                 "templateName": template_name,
                 "context": context,
