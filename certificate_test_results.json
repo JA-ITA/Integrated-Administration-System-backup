@@ -5,7 +5,7 @@
     "failed_tests": 1,
     "success_rate": 90.9090909090909,
     "test_timestamp": "2025-08-18T01:40:32.655796",
-    "main_backend_url": "https://special-test-manager.preview.emergentagent.com",
+    "main_backend_url": "https://test-template-config.preview.emergentagent.com",
     "certificate_service_url": "http://localhost:8006",
     "focus": "ITADIAS Certificate Microservice with Handlebars + PDF-lib"
   },
