@@ -339,3 +339,67 @@ class StorageService:
             logger.info("Storage service connections closed")
         except Exception as e:
             logger.error(f"Error closing storage connections: {e}")
+    
+    async def _upload_to_local_filesystem(
+        self,
+        file_data: bytes,
+        file_name: str,
+        content_type: str,
+        metadata: Optional[Dict[str, str]] = None
+    ) -> Dict[str, Any]:
+        """Fallback: Upload file to local filesystem"""
+        try:
+            # Create storage directory
+            storage_dir = "/tmp/certificate-storage"
+            os.makedirs(storage_dir, exist_ok=True)
+            
+            # Save file
+            file_path = os.path.join(storage_dir, file_name)
+            with open(file_path, "wb") as f:
+                f.write(file_data)
+            
+            # Calculate hash
+            file_hash = hashlib.sha256(file_data).hexdigest()
+            file_size = len(file_data)
+            
+            # Save metadata
+            metadata_file = file_path + ".meta"
+            meta_info = {
+                "content_type": content_type,
+                "file_hash": file_hash,
+                "upload_timestamp": datetime.utcnow().isoformat(),
+                "metadata": metadata or {}
+            }
+            
+            with open(metadata_file, "w") as f:
+                json.dump(meta_info, f)
+            
+            file_url = f"file://{file_path}"
+            
+            logger.info(f"File uploaded to local filesystem: {file_name}")
+            
+            return {
+                "file_url": file_url,
+                "file_size": file_size,
+                "file_hash": file_hash,
+                "content_type": content_type
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to upload to local filesystem: {e}")
+            raise
+    
+    async def _generate_local_download_url(self, file_name: str) -> str:
+        """Generate local file download URL"""
+        storage_dir = "/tmp/certificate-storage"
+        file_path = os.path.join(storage_dir, file_name)
+        
+        # For local development, return file path
+        # In production, this would be served via a web server
+        return f"file://{file_path}"
+    
+    async def _check_local_file_exists(self, file_name: str) -> bool:
+        """Check if file exists in local filesystem"""
+        storage_dir = "/tmp/certificate-storage"
+        file_path = os.path.join(storage_dir, file_name)
+        return os.path.exists(file_path)
