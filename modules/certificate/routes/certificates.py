@@ -469,19 +469,29 @@ async def verify_certificate(
     })
     
     try:
-        if not db:
-            raise HTTPException(status_code=503, detail="Database service unavailable")
+        certificate = None
+        certificate_data = None
         
-        # Find certificate by verification token
-        cert_query = select(Certificate).where(
-            Certificate.verification_token == verification_token
-        )
-        result = await db.execute(cert_query)
-        certificate = result.scalar_one_or_none()
+        if db:
+            # Try database first
+            cert_query = select(Certificate).where(
+                Certificate.verification_token == verification_token
+            )
+            result = await db.execute(cert_query)
+            certificate = result.scalar_one_or_none()
+            
+            if not certificate:
+                # Fall back to fallback storage
+                certificate_data = fallback_storage.find_certificate_by_verification_token(verification_token)
+        else:
+            # Use fallback storage
+            logger.info("Database unavailable, using fallback storage for verification")
+            certificate_data = fallback_storage.find_certificate_by_verification_token(verification_token)
         
         verification_timestamp = datetime.now(timezone.utc)
         
-        if not certificate:
+        # Check if certificate exists
+        if not certificate and not certificate_data:
             # Publish verification event (failed)
             await event_service.publish_certificate_verified(
                 certificate_id="unknown",
@@ -495,11 +505,30 @@ async def verify_certificate(
                 message="Invalid verification token"
             )
         
-        is_valid = certificate.is_valid()
+        # Check validity
+        if certificate:
+            is_valid = certificate.is_valid()
+            cert_id = certificate.id
+            cert_status = certificate.status
+            cert_name = certificate.candidate_name
+            cert_endorsement = certificate.licence_endorsement
+            cert_issue_date = certificate.issue_date
+            cert_expiry_date = certificate.expiry_date
+            cert_hub = certificate.service_hub
+        else:
+            # Using fallback storage
+            is_valid = fallback_storage._is_certificate_valid(certificate_data)
+            cert_id = certificate_data["id"]
+            cert_status = certificate_data["status"]
+            cert_name = certificate_data["candidate_name"]
+            cert_endorsement = certificate_data["licence_endorsement"]
+            cert_issue_date = datetime.fromisoformat(certificate_data["issue_date"].replace('Z', '+00:00'))
+            cert_expiry_date = datetime.fromisoformat(certificate_data["expiry_date"].replace('Z', '+00:00')) if certificate_data["expiry_date"] else None
+            cert_hub = certificate_data["service_hub"]
         
         # Publish verification event
         await event_service.publish_certificate_verified(
-            certificate_id=str(certificate.id),
+            certificate_id=str(cert_id),
             verification_token=verification_token,
             verification_result=is_valid,
             verification_timestamp=verification_timestamp
@@ -507,33 +536,33 @@ async def verify_certificate(
         
         if is_valid:
             logger.info(f"Certificate verification successful", extra={
-                "certificate_id": str(certificate.id),
+                "certificate_id": str(cert_id),
                 "verification_token": verification_token
             })
             
             return CertificateVerificationResponse(
                 valid=True,
-                certificate_id=certificate.id,
-                candidate_name=certificate.candidate_name,
-                licence_endorsement=certificate.licence_endorsement,
-                issue_date=certificate.issue_date,
-                expiry_date=certificate.expiry_date,
-                status=certificate.status,
-                service_hub=certificate.service_hub,
+                certificate_id=uuid.UUID(cert_id) if isinstance(cert_id, str) else cert_id,
+                candidate_name=cert_name,
+                licence_endorsement=cert_endorsement,
+                issue_date=cert_issue_date,
+                expiry_date=cert_expiry_date,
+                status=cert_status,
+                service_hub=cert_hub,
                 message="Certificate is valid and authentic"
             )
         else:
             logger.info(f"Certificate verification failed - invalid status", extra={
-                "certificate_id": str(certificate.id),
-                "status": certificate.status,
+                "certificate_id": str(cert_id),
+                "status": cert_status,
                 "verification_token": verification_token
             })
             
             return CertificateVerificationResponse(
                 valid=False,
-                certificate_id=certificate.id,
-                status=certificate.status,
-                message=f"Certificate is {certificate.status}"
+                certificate_id=uuid.UUID(cert_id) if isinstance(cert_id, str) else cert_id,
+                status=cert_status,
+                message=f"Certificate is {cert_status}"
             )
             
     except HTTPException:
