@@ -102,19 +102,10 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "assess the repository and Create /modules/registration Tables: registrations, documents.
-Endpoint: POST /api/v1/registrations (bookingId, receiptNo, docs[])
-Enforce age & medical rules.
-Publish RegistrationCompleted.
-
-Generate /modules/calendar Tables: hubs, slots, bookings.
-Endpoints: GET /api/v1/slots?hub=X&date=Y POST /api/v1/bookings (reserve slot) Publish BookingCreated.
-Lock slot for 15 min on reservation.
-
-Generate /modules/receipt Table: receipts (receipt_no PK, issue_date, location, amount, used_flag).
-Endpoint: POST /api/v1/receipts/validate
-Return 200 OK or 409 Duplicate.
-Publish ReceiptValidated."
+user_problem_statement: "analise the repository and Create /modules/test-engine Tables: tests, questions, answers.
+Endpoints: POST /api/v1/tests/start → returns TestID (one-time) POST /api/v1/tests/{id}/submit
+Auto-grade ≥75 %.
+Publish TestCompleted."
 
 backend:
   - task: "Calendar Microservice - Tables Implementation"
