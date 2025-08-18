@@ -235,8 +235,17 @@ agent_communication:
   - agent: "main"
     message: "🔧 CERTIFICATE MODULE ROUTE CONFLICT FIXED: Fixed path collision in certificate routes by updating '/certificates/{certificate_id}/download' to '/certificates/by-id/{certificate_id}/download' to avoid conflict with '/certificates/{driver_record_id}/download'. Updated backend client accordingly. Services are running: Certificate (8006) with Handlebars+PDF-lib implementation, PDF service (3001), S3 storage with pre-signed URLs (using fallback mode), and CertificateGenerated event publishing (using fallback mode). The main required endpoint 'GET /api/v1/certificates/{driverRecordId}/download' is now properly accessible and functional. Ready for testing."
 
-  - agent: "testing"
-    message: "✅ CERTIFICATE MICROSERVICE COMPREHENSIVE TESTING COMPLETE: Achieved 90.9% success rate (10/11 tests passed) with all critical functionality working. MAIN ENDPOINT VERIFIED: GET /api/v1/certificates/{driverRecordId}/download working perfectly - the primary requirement from review request is fully satisfied. SERVICES OPERATIONAL: Certificate service (8006) healthy, PDF service (3001) healthy with Handlebars+PDF-lib integration generating valid PDFs. FALLBACK MODES CONFIRMED: All services operating in degraded mode as intended - storage using local filesystem, events using in-memory fallback, database fallback seamless. ROUTE CONFLICTS RESOLVED: Both download endpoints working without conflicts. PDF GENERATION PIPELINE: Fixed text encoding issue, now generating certificates with QR codes and proper formatting. All comprehensive testing requirements from review request satisfied - certificate microservice is fully functional in degraded/fallback mode."
+  - task: "Special Admin Microservice - Database and Service Setup"
+    implemented: true
+    working: false
+    file: "/modules/special-admin/app.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Created Special Admin microservice on port 8007 with PostgreSQL schema 'config'. Implemented all required tables (special_test_types, question_modules, certificate_templates), API endpoints, event publishing, template service with Handlebars compilation, question CSV upload service. Service fails to start due to PostgreSQL connection issues. Main backend integration endpoints created."
 
   - task: "Registration Microservice - Tables Implementation"
     implemented: true
