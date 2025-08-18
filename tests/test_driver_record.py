@@ -726,7 +726,7 @@ class TestIntegration:
             attempt_no=1,
             module="Road Rules",
             score=16,
-            pass=True
+            passed=True
         )
         
         sample_record = {'id': uuid.uuid4(), 'licence_number': "D999888777"}
