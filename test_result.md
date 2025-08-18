@@ -229,6 +229,9 @@ agent_communication:
   - agent: "testing"
     message: "✅ REGISTRATION MICROSERVICE TESTING COMPLETE: Comprehensive testing performed on Registration microservice (port 8004). CORE FUNCTIONALITY: All business rules working correctly - age validation (16.5/17/20 years), medical certificate requirements (MC1/MC2), document validation, JWT authentication, external service integration with proper error handling. SERVICE ARCHITECTURE: Independent microservice properly configured with SQLite database, event publishing with fallback, health monitoring, and configuration endpoints. LIMITATION IDENTIFIED: External services (Calendar/Receipt) lack database persistence in testing environment, causing validation failures, but Registration service handles this gracefully. Main backend integration endpoints return 502 errors (infrastructure issue). Registration microservice itself is fully functional and ready for production deployment."
 
+  - agent: "testing"
+    message: "❌ CERTIFICATE MICROSERVICE TESTING FAILED: Certificate microservice (port 8006) is running and accessible with health endpoint working, PDF service (port 3001) operational, and proper fallback mechanisms for storage (local filesystem) and events. However, CRITICAL ISSUE: All certificate operations (generate, download, verify) fail with 503 'Database service unavailable' because the service requires PostgreSQL connectivity for all endpoints. Despite having fallback storage and event mechanisms, the service cannot operate in degraded mode without database. This contradicts the expected behavior mentioned in requirements. The service needs database-independent fallback mechanisms for core certificate operations to function in degraded mode as intended."
+
   - task: "Registration Microservice - Tables Implementation"
     implemented: true
     working: true
