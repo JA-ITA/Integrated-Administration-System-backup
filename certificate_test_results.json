@@ -1,0 +1,143 @@
+{
+  "summary": {
+    "total_tests": 11,
+    "passed_tests": 4,
+    "failed_tests": 7,
+    "success_rate": 36.36363636363637,
+    "test_timestamp": "2025-08-18T01:00:38.721685",
+    "main_backend_url": "https://cert-download-api.preview.emergentagent.com",
+    "certificate_service_url": "http://localhost:8006",
+    "focus": "ITADIAS Certificate Microservice with Handlebars + PDF-lib"
+  },
+  "test_results": [
+    {
+      "test": "Certificate Service Health Check (via Main Backend)",
+      "success": true,
+      "message": "Certificate service is healthy: healthy",
+      "timestamp": "2025-08-18T01:00:38.526498",
+      "details": {
+        "service_status": "healthy",
+        "status_details": {
+          "status": "healthy",
+          "service": "ITADIAS Certificate Microservice",
+          "version": "1.0.0",
+          "database": "unavailable",
+          "events": "connected",
+          "storage": "connected",
+          "event_details": {
+            "connected": false,
+            "exchange": "certificate_events",
+            "fallback_events_count": 0,
+            "max_fallback_events": 1000
+          },
+          "storage_details": {
+            "backend": "minio",
+            "bucket": "certificates",
+            "connected": false,
+            "bucket_exists": false
+          }
+        }
+      }
+    },
+    {
+      "test": "Certificate Service Direct Health Check",
+      "success": true,
+      "message": "Service healthy: healthy",
+      "timestamp": "2025-08-18T01:00:38.529268",
+      "details": {
+        "service": "ITADIAS Certificate Microservice",
+        "version": "1.0.0",
+        "storage": "connected",
+        "database": "unavailable"
+      }
+    },
+    {
+      "test": "Certificate Service Configuration",
+      "success": false,
+      "message": "Configuration missing expected fields: ['service', 'version', 'storage', 'pdf_service']",
+      "timestamp": "2025-08-18T01:00:38.531026",
+      "details": {
+        "storage_backend": "minio",
+        "supported_formats": [
+          "PDF"
+        ],
+        "max_certificate_age_days": 365,
+        "qr_code_enabled": true,
+        "template_engine": "handlebars",
+        "available_templates": [
+          "driver-licence-certificate",
+          "endorsement-certificate"
+        ]
+      }
+    },
+    {
+      "test": "Certificate Generation (via Main Backend)",
+      "success": false,
+      "message": "Certificate generation failed: Database service unavailable",
+      "timestamp": "2025-08-18T01:00:38.590691",
+      "details": {
+        "success": false,
+        "error": "Database service unavailable",
+        "status_code": 503
+      }
+    },
+    {
+      "test": "Certificate Download by Driver Record",
+      "success": false,
+      "message": "No certificates available for testing (generation may have failed)",
+      "timestamp": "2025-08-18T01:00:38.590745",
+      "details": {}
+    },
+    {
+      "test": "Certificate Download by Certificate ID",
+      "success": false,
+      "message": "No certificates available for testing (generation may have failed)",
+      "timestamp": "2025-08-18T01:00:38.590753",
+      "details": {}
+    },
+    {
+      "test": "Certificate Verification",
+      "success": false,
+      "message": "No certificates available for testing (generation may have failed)",
+      "timestamp": "2025-08-18T01:00:38.590759",
+      "details": {}
+    },
+    {
+      "test": "Certificate Status",
+      "success": false,
+      "message": "No certificates available for testing (generation may have failed)",
+      "timestamp": "2025-08-18T01:00:38.590766",
+      "details": {}
+    },
+    {
+      "test": "Driver Certificates List",
+      "success": false,
+      "message": "No certificates available for testing (generation may have failed)",
+      "timestamp": "2025-08-18T01:00:38.590773",
+      "details": {}
+    },
+    {
+      "test": "Error Handling - Non-existent Certificate",
+      "success": true,
+      "message": "Properly handled non-existent certificate: Database service unavailable",
+      "timestamp": "2025-08-18T01:00:38.637361",
+      "details": {
+        "non_existent_id": "f9cd3926-f633-4419-8633-bd47ca2709a2",
+        "error": "Database service unavailable",
+        "status_code": 503
+      }
+    },
+    {
+      "test": "Error Handling - Invalid Verification Token",
+      "success": true,
+      "message": "Properly handled invalid verification token: Database service unavailable",
+      "timestamp": "2025-08-18T01:00:38.721446",
+      "details": {
+        "invalid_token": "invalid-token-12345",
+        "error": "Database service unavailable",
+        "status_code": 503
+      }
+    }
+  ],
+  "generated_certificates": []
+}
