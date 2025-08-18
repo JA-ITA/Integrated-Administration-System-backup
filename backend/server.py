@@ -878,29 +878,6 @@ async def update_checklist(checklist_id: str, update_data: ChecklistUpdate):
         logger.error(f"Error updating checklist {checklist_id}: {e}")
         return {"success": False, "error": str(e)}
 
-@api_router.get("/checklists/unsynced")
-async def get_unsynced_checklists():
-    """Get all checklists that need to be synced"""
-    try:
-        checklists = await db.checklists.find({"synced": False}).to_list(1000)
-        
-        # Remove MongoDB _ids and calculate summaries
-        processed_checklists = []
-        for checklist in checklists:
-            checklist.pop("_id", None)
-            checklist_with_summary = calculate_checklist_summary(checklist)
-            processed_checklists.append(checklist_with_summary)
-        
-        return {
-            "success": True,
-            "data": processed_checklists,
-            "count": len(processed_checklists)
-        }
-        
-    except Exception as e:
-        logger.error(f"Error getting unsynced checklists: {e}")
-        return {"success": False, "error": str(e)}
-
 @api_router.post("/checklists/{checklist_id}/sync")
 async def mark_checklist_synced(checklist_id: str):
     """Mark a checklist as synced"""
