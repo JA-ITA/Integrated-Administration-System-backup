@@ -78,7 +78,7 @@ async def generate_certificate(
                 qr_code=existing_cert.qr_code,
                 issue_date=existing_cert.issue_date,
                 expiry_date=existing_cert.expiry_date,
-                metadata=existing_cert.metadata or {}
+                metadata=existing_cert.certificate_metadata or {}
             )
         
         # Fetch certificate data from other services
