@@ -430,12 +430,12 @@ async def download_certificate_by_driver_record(
         
         # Publish CertificateDownloaded event
         await event_service.publish_certificate_downloaded(
-            certificate_id=str(certificate.id),
+            certificate_id=str(cert_id),
             download_timestamp=datetime.now(timezone.utc)
         )
         
         logger.info(f"Certificate download URL generated for driver record", extra={
-            "certificate_id": str(certificate.id),
+            "certificate_id": str(cert_id),
             "driver_record_id": str(driver_record_id),
             "file_name": file_name
         })
