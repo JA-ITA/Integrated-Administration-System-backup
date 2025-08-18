@@ -6,7 +6,7 @@
     "success_rate": 100.0,
     "test_timestamp": "2025-08-18T00:14:02.639010",
     "test_engine_service_url": "http://localhost:8005",
-    "main_backend_url": "https://driver-cert-system.preview.emergentagent.com",
+    "main_backend_url": "https://cert-generator-2.preview.emergentagent.com",
     "focus": "Complete Test Engine microservice and integration testing"
   },
   "test_results": [

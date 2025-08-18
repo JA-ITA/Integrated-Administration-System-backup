@@ -5,7 +5,7 @@
     "failed_tests": 7,
     "success_rate": 36.36363636363637,
     "test_timestamp": "2025-08-18T01:00:38.721685",
-    "main_backend_url": "https://driver-cert-system.preview.emergentagent.com",
+    "main_backend_url": "https://cert-generator-2.preview.emergentagent.com",
     "certificate_service_url": "http://localhost:8006",
     "focus": "ITADIAS Certificate Microservice with Handlebars + PDF-lib"
   },
