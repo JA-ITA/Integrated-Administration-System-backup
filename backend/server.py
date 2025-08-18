@@ -16,6 +16,12 @@ from test_engine_client import test_engine_client
 from certificate_client import certificate_client
 from special_admin_client import special_admin_client
 
+# Configure logging early
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
