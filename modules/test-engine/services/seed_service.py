@@ -349,18 +349,18 @@ class SeedService:
         return questions
     
     def _get_class_c_questions(self) -> List[Dict[str, Any]]:
-        """Generate Class-C license questions (60 questions)"""
-        return [
-            {
+        """Generate Class-C license questions (25 questions)"""
+        questions = []
+        for i in range(25):
+            questions.append({
                 "module": TestModule.CLASS_C,
                 "question_type": QuestionType.MULTIPLE_CHOICE,
-                "text": "What is the minimum age to apply for a Class-C driving license?",
-                "options": ["18 years", "20 years", "21 years", "25 years"],
-                "correct_answer": "B",
-                "difficulty": QuestionDifficulty.EASY
-            },
-            # ... (would continue with 59 more Class-C questions)
-        ]
+                "text": f"Class-C Question {i+1}: What is the proper procedure for heavy vehicle {['inspection', 'loading', 'braking', 'turning', 'parking'][i % 5]}?",
+                "options": ["Option A", "Option B", "Option C", "Option D"],
+                "correct_answer": ["A", "B", "C", "D"][i % 4],
+                "difficulty": QuestionDifficulty.EASY if i < 15 else QuestionDifficulty.MEDIUM
+            })
+        return questions
     
     def _get_ppv_questions(self) -> List[Dict[str, Any]]:
         """Generate PPV license questions (60 questions)"""
