@@ -496,13 +496,13 @@ agent_communication:
         agent: "main"
         comment: "Created REST client and integration endpoints for main backend to communicate with test engine service, including test start, submit, status, and statistics endpoints"
 
-  - task: "Certificate Microservice - Backend Integration and Missing Endpoint"
+  - task: "Certificate Microservice - Database Fallback Implementation"
     implemented: true
-    working: false
+    working: true
     file: "/modules/certificate/routes/certificates.py"
-    stuck_count: 1
+    stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: true
         agent: "main"
@@ -510,3 +510,6 @@ agent_communication:
       - working: false
         agent: "testing"
         comment: "✅ INFRASTRUCTURE WORKING: Certificate microservice (port 8006) is running with health endpoint accessible, PDF service (port 3001) is operational, storage service has local filesystem fallback, and event service has fallback storage. Main backend integration endpoints are properly configured. ❌ CRITICAL ISSUE: Certificate service requires database connectivity for all operations and returns 503 'Database service unavailable' errors when PostgreSQL is not available. Despite having storage and event fallbacks, the service cannot generate, download, or verify certificates without database. This contradicts the expected 'degraded mode' functionality mentioned in requirements. All certificate endpoints fail with database dependency."
+      - working: true
+        agent: "main"
+        comment: "✅ FIXED DATABASE DEPENDENCY ISSUE: Implemented comprehensive database fallback mechanisms. Created fallback_storage.py service for in-memory and file-based certificate metadata storage when database is unavailable. Modified all certificate routes (generate, download by ID/driver record, verify, status, get driver certificates) to work seamlessly with either database or fallback storage. Certificate service now operates in degraded mode without database, using local filesystem for file storage, in-memory events for RabbitMQ fallback, and JSON file storage for certificate metadata. Services running: Certificate (8006), PDF (3001). Health endpoint shows 'healthy' status even with database unavailable."
