@@ -270,6 +270,11 @@ class StorageService:
     
     async def file_exists(self, file_name: str) -> bool:
         """Check if file exists in storage"""
+        
+        # Fallback: Check local filesystem when storage backend is unavailable
+        if not self.s3_client and not self.minio_client:
+            return await self._check_local_file_exists(file_name)
+        
         try:
             if self.backend == "s3" and self.s3_client:
                 try:
@@ -295,7 +300,8 @@ class StorageService:
             
         except Exception as e:
             logger.error(f"Failed to check file existence: {e}")
-            return False
+            # Fallback to local filesystem
+            return await self._check_local_file_exists(file_name)
     
     async def get_status(self) -> Dict[str, Any]:
         """Get storage service status"""
