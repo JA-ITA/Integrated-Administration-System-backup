@@ -15,6 +15,7 @@ from registration_routes import router as registration_router
 from test_engine_client import test_engine_client
 from certificate_client import certificate_client
 from special_admin_client import special_admin_client
+from audit_client import audit_client, OverrideRequest as AuditOverrideRequest
 
 # Configure logging early
 logging.basicConfig(
