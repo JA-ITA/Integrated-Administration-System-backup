@@ -793,6 +793,29 @@ async def create_checklist(checklist_data: ChecklistCreate):
         logger.error(f"Error creating checklist: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.get("/checklists/unsynced")
+async def get_unsynced_checklists():
+    """Get all checklists that need to be synced"""
+    try:
+        checklists = await db.checklists.find({"synced": False}).to_list(1000)
+        
+        # Remove MongoDB _ids and calculate summaries
+        processed_checklists = []
+        for checklist in checklists:
+            checklist.pop("_id", None)
+            checklist_with_summary = calculate_checklist_summary(checklist)
+            processed_checklists.append(checklist_with_summary)
+        
+        return {
+            "success": True,
+            "data": processed_checklists,
+            "count": len(processed_checklists)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting unsynced checklists: {e}")
+        return {"success": False, "error": str(e)}
+
 @api_router.get("/checklists/{driver_record_id}")
 async def get_checklist_by_driver(driver_record_id: str):
     """Get checklist for a specific driver record"""
