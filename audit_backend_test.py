@@ -734,6 +734,7 @@ class AuditServiceTester:
         # Service Health and Configuration Tests
         print("\n📋 SERVICE HEALTH AND CONFIGURATION")
         await self.test_audit_service_health()
+        await self.test_database_structure_verification()
         await self.test_audit_service_configuration()
         await self.test_events_status_endpoint()
         
