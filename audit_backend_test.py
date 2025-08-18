@@ -780,6 +780,7 @@ class AuditServiceTester:
         
         # Authentication Tests
         print("\n🔐 AUTHENTICATION TESTING")
+        await self.test_authentication_diagnostics()
         await self.test_rd_authentication_valid_token()
         await self.test_rd_authentication_invalid_token()
         await self.test_rd_authentication_wrong_role()
