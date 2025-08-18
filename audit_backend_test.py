@@ -58,10 +58,10 @@ class AuditServiceTester:
             user_id = self.test_actor_id
             
         payload = {
-            "user_id": user_id,
+            "user_id": user_id,  # Keep as string - JWT will serialize it
             "role": role,
-            "iat": datetime.utcnow().timestamp(),
-            "exp": (datetime.utcnow() + timedelta(hours=expires_in_hours)).timestamp()
+            "iat": int(datetime.utcnow().timestamp()),  # Use int timestamps
+            "exp": int((datetime.utcnow() + timedelta(hours=expires_in_hours)).timestamp())
         }
         
         return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
