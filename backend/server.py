@@ -656,6 +656,288 @@ async def get_questions_csv_template():
         logger.error(f"Error getting CSV template: {e}")
         return {"success": False, "error": str(e)}
 
+# Checklist Management Endpoints
+def generate_default_checklist_items(test_type: str, test_category: str) -> List[ChecklistItem]:
+    """Generate default checklist items based on test type and category"""
+    items = []
+    
+    # Common pre-inspection items for all tests
+    pre_inspection_items = [
+        "Vehicle exterior condition check",
+        "Mirrors properly adjusted",
+        "Seat and steering wheel adjustment",
+        "Safety equipment present and functional",
+        "Documents and identification verified"
+    ]
+    
+    # Yard test specific items
+    yard_items = [
+        "Reverse parking maneuver",
+        "Three-point turn execution",
+        "Hill start procedure",
+        "Emergency stop demonstration",
+        "Parallel parking (if applicable)"
+    ]
+    
+    # Road test specific items  
+    road_items = [
+        "Traffic observation and awareness",
+        "Signal usage and timing",
+        "Lane discipline maintenance",
+        "Speed control and adaptation",
+        "Hazard perception and response",
+        "Junction approach and execution",
+        "Overtaking procedure (if applicable)",
+        "Roundabout navigation"
+    ]
+    
+    # Class-specific items
+    if test_type in ["Class C"]:
+        commercial_items = [
+            "Commercial vehicle pre-trip inspection",
+            "Load securement verification",
+            "Air brake system check",
+            "Coupling/uncoupling procedure (if applicable)"
+        ]
+        pre_inspection_items.extend(commercial_items)
+    
+    if test_type == "PPV":
+        ppv_items = [
+            "Passenger safety equipment check",
+            "Emergency exit operation",
+            "Wheelchair accessibility features",
+            "First aid kit presence and location"
+        ]
+        pre_inspection_items.extend(ppv_items)
+    
+    # Generate ChecklistItem objects
+    category_items = {
+        "Pre-inspection": pre_inspection_items,
+        "Yard Maneuvers": yard_items if test_category == "Yard" else [],
+        "Road Driving": road_items if test_category == "Road" else []
+    }
+    
+    for category, descriptions in category_items.items():
+        for desc in descriptions:
+            if desc:  # Only add non-empty descriptions
+                items.append(ChecklistItem(
+                    category=category,
+                    description=desc
+                ))
+    
+    return items
+
+def calculate_checklist_summary(checklist: Dict[str, Any]) -> Dict[str, Any]:
+    """Calculate summary statistics for a checklist"""
+    items = checklist.get("items", [])
+    
+    total_items = len(items)
+    checked_items = sum(1 for item in items if item.get("checked", False))
+    minor_breaches = sum(1 for item in items if item.get("breach_type") == "minor")
+    major_breaches = sum(1 for item in items if item.get("breach_type") == "major")
+    
+    # Determine pass/fail status
+    pass_fail_status = None
+    if checklist.get("status") == "completed":
+        # Fail if any major breaches, or too many minor breaches
+        if major_breaches > 0:
+            pass_fail_status = "fail"
+        elif minor_breaches > 3:  # Allow up to 3 minor breaches
+            pass_fail_status = "fail"  
+        else:
+            pass_fail_status = "pass"
+    
+    checklist.update({
+        "total_items": total_items,
+        "checked_items": checked_items,
+        "minor_breaches": minor_breaches,
+        "major_breaches": major_breaches,
+        "pass_fail_status": pass_fail_status
+    })
+    
+    return checklist
+
+@api_router.post("/checklists", response_model=Checklist)
+async def create_checklist(checklist_data: ChecklistCreate):
+    """Create a new checklist for driver examination"""
+    try:
+        checklist_dict = checklist_data.dict()
+        
+        # Generate default items if none provided
+        if not checklist_dict.get("items"):
+            checklist_dict["items"] = [
+                item.dict() for item in generate_default_checklist_items(
+                    checklist_dict["test_type"], 
+                    checklist_dict["test_category"]
+                )
+            ]
+        
+        # Create the checklist object
+        checklist = Checklist(**checklist_dict)
+        checklist_with_summary = calculate_checklist_summary(checklist.dict())
+        
+        # Insert into MongoDB
+        result = await db.checklists.insert_one(checklist_with_summary)
+        checklist_with_summary["_id"] = str(result.inserted_id)
+        
+        logger.info(f"Created checklist {checklist.id} for driver {checklist.driver_record_id}")
+        return Checklist(**checklist_with_summary)
+        
+    except Exception as e:
+        logger.error(f"Error creating checklist: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/checklists/{driver_record_id}")
+async def get_checklist_by_driver(driver_record_id: str):
+    """Get checklist for a specific driver record"""
+    try:
+        checklist = await db.checklists.find_one({"driver_record_id": driver_record_id})
+        
+        if not checklist:
+            return {"success": False, "error": "Checklist not found"}
+        
+        # Remove MongoDB _id and calculate summary
+        checklist.pop("_id", None)
+        checklist_with_summary = calculate_checklist_summary(checklist)
+        
+        return {
+            "success": True,
+            "data": checklist_with_summary
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting checklist for driver {driver_record_id}: {e}")
+        return {"success": False, "error": str(e)}
+
+@api_router.put("/checklists/{checklist_id}")
+async def update_checklist(checklist_id: str, update_data: ChecklistUpdate):
+    """Update an existing checklist"""
+    try:
+        update_dict = {k: v for k, v in update_data.dict().items() if v is not None}
+        update_dict["updated_at"] = datetime.utcnow()
+        
+        # If items are being updated, convert to dict format
+        if "items" in update_dict and update_dict["items"]:
+            update_dict["items"] = [
+                item.dict() if hasattr(item, 'dict') else item 
+                for item in update_dict["items"]
+            ]
+        
+        result = await db.checklists.update_one(
+            {"id": checklist_id},
+            {"$set": update_dict}
+        )
+        
+        if result.matched_count == 0:
+            return {"success": False, "error": "Checklist not found"}
+        
+        # Get updated checklist
+        updated_checklist = await db.checklists.find_one({"id": checklist_id})
+        if updated_checklist:
+            updated_checklist.pop("_id", None)
+            checklist_with_summary = calculate_checklist_summary(updated_checklist)
+            
+            logger.info(f"Updated checklist {checklist_id}")
+            return {
+                "success": True,
+                "data": checklist_with_summary
+            }
+        
+        return {"success": False, "error": "Failed to retrieve updated checklist"}
+        
+    except Exception as e:
+        logger.error(f"Error updating checklist {checklist_id}: {e}")
+        return {"success": False, "error": str(e)}
+
+@api_router.get("/checklists/unsynced")
+async def get_unsynced_checklists():
+    """Get all checklists that need to be synced"""
+    try:
+        checklists = await db.checklists.find({"synced": False}).to_list(1000)
+        
+        # Remove MongoDB _ids and calculate summaries
+        processed_checklists = []
+        for checklist in checklists:
+            checklist.pop("_id", None)
+            checklist_with_summary = calculate_checklist_summary(checklist)
+            processed_checklists.append(checklist_with_summary)
+        
+        return {
+            "success": True,
+            "data": processed_checklists,
+            "count": len(processed_checklists)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting unsynced checklists: {e}")
+        return {"success": False, "error": str(e)}
+
+@api_router.post("/checklists/{checklist_id}/sync")
+async def mark_checklist_synced(checklist_id: str):
+    """Mark a checklist as synced"""
+    try:
+        result = await db.checklists.update_one(
+            {"id": checklist_id},
+            {"$set": {"synced": True, "updated_at": datetime.utcnow()}}
+        )
+        
+        if result.matched_count == 0:
+            return {"success": False, "error": "Checklist not found"}
+        
+        logger.info(f"Marked checklist {checklist_id} as synced")
+        return {"success": True, "message": "Checklist marked as synced"}
+        
+    except Exception as e:
+        logger.error(f"Error marking checklist {checklist_id} as synced: {e}")
+        return {"success": False, "error": str(e)}
+
+@api_router.get("/checklists")
+async def get_all_checklists(
+    limit: int = 50,
+    skip: int = 0,
+    examiner_id: Optional[str] = None,
+    test_type: Optional[str] = None,
+    status: Optional[str] = None
+):
+    """Get checklists with optional filtering"""
+    try:
+        # Build filter query
+        filter_query = {}
+        if examiner_id:
+            filter_query["examiner_id"] = examiner_id
+        if test_type:
+            filter_query["test_type"] = test_type
+        if status:
+            filter_query["status"] = status
+        
+        # Get checklists with pagination
+        checklists = await db.checklists.find(filter_query).skip(skip).limit(limit).to_list(limit)
+        
+        # Remove MongoDB _ids and calculate summaries
+        processed_checklists = []
+        for checklist in checklists:
+            checklist.pop("_id", None)
+            checklist_with_summary = calculate_checklist_summary(checklist)
+            processed_checklists.append(checklist_with_summary)
+        
+        # Get total count
+        total_count = await db.checklists.count_documents(filter_query)
+        
+        return {
+            "success": True,
+            "data": processed_checklists,
+            "pagination": {
+                "total": total_count,
+                "limit": limit,
+                "skip": skip,
+                "has_more": skip + len(processed_checklists) < total_count
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting checklists: {e}")
+        return {"success": False, "error": str(e)}
+
 # Include the router in the main app
 app.include_router(api_router)
 
