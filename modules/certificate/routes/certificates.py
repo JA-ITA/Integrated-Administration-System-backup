@@ -252,14 +252,14 @@ async def generate_certificate(
             detail=f"Certificate generation failed: {str(e)}"
         )
 
-@router.get("/certificates/{certificate_id}/download")
-async def download_certificate(
+@router.get("/certificates/by-id/{certificate_id}/download")
+async def download_certificate_by_id(
     certificate_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
     storage_service: StorageService = Depends(get_storage_service),
     event_service: EventService = Depends(get_event_service)
 ):
-    """Download certificate PDF via redirect to pre-signed URL"""
+    """Download certificate PDF by certificate ID via redirect to pre-signed URL"""
     
     logger.info(f"Certificate download requested", extra={
         "certificate_id": str(certificate_id)
