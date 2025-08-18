@@ -1,10 +1,10 @@
 {
   "summary": {
     "total_tests": 11,
-    "passed_tests": 4,
-    "failed_tests": 7,
-    "success_rate": 36.36363636363637,
-    "test_timestamp": "2025-08-18T01:39:12.812428",
+    "passed_tests": 10,
+    "failed_tests": 1,
+    "success_rate": 90.9090909090909,
+    "test_timestamp": "2025-08-18T01:40:32.655796",
     "main_backend_url": "https://cert-generator-2.preview.emergentagent.com",
     "certificate_service_url": "http://localhost:8006",
     "focus": "ITADIAS Certificate Microservice with Handlebars + PDF-lib"
@@ -14,7 +14,7 @@
       "test": "Certificate Service Health Check (via Main Backend)",
       "success": true,
       "message": "Certificate service is healthy: healthy",
-      "timestamp": "2025-08-18T01:39:12.577559",
+      "timestamp": "2025-08-18T01:40:32.118102",
       "details": {
         "service_status": "healthy",
         "status_details": {
@@ -27,7 +27,7 @@
           "event_details": {
             "connected": false,
             "exchange": "certificate_events",
-            "fallback_events_count": 1,
+            "fallback_events_count": 0,
             "max_fallback_events": 1000
           },
           "storage_details": {
@@ -43,7 +43,7 @@
       "test": "Certificate Service Direct Health Check",
       "success": true,
       "message": "Service healthy: healthy",
-      "timestamp": "2025-08-18T01:39:12.580706",
+      "timestamp": "2025-08-18T01:40:32.121161",
       "details": {
         "service": "ITADIAS Certificate Microservice",
         "version": "1.0.0",
@@ -55,7 +55,7 @@
       "test": "Certificate Service Configuration",
       "success": false,
       "message": "Configuration missing expected fields: ['service', 'version', 'storage', 'pdf_service']",
-      "timestamp": "2025-08-18T01:39:12.582516",
+      "timestamp": "2025-08-18T01:40:32.123015",
       "details": {
         "storage_backend": "minio",
         "supported_formats": [
@@ -72,57 +72,133 @@
     },
     {
       "test": "Certificate Generation (via Main Backend)",
-      "success": false,
-      "message": "Certificate generation failed: Certificate generation failed: 'NoneType' object has no attribute 'id'",
-      "timestamp": "2025-08-18T01:39:12.709197",
+      "success": true,
+      "message": "Certificate generated successfully for driver record: 0a86857c-8289-42c1-a74f-899bd4f276b9",
+      "timestamp": "2025-08-18T01:40:32.266970",
       "details": {
-        "success": false,
-        "error": "Certificate generation failed: 'NoneType' object has no attribute 'id'",
-        "status_code": 500
+        "certificate_id": "0135f822-8356-42e8-8796-1efd5b57e569",
+        "has_download_url": true,
+        "has_verification_token": true,
+        "issue_date": "2025-08-18T01:40:32.260718Z",
+        "metadata": {
+          "template_used": "driver-licence-certificate",
+          "verification_token": "gcmYyiTLJwVmpWQjbNR7Yw",
+          "qr_code_url": "https://certificates.itadias.com/verify/gcmYyiTLJwVmpWQjbNR7Yw",
+          "generation_timestamp": "2025-08-18T01:40:32.260074+00:00",
+          "certificate_data": {
+            "candidate_full_name": "John Doe",
+            "driver_record_number": "0a86857c-8289-42c1-a74f-899bd4f276b9",
+            "licence_endorsement": "Class B Driver Licence",
+            "issue_date": "2025-08-18",
+            "expiry_date": null,
+            "certificate_id": "8759bae9-afab-4411-8d55-ef82e98e0b06",
+            "service_hub_name": "Central Testing Hub",
+            "test_score": 85.0,
+            "test_date": "2024-01-15",
+            "issuing_authority": "Island Traffic Authority"
+          }
+        }
       }
     },
     {
       "test": "Certificate Download by Driver Record",
-      "success": false,
-      "message": "No certificates available for testing (generation may have failed)",
-      "timestamp": "2025-08-18T01:39:12.709260",
-      "details": {}
+      "success": true,
+      "message": "Download URL obtained for driver record: 0a86857c-8289-42c1-a74f-899bd4f276b9",
+      "timestamp": "2025-08-18T01:40:32.317924",
+      "details": {
+        "driver_record_id": "0a86857c-8289-42c1-a74f-899bd4f276b9",
+        "has_download_url": true
+      }
     },
     {
       "test": "Certificate Download by Certificate ID",
-      "success": false,
-      "message": "No certificates available for testing (generation may have failed)",
-      "timestamp": "2025-08-18T01:39:12.709268",
-      "details": {}
+      "success": true,
+      "message": "Download URL obtained for certificate: 0135f822-8356-42e8-8796-1efd5b57e569",
+      "timestamp": "2025-08-18T01:40:32.368851",
+      "details": {
+        "certificate_id": "0135f822-8356-42e8-8796-1efd5b57e569",
+        "has_download_url": true
+      }
     },
     {
       "test": "Certificate Verification",
-      "success": false,
-      "message": "No certificates available for testing (generation may have failed)",
-      "timestamp": "2025-08-18T01:39:12.709274",
-      "details": {}
+      "success": true,
+      "message": "Certificate verification successful for token: gcmYyiTLJwVmpWQjbNR7Yw",
+      "timestamp": "2025-08-18T01:40:32.454814",
+      "details": {
+        "verification_token": "gcmYyiTLJwVmpWQjbNR7Yw",
+        "valid": true,
+        "certificate_id": "0135f822-8356-42e8-8796-1efd5b57e569",
+        "issue_date": "2025-08-18T01:40:32.260718Z"
+      }
     },
     {
       "test": "Certificate Status",
-      "success": false,
-      "message": "No certificates available for testing (generation may have failed)",
-      "timestamp": "2025-08-18T01:39:12.709281",
-      "details": {}
+      "success": true,
+      "message": "Certificate status retrieved for: 0135f822-8356-42e8-8796-1efd5b57e569",
+      "timestamp": "2025-08-18T01:40:32.501560",
+      "details": {
+        "certificate_id": "0135f822-8356-42e8-8796-1efd5b57e569",
+        "status": "active",
+        "issue_date": "2025-08-18T01:40:32.260718+00:00",
+        "expiry_date": "2030-08-17T01:40:32.260718+00:00"
+      }
     },
     {
       "test": "Driver Certificates List",
-      "success": false,
-      "message": "No certificates available for testing (generation may have failed)",
-      "timestamp": "2025-08-18T01:39:12.709287",
-      "details": {}
+      "success": true,
+      "message": "Retrieved 1 certificates for driver: 0a86857c-8289-42c1-a74f-899bd4f276b9",
+      "timestamp": "2025-08-18T01:40:32.546982",
+      "details": {
+        "driver_record_id": "0a86857c-8289-42c1-a74f-899bd4f276b9",
+        "certificates_count": 1,
+        "first_certificate": {
+          "id": "0135f822-8356-42e8-8796-1efd5b57e569",
+          "driver_record_id": "0a86857c-8289-42c1-a74f-899bd4f276b9",
+          "certificate_type": "driver_licence",
+          "licence_endorsement": "Class B Driver Licence",
+          "candidate_name": "John Doe",
+          "service_hub": "Central Testing Hub",
+          "issue_date": "2025-08-18T01:40:32.260718+00:00",
+          "expiry_date": "2030-08-17T01:40:32.260718+00:00",
+          "status": "active",
+          "file_url": "file:///tmp/certificate-storage/certificate-0135f822-8356-42e8-8796-1efd5b57e569.pdf",
+          "file_size": 2048,
+          "file_hash": "72d33c0e7a89a76aa668a9ba2097da03e280d5e4ff91d657832826532db72d76",
+          "qr_code": "https://certificates.itadias.com/verify/gcmYyiTLJwVmpWQjbNR7Yw",
+          "verification_token": "gcmYyiTLJwVmpWQjbNR7Yw",
+          "certificate_metadata": {
+            "template_used": "driver-licence-certificate",
+            "verification_token": "gcmYyiTLJwVmpWQjbNR7Yw",
+            "qr_code_url": "https://certificates.itadias.com/verify/gcmYyiTLJwVmpWQjbNR7Yw",
+            "generation_timestamp": "2025-08-18T01:40:32.260074+00:00",
+            "certificate_data": {
+              "candidate_full_name": "John Doe",
+              "driver_record_number": "0a86857c-8289-42c1-a74f-899bd4f276b9",
+              "licence_endorsement": "Class B Driver Licence",
+              "issue_date": "2025-08-18",
+              "expiry_date": null,
+              "certificate_id": "8759bae9-afab-4411-8d55-ef82e98e0b06",
+              "service_hub_name": "Central Testing Hub",
+              "test_score": 85.0,
+              "test_date": "2024-01-15",
+              "issuing_authority": "Island Traffic Authority"
+            }
+          },
+          "template_used": "driver-licence-certificate",
+          "created_at": "2025-08-18T01:40:32.260718+00:00",
+          "updated_at": "2025-08-18T01:40:32.260718+00:00",
+          "is_valid": true
+        }
+      }
     },
     {
       "test": "Error Handling - Non-existent Certificate",
       "success": true,
       "message": "Properly handled non-existent certificate: Certificate not found",
-      "timestamp": "2025-08-18T01:39:12.762769",
+      "timestamp": "2025-08-18T01:40:32.592510",
       "details": {
-        "non_existent_id": "cd8a395d-8e58-4423-adab-dda523c76e05",
+        "non_existent_id": "9ca8dc52-3897-4b13-b913-ef4850765ce4",
         "error": "Certificate not found",
         "status_code": 404
       }
@@ -131,7 +207,7 @@
       "test": "Error Handling - Invalid Verification Token",
       "success": true,
       "message": "Properly handled invalid verification token: Certificate verification failed",
-      "timestamp": "2025-08-18T01:39:12.812145",
+      "timestamp": "2025-08-18T01:40:32.655515",
       "details": {
         "invalid_token": "invalid-token-12345",
         "error": "Certificate verification failed",
@@ -139,5 +215,14 @@
       }
     }
   ],
-  "generated_certificates": []
+  "generated_certificates": [
+    {
+      "driver_record_id": "0a86857c-8289-42c1-a74f-899bd4f276b9",
+      "certificate_id": "0135f822-8356-42e8-8796-1efd5b57e569",
+      "download_url": "file:///tmp/certificate-storage/certificate-0135f822-8356-42e8-8796-1efd5b57e569.pdf",
+      "verification_token": "gcmYyiTLJwVmpWQjbNR7Yw",
+      "issue_date": "2025-08-18T01:40:32.260718Z",
+      "expiry_date": "2030-08-17T01:40:32.260718Z"
+    }
+  ]
 }
