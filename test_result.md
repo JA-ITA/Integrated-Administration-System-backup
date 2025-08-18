@@ -495,12 +495,15 @@ agent_communication:
 
   - task: "Certificate Microservice - Backend Integration and Missing Endpoint"
     implemented: true
-    working: true
+    working: false
     file: "/modules/certificate/routes/certificates.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Added missing GET /api/v1/certificates/{driverRecordId}/download endpoint to existing certificate module. Certificate service already had comprehensive Handlebars + PDF-lib implementation, S3 storage with pre-signed URLs, and CertificateGenerated event publishing. Created main backend integration via certificate_client.py with full API endpoints."
+      - working: false
+        agent: "testing"
+        comment: "✅ INFRASTRUCTURE WORKING: Certificate microservice (port 8006) is running with health endpoint accessible, PDF service (port 3001) is operational, storage service has local filesystem fallback, and event service has fallback storage. Main backend integration endpoints are properly configured. ❌ CRITICAL ISSUE: Certificate service requires database connectivity for all operations and returns 503 'Database service unavailable' errors when PostgreSQL is not available. Despite having storage and event fallbacks, the service cannot generate, download, or verify certificates without database. This contradicts the expected 'degraded mode' functionality mentioned in requirements. All certificate endpoints fail with database dependency."
