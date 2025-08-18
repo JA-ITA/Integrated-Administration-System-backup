@@ -138,6 +138,11 @@ class StorageService:
         metadata: Optional[Dict[str, str]] = None
     ) -> Dict[str, Any]:
         """Upload file to storage backend"""
+        
+        # Fallback: Save to local filesystem when storage backend is unavailable
+        if not self.s3_client and not self.minio_client:
+            return await self._upload_to_local_filesystem(file_data, file_name, content_type, metadata)
+        
         try:
             # Calculate file hash
             file_hash = hashlib.sha256(file_data).hexdigest()
@@ -192,7 +197,8 @@ class StorageService:
             
         except Exception as e:
             logger.error(f"Failed to upload file: {e}")
-            raise
+            # Fallback to local filesystem
+            return await self._upload_to_local_filesystem(file_data, file_name, content_type, metadata)
     
     async def generate_download_url(
         self, 
