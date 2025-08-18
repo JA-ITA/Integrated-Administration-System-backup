@@ -134,7 +134,7 @@ async def generate_certificate(
             file_hash=upload_result["file_hash"],
             qr_code=pdf_metadata.get("qr_code_url"),
             verification_token=pdf_metadata.get("verification_token"),
-            metadata=pdf_metadata,
+            certificate_metadata=pdf_metadata,
             template_used=pdf_metadata.get("template_used"),
             status=CertificateStatus.ACTIVE
         )
