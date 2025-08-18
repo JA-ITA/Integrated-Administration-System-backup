@@ -691,7 +691,7 @@ class SpecialAdminPort8009Tester:
     
     # 4. Question Upload API
     def test_upload_questions_csv(self):
-        """Test POST /api/v1/modules/upload-questions (CSV question upload)"""
+        """Test POST /api/v1/questions/upload-text (CSV question upload via JSON)"""
         try:
             # Create sample CSV data for question upload
             csv_data = """question_text,option_a,option_b,option_c,option_d,correct_answer,difficulty,explanation
@@ -704,12 +704,12 @@ class SpecialAdminPort8009Tester:
             
             upload_data = {
                 "module_code": "SPECIAL-HAZMAT",
-                "csv_content": csv_data,
+                "csv_data": csv_data,
                 "created_by": "Test Administrator"
             }
             
             response = self.session.post(
-                f"{self.service_url}/api/v1/modules/upload-questions",
+                f"{self.service_url}/api/v1/questions/upload-text",
                 json=upload_data
             )
             
@@ -717,16 +717,15 @@ class SpecialAdminPort8009Tester:
                 data = response.json()
                 
                 if data.get("success", False):
-                    upload_result = data.get("data", {})
                     self.log_test(
                         "POST CSV Question Upload",
                         True,
-                        f"Questions uploaded successfully: {upload_result.get('processed_count', 0)} questions",
+                        f"Questions uploaded successfully: {data.get('questions_created', 0)} questions",
                         {
-                            "processed_count": upload_result.get("processed_count"),
-                            "success_count": upload_result.get("success_count"),
-                            "error_count": upload_result.get("error_count", 0),
-                            "module_code": upload_result.get("module_code")
+                            "questions_created": data.get("questions_created"),
+                            "questions_updated": data.get("questions_updated"),
+                            "errors": data.get("errors", []),
+                            "module_code": data.get("module_code")
                         }
                     )
                 else:
