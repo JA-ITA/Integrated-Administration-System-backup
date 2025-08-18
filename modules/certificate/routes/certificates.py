@@ -54,33 +54,56 @@ async def generate_certificate(
     })
     
     try:
-        if not db:
-            raise HTTPException(status_code=503, detail="Database service unavailable")
+        # Check if certificate already exists (database or fallback)
+        existing_cert = None
+        existing_cert_data = None
         
-        # Check if certificate already exists for this driver record
-        existing_cert_query = select(Certificate).where(
-            Certificate.driver_record_id == request.driver_record_id,
-            Certificate.status == CertificateStatus.ACTIVE
-        )
-        result = await db.execute(existing_cert_query)
-        existing_cert = result.scalar_one_or_none()
-        
-        if existing_cert and existing_cert.is_valid():
-            logger.info(f"Active certificate already exists for driver_record_id: {request.driver_record_id}")
-            
-            # Generate fresh download URL
-            file_name = existing_cert.file_url.split('/')[-1]
-            download_url = await storage_service.generate_download_url(file_name)
-            
-            return CertificateGenerateResponse(
-                certificate_id=existing_cert.id,
-                download_url=download_url,
-                verification_token=existing_cert.verification_token,
-                qr_code=existing_cert.qr_code,
-                issue_date=existing_cert.issue_date,
-                expiry_date=existing_cert.expiry_date,
-                metadata=existing_cert.certificate_metadata or {}
+        if db:
+            # Try database first
+            existing_cert_query = select(Certificate).where(
+                Certificate.driver_record_id == request.driver_record_id,
+                Certificate.status == CertificateStatus.ACTIVE
             )
+            result = await db.execute(existing_cert_query)
+            existing_cert = result.scalar_one_or_none()
+            
+            if existing_cert and existing_cert.is_valid():
+                logger.info(f"Active certificate already exists in database for driver_record_id: {request.driver_record_id}")
+                
+                # Generate fresh download URL
+                file_name = existing_cert.file_url.split('/')[-1]
+                download_url = await storage_service.generate_download_url(file_name)
+                
+                return CertificateGenerateResponse(
+                    certificate_id=existing_cert.id,
+                    download_url=download_url,
+                    verification_token=existing_cert.verification_token,
+                    qr_code=existing_cert.qr_code,
+                    issue_date=existing_cert.issue_date,
+                    expiry_date=existing_cert.expiry_date,
+                    metadata=existing_cert.certificate_metadata or {}
+                )
+        else:
+            # Use fallback storage
+            logger.info("Database unavailable, using fallback storage")
+            existing_cert_data = fallback_storage.find_certificate_by_driver_record(request.driver_record_id)
+            
+            if existing_cert_data:
+                logger.info(f"Active certificate already exists in fallback storage for driver_record_id: {request.driver_record_id}")
+                
+                # Generate fresh download URL
+                file_name = existing_cert_data["file_url"].split('/')[-1]
+                download_url = await storage_service.generate_download_url(file_name)
+                
+                return CertificateGenerateResponse(
+                    certificate_id=uuid.UUID(existing_cert_data["id"]),
+                    download_url=download_url,
+                    verification_token=existing_cert_data["verification_token"],
+                    qr_code=existing_cert_data["qr_code"],
+                    issue_date=datetime.fromisoformat(existing_cert_data["issue_date"].replace('Z', '+00:00')),
+                    expiry_date=datetime.fromisoformat(existing_cert_data["expiry_date"].replace('Z', '+00:00')) if existing_cert_data["expiry_date"] else None,
+                    metadata=existing_cert_data["certificate_metadata"] or {}
+                )
         
         # Fetch certificate data from other services
         certificate_data = await certificate_service.fetch_certificate_data(
