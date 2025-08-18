@@ -4,7 +4,7 @@
     "passed_tests": 2,
     "failed_tests": 6,
     "success_rate": 25.0,
-    "test_timestamp": "2025-08-18T01:21:15.570738",
+    "test_timestamp": "2025-08-18T01:23:21.359567",
     "certificate_service_url": "http://localhost:8006",
     "pdf_service_url": "http://localhost:3001",
     "focus": "Database fallback mechanisms and degraded mode functionality"
@@ -14,7 +14,7 @@
       "test": "Health Check - Service Healthy Without Database",
       "success": true,
       "message": "Service shows healthy status despite database unavailable",
-      "timestamp": "2025-08-18T01:21:15.521716",
+      "timestamp": "2025-08-18T01:23:21.301991",
       "details": {
         "service_status": "healthy",
         "database_status": "unavailable",
@@ -26,7 +26,7 @@
       "test": "PDF Service Health Check",
       "success": true,
       "message": "PDF service is healthy on port 3001",
-      "timestamp": "2025-08-18T01:21:15.524757",
+      "timestamp": "2025-08-18T01:23:21.304476",
       "details": {
         "service": "Certificate PDF Generation Service",
         "version": "1.0.0",
@@ -37,44 +37,44 @@
       "test": "Certificate Generation with Fallback Storage",
       "success": false,
       "message": "Certificate generation failed with status 500",
-      "timestamp": "2025-08-18T01:21:15.570395",
+      "timestamp": "2025-08-18T01:23:21.359261",
       "details": {
-        "response": "{\"detail\":\"Certificate generation failed: Object of type function is not JSON serializable\"}"
+        "response": "{\"detail\":\"Certificate generation failed: PDF service error: PDF generation failed\"}"
       }
     },
     {
       "test": "Certificate Download by Driver Record",
       "success": false,
       "message": "No certificates available for testing (generation may have failed)",
-      "timestamp": "2025-08-18T01:21:15.570450",
+      "timestamp": "2025-08-18T01:23:21.359316",
       "details": {}
     },
     {
       "test": "Certificate Download by ID",
       "success": false,
       "message": "No certificates available for testing (generation may have failed)",
-      "timestamp": "2025-08-18T01:21:15.570457",
+      "timestamp": "2025-08-18T01:23:21.359324",
       "details": {}
     },
     {
       "test": "Certificate Verification with Fallback",
       "success": false,
       "message": "No certificates available for testing (generation may have failed)",
-      "timestamp": "2025-08-18T01:21:15.570463",
+      "timestamp": "2025-08-18T01:23:21.359330",
       "details": {}
     },
     {
       "test": "Certificate Status with Fallback",
       "success": false,
       "message": "No certificates available for testing (generation may have failed)",
-      "timestamp": "2025-08-18T01:21:15.570469",
+      "timestamp": "2025-08-18T01:23:21.359335",
       "details": {}
     },
     {
       "test": "Driver Certificates List with Fallback",
       "success": false,
       "message": "No certificates available for testing (generation may have failed)",
-      "timestamp": "2025-08-18T01:21:15.570475",
+      "timestamp": "2025-08-18T01:23:21.359342",
       "details": {}
     }
   ],
