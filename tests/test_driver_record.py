@@ -640,7 +640,7 @@ class TestPydanticModels:
         
         attempt = TheoryAttempt(**valid_data)
         assert attempt.score == 18
-        assert attempt.pass is True
+        assert attempt.passed is True
         
         # Test invalid score
         with pytest.raises(ValueError):
