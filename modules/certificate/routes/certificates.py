@@ -266,27 +266,50 @@ async def download_certificate(
     })
     
     try:
-        if not db:
-            raise HTTPException(status_code=503, detail="Database service unavailable")
+        certificate = None
+        certificate_data = None
         
-        # Find certificate in database
-        cert_query = select(Certificate).where(Certificate.id == certificate_id)
-        result = await db.execute(cert_query)
-        certificate = result.scalar_one_or_none()
+        if db:
+            # Try database first
+            cert_query = select(Certificate).where(Certificate.id == certificate_id)
+            result = await db.execute(cert_query)
+            certificate = result.scalar_one_or_none()
+            
+            if not certificate:
+                logger.warning(f"Certificate not found in database: {certificate_id}")
+                # Fall back to fallback storage
+                certificate_data = fallback_storage.find_certificate_by_id(certificate_id)
+        else:
+            # Use fallback storage
+            logger.info("Database unavailable, using fallback storage")
+            certificate_data = fallback_storage.find_certificate_by_id(certificate_id)
         
-        if not certificate:
+        # Check if certificate exists
+        if not certificate and not certificate_data:
             logger.warning(f"Certificate not found: {certificate_id}")
             raise HTTPException(status_code=404, detail="Certificate not found")
         
-        if not certificate.is_valid():
-            logger.warning(f"Certificate is not valid: {certificate_id}")
-            raise HTTPException(
-                status_code=410, 
-                detail=f"Certificate is {certificate.status}"
-            )
+        # Check validity
+        if certificate:
+            if not certificate.is_valid():
+                logger.warning(f"Certificate is not valid: {certificate_id}")
+                raise HTTPException(
+                    status_code=410, 
+                    detail=f"Certificate is {certificate.status}"
+                )
+            file_url = certificate.file_url
+        else:
+            # Using fallback storage
+            if not fallback_storage._is_certificate_valid(certificate_data):
+                logger.warning(f"Certificate is not valid: {certificate_id}")
+                raise HTTPException(
+                    status_code=410, 
+                    detail=f"Certificate is {certificate_data['status']}"
+                )
+            file_url = certificate_data["file_url"]
         
         # Extract file name from storage URL
-        file_name = certificate.file_url.split('/')[-1]
+        file_name = file_url.split('/')[-1]
         
         # Check if file exists in storage
         file_exists = await storage_service.file_exists(file_name)
