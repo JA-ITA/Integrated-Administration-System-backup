@@ -492,3 +492,15 @@ agent_communication:
       - working: true
         agent: "main"
         comment: "Created REST client and integration endpoints for main backend to communicate with test engine service, including test start, submit, status, and statistics endpoints"
+
+  - task: "Certificate Microservice - Backend Integration and Missing Endpoint"
+    implemented: true
+    working: true
+    file: "/modules/certificate/routes/certificates.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Added missing GET /api/v1/certificates/{driverRecordId}/download endpoint to existing certificate module. Certificate service already had comprehensive Handlebars + PDF-lib implementation, S3 storage with pre-signed URLs, and CertificateGenerated event publishing. Created main backend integration via certificate_client.py with full API endpoints."
