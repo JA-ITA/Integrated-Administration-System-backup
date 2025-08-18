@@ -20,12 +20,12 @@ router = APIRouter()
 
 async def get_event_service():
     """Dependency to get event service"""
-    from main import app
+    from app import app
     return app.state.event_service
 
 async def get_template_service():
     """Dependency to get template service"""
-    from main import app
+    from app import app
     return app.state.template_service
 
 @router.post("/templates", response_model=CertificateTemplateResponse, status_code=status.HTTP_201_CREATED)
