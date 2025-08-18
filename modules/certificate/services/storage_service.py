@@ -208,6 +208,11 @@ class StorageService:
         expiry_seconds: Optional[int] = None
     ) -> str:
         """Generate pre-signed download URL"""
+        
+        # Fallback: Use local filesystem when storage backend is unavailable
+        if not self.s3_client and not self.minio_client:
+            return await self._generate_local_download_url(file_name)
+        
         try:
             expiry = expiry_seconds or config.storage.presigned_url_expiry
             
@@ -235,7 +240,8 @@ class StorageService:
             
         except Exception as e:
             logger.error(f"Failed to generate download URL: {e}")
-            raise
+            # Fallback to local filesystem
+            return await self._generate_local_download_url(file_name)
     
     async def delete_file(self, file_name: str) -> bool:
         """Delete file from storage"""
