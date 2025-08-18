@@ -173,6 +173,7 @@ async def get_events_status():
 
 # Include routers
 app.include_router(tests_router, prefix="/api/v1", tags=["tests"])
+app.include_router(questions_router, prefix="/api/v1", tags=["questions"])
 
 # Root endpoint
 @app.get("/")
