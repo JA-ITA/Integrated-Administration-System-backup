@@ -258,6 +258,8 @@ class AuditServiceTester:
         except Exception as e:
             self.log_test("Authentication Diagnostics", False, f"Exception: {str(e)}")
             return False
+    
+    async def test_rd_authentication_valid_token(self):
         """Test RD authentication with valid token"""
         try:
             # Generate valid RD token
