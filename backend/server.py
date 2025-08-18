@@ -456,6 +456,165 @@ async def get_driver_certificates(driver_record_id: str):
         logger.error(f"Error getting driver certificates: {e}")
         return {"success": False, "error": str(e)}
 
+# Special Admin service integration endpoints
+@api_router.get("/special-admin/health")
+async def check_special_admin_service():
+    """Check if special admin service is healthy"""
+    health = await special_admin_client.health_check()
+    return {
+        "special_admin_service": health.get("status", "unavailable") if health else "unavailable",
+        "status": health
+    }
+
+@api_router.get("/special-admin/config")
+async def get_special_admin_config():
+    """Get special admin configuration"""
+    try:
+        config = await special_admin_client.get_config()
+        return config if config else {"error": "Special admin service unavailable"}
+    except Exception as e:
+        logger.error(f"Error getting special admin config: {e}")
+        return {"error": str(e)}
+
+@api_router.get("/special-admin/statistics")
+async def get_special_admin_statistics():
+    """Get special admin statistics"""
+    try:
+        stats = await special_admin_client.get_statistics()
+        return stats if stats else {"error": "Special admin service unavailable"}
+    except Exception as e:
+        logger.error(f"Error getting special admin statistics: {e}")
+        return {"error": str(e)}
+
+# Special Test Types endpoints
+@api_router.get("/special-types")
+async def get_special_types():
+    """Get all special test types"""
+    try:
+        types = await special_admin_client.get_special_types()
+        return {"success": True, "data": types} if types else {"success": False, "error": "Service unavailable"}
+    except Exception as e:
+        logger.error(f"Error getting special types: {e}")
+        return {"success": False, "error": str(e)}
+
+@api_router.post("/special-types")
+async def create_special_type(type_data: dict):
+    """Create a new special test type"""
+    try:
+        result = await special_admin_client.create_special_type(type_data)
+        return result
+    except Exception as e:
+        logger.error(f"Error creating special type: {e}")
+        return {"success": False, "error": str(e)}
+
+@api_router.get("/special-types/{type_id}")
+async def get_special_type(type_id: str):
+    """Get a specific special test type"""
+    try:
+        type_uuid = uuid.UUID(type_id)
+        result = await special_admin_client.get_special_type(type_uuid)
+        return result
+    except Exception as e:
+        logger.error(f"Error getting special type: {e}")
+        return {"success": False, "error": str(e)}
+
+# Certificate Templates endpoints
+@api_router.get("/templates")
+async def get_certificate_templates(template_type: str = None):
+    """Get certificate templates"""
+    try:
+        templates = await special_admin_client.get_templates(template_type)
+        return {"success": True, "data": templates} if templates else {"success": False, "error": "Service unavailable"}
+    except Exception as e:
+        logger.error(f"Error getting templates: {e}")
+        return {"success": False, "error": str(e)}
+
+@api_router.post("/templates")
+async def create_certificate_template(template_data: dict):
+    """Create a new certificate template"""
+    try:
+        result = await special_admin_client.create_template(template_data)
+        return result
+    except Exception as e:
+        logger.error(f"Error creating template: {e}")
+        return {"success": False, "error": str(e)}
+
+@api_router.get("/templates/{template_id}/preview")
+async def get_template_preview(template_id: str):
+    """Get template preview"""
+    try:
+        template_uuid = uuid.UUID(template_id)
+        result = await special_admin_client.get_template_preview(template_uuid)
+        return result
+    except Exception as e:
+        logger.error(f"Error getting template preview: {e}")
+        return {"success": False, "error": str(e)}
+
+@api_router.post("/templates/preview")
+async def preview_template_content(preview_data: dict):
+    """Generate preview for template content"""
+    try:
+        result = await special_admin_client.preview_template_content(preview_data)
+        return result
+    except Exception as e:
+        logger.error(f"Error generating template preview: {e}")
+        return {"success": False, "error": str(e)}
+
+@api_router.get("/templates/config/default")
+async def get_default_template_config():
+    """Get default template configuration"""
+    try:
+        result = await special_admin_client.get_default_template_config()
+        return result
+    except Exception as e:
+        logger.error(f"Error getting default template config: {e}")
+        return {"success": False, "error": str(e)}
+
+# Question Modules endpoints
+@api_router.get("/question-modules")
+async def get_question_modules():
+    """Get all question modules"""
+    try:
+        modules = await special_admin_client.get_modules()
+        return {"success": True, "data": modules} if modules else {"success": False, "error": "Service unavailable"}
+    except Exception as e:
+        logger.error(f"Error getting question modules: {e}")
+        return {"success": False, "error": str(e)}
+
+@api_router.post("/question-modules")
+async def create_question_module(module_data: dict):
+    """Create a new question module"""
+    try:
+        result = await special_admin_client.create_module(module_data)
+        return result
+    except Exception as e:
+        logger.error(f"Error creating question module: {e}")
+        return {"success": False, "error": str(e)}
+
+@api_router.post("/questions/upload")
+async def upload_questions(upload_data: dict):
+    """Upload questions from CSV"""
+    try:
+        result = await special_admin_client.upload_questions_csv(
+            upload_data["module_code"],
+            upload_data["created_by"], 
+            upload_data["csv_data"]
+        )
+        return result
+    except Exception as e:
+        logger.error(f"Error uploading questions: {e}")
+        return {"success": False, "error": str(e)}
+
+@api_router.get("/questions/template")
+async def get_questions_csv_template():
+    """Get CSV template for question upload"""
+    try:
+        result = await special_admin_client.get_csv_template()
+        return result
+    except Exception as e:
+        logger.error(f"Error getting CSV template: {e}")
+        return {"success": False, "error": str(e)}
+
 # Include the router in the main app
 app.include_router(api_router)
 
