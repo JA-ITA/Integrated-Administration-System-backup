@@ -143,47 +143,78 @@ async def generate_certificate(
         
         expiry_date = calculate_expiry_date(cert_type, issue_date)
         
-        # Create database record
-        certificate = Certificate(
-            id=certificate_id,
-            driver_record_id=request.driver_record_id,
-            certificate_type=cert_type,
-            licence_endorsement=licence_endorsement,
-            candidate_name=certificate_data.get("candidate_name", "Unknown"),
-            service_hub=certificate_data.get("service_hub", "Unknown Hub"),
-            issue_date=issue_date,
-            expiry_date=expiry_date,
-            file_url=upload_result["file_url"],
-            file_size=upload_result["file_size"],
-            file_hash=upload_result["file_hash"],
-            qr_code=pdf_metadata.get("qr_code_url"),
-            verification_token=pdf_metadata.get("verification_token"),
-            certificate_metadata=pdf_metadata,
-            template_used=pdf_metadata.get("template_used"),
-            status=CertificateStatus.ACTIVE
-        )
+        # Store certificate record (database or fallback)
+        certificate = None
+        certificate_data = None
         
-        db.add(certificate)
-        await db.commit()
-        await db.refresh(certificate)
+        if db:
+            # Create database record
+            certificate = Certificate(
+                id=certificate_id,
+                driver_record_id=request.driver_record_id,
+                certificate_type=cert_type,
+                licence_endorsement=licence_endorsement,
+                candidate_name=certificate_data.get("candidate_name", "Unknown"),
+                service_hub=certificate_data.get("service_hub", "Unknown Hub"),
+                issue_date=issue_date,
+                expiry_date=expiry_date,
+                file_url=upload_result["file_url"],
+                file_size=upload_result["file_size"],
+                file_hash=upload_result["file_hash"],
+                qr_code=pdf_metadata.get("qr_code_url"),
+                verification_token=pdf_metadata.get("verification_token"),
+                certificate_metadata=pdf_metadata,
+                template_used=pdf_metadata.get("template_used"),
+                status=CertificateStatus.ACTIVE
+            )
+            
+            db.add(certificate)
+            await db.commit()
+            await db.refresh(certificate)
+            
+            logger.info(f"Certificate saved to database: {certificate_id}")
+            
+        else:
+            # Use fallback storage
+            certificate_data = fallback_storage.create_certificate(
+                certificate_id=certificate_id,
+                driver_record_id=request.driver_record_id,
+                certificate_type=cert_type,
+                licence_endorsement=licence_endorsement,
+                candidate_name=certificate_data.get("candidate_name", "Unknown"),
+                service_hub=certificate_data.get("service_hub", "Unknown Hub"),
+                file_url=upload_result["file_url"],
+                file_size=upload_result["file_size"],
+                file_hash=upload_result["file_hash"],
+                qr_code=pdf_metadata.get("qr_code_url"),
+                verification_token=pdf_metadata.get("verification_token"),
+                certificate_metadata=pdf_metadata,
+                template_used=pdf_metadata.get("template_used")
+            )
+            
+            logger.info(f"Certificate saved to fallback storage: {certificate_id}")
         
         # Generate download URL
         download_url = await storage_service.generate_download_url(file_name)
         
         # Publish CertificateGenerated event
+        candidate_name = certificate.candidate_name if certificate else certificate_data["candidate_name"]
+        service_hub = certificate.service_hub if certificate else certificate_data["service_hub"]
+        
         await event_service.publish_certificate_generated(
             driver_record_id=str(request.driver_record_id),
-            certificate_id=str(certificate.id),
-            candidate_name=certificate.candidate_name,
-            licence_endorsement=certificate.licence_endorsement,
-            issue_date=certificate.issue_date,
-            expiry_date=certificate.expiry_date,
+            certificate_id=str(certificate_id),
+            candidate_name=candidate_name,
+            licence_endorsement=licence_endorsement,
+            issue_date=issue_date,
+            expiry_date=expiry_date,
             download_url=download_url,
-            service_hub=certificate.service_hub,
+            service_hub=service_hub,
             additional_data={
-                "certificate_type": certificate.certificate_type,
-                "file_size": certificate.file_size,
-                "template_used": certificate.template_used
+                "certificate_type": cert_type,
+                "file_size": upload_result["file_size"],
+                "template_used": pdf_metadata.get("template_used"),
+                "storage_mode": "database" if certificate else "fallback"
             }
         )
         
