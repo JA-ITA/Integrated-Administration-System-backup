@@ -116,7 +116,7 @@ const ExaminerTabletLayout = () => {
                       : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                   }`}
                 >
-                  <Sync className="h-4 w-4" />
+                  <RefreshCw className="h-4 w-4" />
                   <span>Sync</span>
                 </button>
                 
