@@ -15,7 +15,7 @@ import sys
 
 # Test configuration
 TEST_ENGINE_SERVICE_URL = "http://localhost:8005"
-MAIN_BACKEND_URL = "https://cranky-tharp.preview.emergentagent.com"
+MAIN_BACKEND_URL = "https://offline-inspector-1.preview.emergentagent.com"
 TEST_ENGINE_API_BASE = f"{TEST_ENGINE_SERVICE_URL}/api/v1"
 MAIN_BACKEND_API_BASE = f"{MAIN_BACKEND_URL}/api"
 

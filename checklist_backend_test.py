@@ -14,7 +14,7 @@ from typing import Dict, Any, Optional, List
 import sys
 
 # Test configuration
-MAIN_BACKEND_URL = "https://cranky-tharp.preview.emergentagent.com"
+MAIN_BACKEND_URL = "https://offline-inspector-1.preview.emergentagent.com"
 API_BASE = f"{MAIN_BACKEND_URL}/api"
 
 class ChecklistManagementTester:
