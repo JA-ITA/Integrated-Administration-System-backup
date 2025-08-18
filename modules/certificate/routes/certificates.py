@@ -272,6 +272,86 @@ async def download_certificate(
             detail="Certificate download failed"
         )
 
+@router.get("/certificates/{driver_record_id}/download")
+async def download_certificate_by_driver_record(
+    driver_record_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    storage_service: StorageService = Depends(get_storage_service),
+    event_service: EventService = Depends(get_event_service)
+):
+    """Download certificate PDF by driver record ID via redirect to pre-signed URL"""
+    
+    logger.info(f"Certificate download requested for driver record", extra={
+        "driver_record_id": str(driver_record_id)
+    })
+    
+    try:
+        if not db:
+            raise HTTPException(status_code=503, detail="Database service unavailable")
+        
+        # Find the most recent active certificate for this driver record
+        cert_query = select(Certificate).where(
+            Certificate.driver_record_id == driver_record_id,
+            Certificate.status == CertificateStatus.ACTIVE
+        ).order_by(Certificate.created_at.desc())
+        
+        result = await db.execute(cert_query)
+        certificate = result.scalar_one_or_none()
+        
+        if not certificate:
+            logger.warning(f"No active certificate found for driver record: {driver_record_id}")
+            raise HTTPException(status_code=404, detail="No active certificate found for this driver record")
+        
+        if not certificate.is_valid():
+            logger.warning(f"Certificate is not valid: {certificate.id}")
+            raise HTTPException(
+                status_code=410, 
+                detail=f"Certificate is {certificate.status}"
+            )
+        
+        # Extract file name from storage URL
+        file_name = certificate.file_url.split('/')[-1]
+        
+        # Check if file exists in storage
+        file_exists = await storage_service.file_exists(file_name)
+        if not file_exists:
+            logger.error(f"Certificate file not found in storage: {file_name}")
+            raise HTTPException(
+                status_code=404, 
+                detail="Certificate file not found"
+            )
+        
+        # Generate pre-signed download URL
+        download_url = await storage_service.generate_download_url(file_name)
+        
+        # Publish CertificateDownloaded event
+        await event_service.publish_certificate_downloaded(
+            certificate_id=str(certificate.id),
+            download_timestamp=datetime.now(timezone.utc)
+        )
+        
+        logger.info(f"Certificate download URL generated for driver record", extra={
+            "certificate_id": str(certificate.id),
+            "driver_record_id": str(driver_record_id),
+            "file_name": file_name
+        })
+        
+        # Return redirect to pre-signed URL
+        return RedirectResponse(url=download_url, status_code=302)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Certificate download failed for driver record", extra={
+            "driver_record_id": str(driver_record_id),
+            "error": str(e)
+        })
+        
+        raise HTTPException(
+            status_code=500,
+            detail="Certificate download failed"
+        )
+
 @router.get("/certificates/verify/{verification_token}", response_model=CertificateVerificationResponse)
 async def verify_certificate(
     verification_token: str,
