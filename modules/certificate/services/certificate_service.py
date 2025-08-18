@@ -165,7 +165,6 @@ class CertificateService:
             
             # Formatting helpers
             "currentYear": datetime.now().year,
-            "formatDate": lambda date: datetime.fromisoformat(date).strftime("%B %d, %Y") if date else "",
         }
         
         return context
