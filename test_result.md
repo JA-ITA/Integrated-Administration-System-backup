@@ -206,11 +206,12 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Special Admin Microservice - Database and Service Setup"
-    - "Special Admin API Endpoints (Special Types, Templates, Modules)"  
-    - "Test Engine Extension - Support for SPECIAL-TEST Module"
-    - "Main Backend Special Admin Integration"
-    - "React Admin Interface for Special Admin Features"
+    - "React Special Admin SPA Pages Implementation"
+    - "Special Admin Backend API Testing"
+    - "Frontend-Backend Integration Testing"
+    - "Special Test Type Management UI"
+    - "CSV Question Upload Functionality"
+    - "Certificate Template Designer"
   stuck_tasks: []
   test_all: true
   test_priority: "high_first"
