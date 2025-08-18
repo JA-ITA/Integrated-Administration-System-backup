@@ -635,7 +635,7 @@ class TestPydanticModels:
             'attempt_no': 1,
             'module': 'Traffic Signs',
             'score': 18,
-            'pass': True
+            'passed': True
         }
         
         attempt = TheoryAttempt(**valid_data)
