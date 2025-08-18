@@ -1,0 +1,144 @@
+{
+  "summary": {
+    "total_tests": 11,
+    "passed_tests": 10,
+    "failed_tests": 1,
+    "success_rate": 90.9090909090909,
+    "test_timestamp": "2025-08-18T15:27:31.646975",
+    "main_backend_url": "https://cranky-tharp.preview.emergentagent.com",
+    "focus": "Checklist Management System for Examiner Tablets"
+  },
+  "test_results": [
+    {
+      "test": "Main Backend Health Check",
+      "success": true,
+      "message": "Backend accessible: Hello World",
+      "timestamp": "2025-08-18T15:27:31.384814",
+      "details": {
+        "status_code": 200
+      }
+    },
+    {
+      "test": "Create Class B Yard Checklist",
+      "success": true,
+      "message": "Checklist created with 10 default items",
+      "timestamp": "2025-08-18T15:27:31.415710",
+      "details": {
+        "checklist_id": "a813e9b7-fea0-468d-a336-fcf9a0e67aec",
+        "test_type": "Class B",
+        "test_category": "Yard",
+        "total_items": 10,
+        "default_items_generated": 10
+      }
+    },
+    {
+      "test": "Create Class C Road Checklist",
+      "success": true,
+      "message": "Class C Road checklist created with commercial and road items",
+      "timestamp": "2025-08-18T15:27:31.426959",
+      "details": {
+        "checklist_id": "eb2e7d91-cbc7-484e-87a6-eb61f2236b94",
+        "total_items": 17,
+        "commercial_items": 2,
+        "road_items": 8
+      }
+    },
+    {
+      "test": "Create PPV Yard Checklist",
+      "success": true,
+      "message": "PPV checklist created with passenger vehicle specific items",
+      "timestamp": "2025-08-18T15:27:31.442155",
+      "details": {
+        "checklist_id": "98e97af8-344e-4da6-9b0b-58dcb243730f",
+        "total_items": 14,
+        "ppv_specific_items": 4
+      }
+    },
+    {
+      "test": "Get Checklist by Driver Record ID",
+      "success": true,
+      "message": "Successfully retrieved checklist for driver 3ecddd0b-9379-4bac-a667-689371ce27a2",
+      "timestamp": "2025-08-18T15:27:31.463132",
+      "details": {
+        "driver_record_id": "3ecddd0b-9379-4bac-a667-689371ce27a2",
+        "checklist_id": "d1b60401-fd36-470c-92b7-7216b576e0b4",
+        "test_type": "Special"
+      }
+    },
+    {
+      "test": "Update Checklist Items with Breaches",
+      "success": true,
+      "message": "Checklist updated with correct summary calculations",
+      "timestamp": "2025-08-18T15:27:31.485305",
+      "details": {
+        "checked_items": 3,
+        "minor_breaches": 1,
+        "major_breaches": 1,
+        "pass_fail_status": "fail"
+      }
+    },
+    {
+      "test": "Pass/Fail Logic - Pass Scenario",
+      "success": true,
+      "message": "Correctly determined PASS with 2 minor breaches, 0 major breaches",
+      "timestamp": "2025-08-18T15:27:31.505648",
+      "details": {
+        "pass_fail_status": "pass",
+        "minor_breaches": 2,
+        "major_breaches": 0
+      }
+    },
+    {
+      "test": "Get Unsynced Checklists",
+      "success": false,
+      "message": "Unsynced request failed: Checklist not found",
+      "timestamp": "2025-08-18T15:27:31.565937",
+      "details": {
+        "success": false,
+        "error": "Checklist not found"
+      }
+    },
+    {
+      "test": "Mark Checklist as Synced",
+      "success": true,
+      "message": "Successfully marked checklist as synced: Checklist marked as synced",
+      "timestamp": "2025-08-18T15:27:31.584817",
+      "details": {
+        "checklist_id": "04bef6fd-3cde-4cad-96e7-09c6bde98511"
+      }
+    },
+    {
+      "test": "Get All Checklists with Filtering",
+      "success": true,
+      "message": "Successfully retrieved and filtered checklists",
+      "timestamp": "2025-08-18T15:27:31.638825",
+      "details": {
+        "total_checklists": 11,
+        "filtered_by_examiner": 2,
+        "pagination_present": true
+      }
+    },
+    {
+      "test": "Checklist Validation - Missing Fields",
+      "success": true,
+      "message": "Correctly rejected invalid checklist data with status 422",
+      "timestamp": "2025-08-18T15:27:31.646743",
+      "details": {
+        "status_code": 422
+      }
+    }
+  ],
+  "created_checklists": [
+    "a813e9b7-fea0-468d-a336-fcf9a0e67aec",
+    "eb2e7d91-cbc7-484e-87a6-eb61f2236b94",
+    "98e97af8-344e-4da6-9b0b-58dcb243730f",
+    "d1b60401-fd36-470c-92b7-7216b576e0b4",
+    "ea767294-3c77-41bf-8e06-aa802b0d1106",
+    "6a810ea3-e9d5-43f1-9ad0-3fb77e50e874",
+    "9ca91177-4723-4849-b746-f18ff27ec84d",
+    "04bef6fd-3cde-4cad-96e7-09c6bde98511",
+    "8937ebc2-7ec6-4327-a577-fbcc073e9d72",
+    "aedd8a59-575c-4feb-a3c6-b6d37c6f98df",
+    "1bd6eec4-3873-44b4-abd8-05dc9bec0b22"
+  ]
+}
