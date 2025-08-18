@@ -324,13 +324,14 @@ async def download_certificate(
         download_url = await storage_service.generate_download_url(file_name)
         
         # Publish CertificateDownloaded event
+        cert_id = str(certificate.id) if certificate else certificate_data["id"]
         await event_service.publish_certificate_downloaded(
-            certificate_id=str(certificate.id),
+            certificate_id=cert_id,
             download_timestamp=datetime.now(timezone.utc)
         )
         
         logger.info(f"Certificate download URL generated", extra={
-            "certificate_id": str(certificate.id),
+            "certificate_id": cert_id,
             "file_name": file_name
         })
         
