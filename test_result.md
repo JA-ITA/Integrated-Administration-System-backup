@@ -237,13 +237,16 @@ agent_communication:
     implemented: true
     working: false
     file: "/modules/special-admin/app.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: false
         agent: "main"
         comment: "Created Special Admin microservice on port 8007 with PostgreSQL schema 'config'. Implemented all required tables (special_test_types, question_modules, certificate_templates), API endpoints, event publishing, template service with Handlebars compilation, question CSV upload service. Service fails to start due to PostgreSQL connection issues. Main backend integration endpoints created."
+      - working: false
+        agent: "testing"
+        comment: "❌ CRITICAL INFRASTRUCTURE ISSUE: Special Admin microservice (port 8007) cannot start due to PostgreSQL database dependency. Service requires PostgreSQL with 'config' schema but database is not available in testing environment. Main backend integration endpoints return 'Service unavailable' errors. Test Engine microservice (port 8005) also fails to start due to missing dependencies (aiormq module). All Special Admin functionality (special test types, certificate templates, question modules, CSV upload) is inaccessible. This is an infrastructure/deployment issue preventing testing of implemented functionality. Service architecture is properly implemented but requires database infrastructure to be operational."
 
   - task: "Registration Microservice - Tables Implementation"
     implemented: true
