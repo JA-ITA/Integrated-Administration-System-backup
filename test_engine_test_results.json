@@ -1,0 +1,172 @@
+{
+  "summary": {
+    "total_tests": 13,
+    "passed_tests": 6,
+    "failed_tests": 7,
+    "success_rate": 46.15384615384615,
+    "test_timestamp": "2025-08-18T00:09:33.874338",
+    "test_engine_service_url": "http://localhost:8005",
+    "main_backend_url": "https://quiz-api.preview.emergentagent.com",
+    "focus": "Complete Test Engine microservice and integration testing"
+  },
+  "test_results": [
+    {
+      "test": "Test Engine Health Check",
+      "success": true,
+      "message": "Service healthy: healthy",
+      "timestamp": "2025-08-18T00:09:33.632074",
+      "details": {
+        "database": "unavailable",
+        "events": "connected",
+        "event_details": {
+          "rabbitmq_connected": false,
+          "fallback_events_count": 0,
+          "exchange": "test_engine_events"
+        }
+      }
+    },
+    {
+      "test": "Test Engine Configuration",
+      "success": true,
+      "message": "Configuration endpoint working with expected values: 20 questions, 25 min, 75.0% pass",
+      "timestamp": "2025-08-18T00:09:33.633762",
+      "details": {
+        "questions_per_test": 20,
+        "time_limit_minutes": 25,
+        "passing_score_percent": 75.0,
+        "available_modules": [
+          "Provisional",
+          "Class-B",
+          "Class-C",
+          "PPV",
+          "HAZMAT"
+        ]
+      }
+    },
+    {
+      "test": "Test Statistics",
+      "success": true,
+      "message": "Statistics endpoint working",
+      "timestamp": "2025-08-18T00:09:33.635696",
+      "details": {
+        "statistics": {
+          "error": "Failed to get statistics",
+          "detail": "Database not initialized"
+        }
+      }
+    },
+    {
+      "test": "Events Status",
+      "success": true,
+      "message": "Events status endpoint working",
+      "timestamp": "2025-08-18T00:09:33.637205",
+      "details": {
+        "events_status": {
+          "rabbitmq_connected": false,
+          "fallback_events_count": 0,
+          "exchange": "test_engine_events"
+        }
+      }
+    },
+    {
+      "test": "Start Test - Provisional",
+      "success": false,
+      "message": "Start test failed with status 503",
+      "timestamp": "2025-08-18T00:09:33.639093",
+      "details": {
+        "response": "{\"detail\":\"Database service unavailable\"}"
+      }
+    },
+    {
+      "test": "Start Test - Class-B",
+      "success": false,
+      "message": "Start test failed with status 503",
+      "timestamp": "2025-08-18T00:09:33.640831",
+      "details": {
+        "response": "{\"detail\":\"Database service unavailable\"}"
+      }
+    },
+    {
+      "test": "Start Test - Class-C",
+      "success": false,
+      "message": "Start test failed with status 503",
+      "timestamp": "2025-08-18T00:09:33.642601",
+      "details": {
+        "response": "{\"detail\":\"Database service unavailable\"}"
+      }
+    },
+    {
+      "test": "Start Test - PPV",
+      "success": false,
+      "message": "Start test failed with status 503",
+      "timestamp": "2025-08-18T00:09:33.644398",
+      "details": {
+        "response": "{\"detail\":\"Database service unavailable\"}"
+      }
+    },
+    {
+      "test": "Start Test - HAZMAT",
+      "success": false,
+      "message": "Start test failed with status 503",
+      "timestamp": "2025-08-18T00:09:33.646013",
+      "details": {
+        "response": "{\"detail\":\"Database service unavailable\"}"
+      }
+    },
+    {
+      "test": "Duplicate Test Prevention",
+      "success": false,
+      "message": "Could not start first test: 503",
+      "timestamp": "2025-08-18T00:09:33.647594",
+      "details": {
+        "response": "{\"detail\":\"Database service unavailable\"}"
+      }
+    },
+    {
+      "test": "Main Backend - Test Engine Health Check",
+      "success": true,
+      "message": "Test engine health via main backend: healthy",
+      "timestamp": "2025-08-18T00:09:33.783881",
+      "details": {
+        "health_response": {
+          "test_engine_service": "healthy",
+          "status": {
+            "status": "healthy",
+            "service": "ITADIAS Test Engine Microservice",
+            "version": "1.0.0",
+            "database": "unavailable",
+            "events": "connected",
+            "event_details": {
+              "rabbitmq_connected": false,
+              "fallback_events_count": 0,
+              "exchange": "test_engine_events"
+            }
+          }
+        }
+      }
+    },
+    {
+      "test": "Main Backend - Start Test",
+      "success": false,
+      "message": "Test start via main backend failed: {'success': False, 'error': ''}",
+      "timestamp": "2025-08-18T00:09:33.830256",
+      "details": {
+        "success": false,
+        "error": ""
+      }
+    },
+    {
+      "test": "Main Backend - Statistics",
+      "success": true,
+      "message": "Statistics retrieved via main backend",
+      "timestamp": "2025-08-18T00:09:33.874089",
+      "details": {
+        "statistics": {
+          "error": "Failed to get statistics",
+          "detail": "Database not initialized"
+        }
+      }
+    }
+  ],
+  "created_tests": []
+}
