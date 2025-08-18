@@ -627,22 +627,32 @@ async def get_driver_certificates(
     """Get all certificates for a driver record"""
     
     try:
-        if not db:
-            raise HTTPException(status_code=503, detail="Database service unavailable")
+        certificates = []
         
-        # Find all certificates for driver
-        certs_query = select(Certificate).where(
-            Certificate.driver_record_id == driver_record_id
-        ).order_by(Certificate.created_at.desc())
-        
-        result = await db.execute(certs_query)
-        certificates = result.scalars().all()
+        if db:
+            # Try database first
+            certs_query = select(Certificate).where(
+                Certificate.driver_record_id == driver_record_id
+            ).order_by(Certificate.created_at.desc())
+            
+            result = await db.execute(certs_query)
+            db_certificates = result.scalars().all()
+            certificates = [cert.to_dict() for cert in db_certificates]
+            
+            # If no certificates in database, check fallback storage
+            if not certificates:
+                fallback_certs = fallback_storage.get_driver_certificates(driver_record_id)
+                certificates = [fallback_storage.certificate_to_dict(cert) for cert in fallback_certs]
+        else:
+            # Use fallback storage
+            fallback_certs = fallback_storage.get_driver_certificates(driver_record_id)
+            certificates = [fallback_storage.certificate_to_dict(cert) for cert in fallback_certs]
         
         return {
             "driver_record_id": str(driver_record_id),
-            "certificates": [cert.to_dict() for cert in certificates],
+            "certificates": certificates,
             "total_count": len(certificates),
-            "active_count": len([cert for cert in certificates if cert.is_valid()])
+            "active_count": len([cert for cert in certificates if cert.get("is_valid", False)])
         }
         
     except HTTPException:
