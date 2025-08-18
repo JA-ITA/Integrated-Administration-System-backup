@@ -60,7 +60,7 @@ class Checklist(BaseModel):
     status: Literal["in_progress", "completed", "submitted"] = "in_progress"
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
-    synced: bool = True
+    synced: bool = False
     items: List[ChecklistItem] = []
     
     # Summary fields for quick assessment
