@@ -782,7 +782,7 @@ async def add_theory_attempt(
         "attempt_no": 1,
         "module": "Traffic Signs and Rules",
         "score": 18,
-        "pass": true,
+        "passed": true,
         "attempt_date": "2024-01-20"
     }
     ```
