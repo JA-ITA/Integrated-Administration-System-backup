@@ -42,8 +42,11 @@ class StorageService:
             logger.info(f"Storage service initialized with backend: {self.backend}")
             
         except Exception as e:
-            logger.error(f"Failed to initialize storage service: {e}")
-            raise
+            logger.warning(f"Failed to initialize storage service: {e}")
+            logger.info("Storage service will use fallback mode")
+            # Don't raise the exception, allow service to start without storage
+            self.s3_client = None
+            self.minio_client = None
     
     async def _initialize_s3(self):
         """Initialize AWS S3 client"""
