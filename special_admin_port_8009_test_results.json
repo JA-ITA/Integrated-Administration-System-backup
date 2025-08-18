@@ -1,0 +1,282 @@
+{
+  "summary": {
+    "total_tests": 22,
+    "passed_tests": 19,
+    "failed_tests": 3,
+    "success_rate": 86.36363636363636,
+    "test_timestamp": "2025-08-18T03:26:44.394018",
+    "service_url": "http://localhost:8009",
+    "focus": "Special Admin microservice backend testing on port 8009"
+  },
+  "test_results": [
+    {
+      "test": "Service Health Check",
+      "success": true,
+      "message": "Service healthy with database connectivity",
+      "timestamp": "2025-08-18T03:26:44.247613",
+      "details": {
+        "database_status": "connected",
+        "database_schema": "config",
+        "services": {
+          "events": "connected",
+          "templates": "connected",
+          "questions": "connected"
+        },
+        "port": 8007
+      }
+    },
+    {
+      "test": "Database Connectivity Check",
+      "success": true,
+      "message": "PostgreSQL 'config' schema connectivity confirmed",
+      "timestamp": "2025-08-18T03:26:44.249198",
+      "details": {
+        "schema": "config",
+        "host": "localhost",
+        "port": 5432,
+        "database": "itadias"
+      }
+    },
+    {
+      "test": "Service Components Check",
+      "success": true,
+      "message": "All service components operational",
+      "timestamp": "2025-08-18T03:26:44.250660",
+      "details": {
+        "events_service": "connected",
+        "templates_service": "connected",
+        "questions_service": "connected"
+      }
+    },
+    {
+      "test": "GET Special Types",
+      "success": true,
+      "message": "Retrieved 0 special test types",
+      "timestamp": "2025-08-18T03:26:44.260440",
+      "details": {
+        "count": 0,
+        "sample": []
+      }
+    },
+    {
+      "test": "POST Create Special Type",
+      "success": true,
+      "message": "Special type created successfully: Advanced Defensive Driving Test",
+      "timestamp": "2025-08-18T03:26:44.276246",
+      "details": {
+        "id": "27bfdc6c-6e95-4333-b83e-b6746f8031ea",
+        "name": "Advanced Defensive Driving Test",
+        "fee": 150.0,
+        "validity_months": 36,
+        "status": "active"
+      }
+    },
+    {
+      "test": "GET Special Type by ID",
+      "success": true,
+      "message": "Retrieved special type: Advanced Defensive Driving Test",
+      "timestamp": "2025-08-18T03:26:44.280981",
+      "details": {
+        "id": "27bfdc6c-6e95-4333-b83e-b6746f8031ea",
+        "name": "Advanced Defensive Driving Test",
+        "status": "active",
+        "fee": 150.0
+      }
+    },
+    {
+      "test": "PUT Update Special Type",
+      "success": true,
+      "message": "Special type updated successfully: Advanced Defensive Driving Test - Updated",
+      "timestamp": "2025-08-18T03:26:44.290853",
+      "details": {
+        "id": "27bfdc6c-6e95-4333-b83e-b6746f8031ea",
+        "name": "Advanced Defensive Driving Test - Updated",
+        "fee": 175.0,
+        "validity_months": 48
+      }
+    },
+    {
+      "test": "DELETE Special Type",
+      "success": true,
+      "message": "Special type deleted successfully and verified",
+      "timestamp": "2025-08-18T03:26:44.308604",
+      "details": {
+        "deleted_id": "c343ceb1-a1dd-43fb-b0d6-b2819d55c228",
+        "name": "Temporary Test Type for Deletion"
+      }
+    },
+    {
+      "test": "GET Question Modules",
+      "success": true,
+      "message": "Retrieved 0 question modules",
+      "timestamp": "2025-08-18T03:26:44.313778",
+      "details": {
+        "count": 0,
+        "sample": []
+      }
+    },
+    {
+      "test": "POST Create Question Module",
+      "success": true,
+      "message": "Question module created successfully: None",
+      "timestamp": "2025-08-18T03:26:44.324903",
+      "details": {
+        "id": "2012933f-364a-4d46-a383-64b0d6284305",
+        "code": "SPECIAL-HAZMAT",
+        "name": null,
+        "difficulty_level": null,
+        "status": "active"
+      }
+    },
+    {
+      "test": "GET Module by ID",
+      "success": true,
+      "message": "Retrieved module: None",
+      "timestamp": "2025-08-18T03:26:44.328936",
+      "details": {
+        "id": "2012933f-364a-4d46-a383-64b0d6284305",
+        "code": "SPECIAL-HAZMAT",
+        "name": null,
+        "status": "active"
+      }
+    },
+    {
+      "test": "PUT Update Module",
+      "success": false,
+      "message": "Update data not reflected in response",
+      "timestamp": "2025-08-18T03:26:44.337598",
+      "details": {
+        "code": "SPECIAL-HAZMAT",
+        "description": "Updated questions for hazardous materials transport certification",
+        "category": null,
+        "status": "active",
+        "id": "2012933f-364a-4d46-a383-64b0d6284305",
+        "question_count": 0,
+        "created_by": "Test Administrator",
+        "created_at": "2025-08-18T03:26:44.318537Z",
+        "updated_at": "2025-08-18T03:26:44.332406Z"
+      }
+    },
+    {
+      "test": "POST CSV Question Upload",
+      "success": false,
+      "message": "Upload failed with status 405",
+      "timestamp": "2025-08-18T03:26:44.339079",
+      "details": {
+        "response": "{\"detail\":\"Method Not Allowed\"}"
+      }
+    },
+    {
+      "test": "GET Certificate Templates",
+      "success": true,
+      "message": "Retrieved 0 certificate templates",
+      "timestamp": "2025-08-18T03:26:44.344112",
+      "details": {
+        "count": 0,
+        "sample": []
+      }
+    },
+    {
+      "test": "POST Create Certificate Template",
+      "success": true,
+      "message": "Template created successfully: Special Test Certificate Template",
+      "timestamp": "2025-08-18T03:26:44.357145",
+      "details": {
+        "id": "eb1976dd-0f57-4c47-a34c-57258aaa4445",
+        "name": "Special Test Certificate Template",
+        "type": "special_test",
+        "status": "active"
+      }
+    },
+    {
+      "test": "GET Template by ID",
+      "success": true,
+      "message": "Retrieved template: Special Test Certificate Template",
+      "timestamp": "2025-08-18T03:26:44.361932",
+      "details": {
+        "id": "eb1976dd-0f57-4c47-a34c-57258aaa4445",
+        "name": "Special Test Certificate Template",
+        "type": "special_test",
+        "status": "active"
+      }
+    },
+    {
+      "test": "PUT Update Template",
+      "success": true,
+      "message": "Template updated successfully: Special Test Certificate Template - Updated",
+      "timestamp": "2025-08-18T03:26:44.370670",
+      "details": {
+        "id": "eb1976dd-0f57-4c47-a34c-57258aaa4445",
+        "name": "Special Test Certificate Template - Updated",
+        "type": "special_test",
+        "status": "active"
+      }
+    },
+    {
+      "test": "DELETE Template",
+      "success": true,
+      "message": "Template deleted successfully and verified",
+      "timestamp": "2025-08-18T03:26:44.386379",
+      "details": {
+        "deleted_id": "89d539fa-ab09-4e24-b8ec-df4616ae7592",
+        "name": "Temporary Template for Deletion"
+      }
+    },
+    {
+      "test": "POST Template Preview",
+      "success": false,
+      "message": "Preview generation failed: Unknown error",
+      "timestamp": "2025-08-18T03:26:44.389246",
+      "details": {
+        "preview_html": "\n<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Certificate Preview</title>\n    <style>\n        \n                .preview-certificate {\n                    background: #f8f9fa;\n                    padding: 20px;\n                    border: 2px solid #007bff;\n                    border-radius: 10px;\n                    text-align: center;\n                    font-family: Arial, sans-serif;\n                }\n                h2 { color: #007bff; }\n                p { margin: 10px 0; }\n                \n    </style>\n</head>\n<body>\n    \n                <div class=\"preview-certificate\">\n                    <h2>Preview Certificate</h2>\n                    <p>Candidate: John Smith</p>\n                    <p>Test Type: Advanced Defensive Driving</p>\n                    <p>Date: 2024-12-15</p>\n                    <p>Score: 92%</p>\n                    <p>Result: PASS</p>\n                </div>\n                \n</body>\n</html>\n",
+        "compiled_template": "\n                <div class=\"preview-certificate\">\n                    <h2>Preview Certificate</h2>\n                    <p>Candidate: John Smith</p>\n                    <p>Test Type: Advanced Defensive Driving</p>\n                    <p>Date: 2024-12-15</p>\n                    <p>Score: 92%</p>\n                    <p>Result: PASS</p>\n                </div>\n                ",
+        "status": "success"
+      }
+    },
+    {
+      "test": "OpenAPI Documentation",
+      "success": true,
+      "message": "API documentation accessible at /docs",
+      "timestamp": "2025-08-18T03:26:44.390621",
+      "details": {
+        "content_length": 966,
+        "has_swagger": true,
+        "has_openapi": true
+      }
+    },
+    {
+      "test": "REST Conventions Check",
+      "success": true,
+      "message": "Service follows REST conventions with proper root endpoint",
+      "timestamp": "2025-08-18T03:26:44.392026",
+      "details": {
+        "service_name": "ITADIAS Special Admin Microservice",
+        "version": "1.0.0",
+        "features_count": 6
+      }
+    },
+    {
+      "test": "Request/Response Schema Validation",
+      "success": true,
+      "message": "Schema validation working correctly, rejected invalid data",
+      "timestamp": "2025-08-18T03:26:44.393775",
+      "details": {
+        "status_code": 422,
+        "error_structure": [
+          "detail"
+        ]
+      }
+    }
+  ],
+  "created_resources": {
+    "special_types": [
+      "27bfdc6c-6e95-4333-b83e-b6746f8031ea"
+    ],
+    "templates": [
+      "eb1976dd-0f57-4c47-a34c-57258aaa4445"
+    ],
+    "modules": [
+      "2012933f-364a-4d46-a383-64b0d6284305"
+    ]
+  }
+}
