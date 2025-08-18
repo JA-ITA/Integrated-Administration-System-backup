@@ -1,10 +1,10 @@
 {
   "summary": {
-    "total_tests": 13,
-    "passed_tests": 6,
-    "failed_tests": 7,
-    "success_rate": 46.15384615384615,
-    "test_timestamp": "2025-08-18T00:09:33.874338",
+    "total_tests": 14,
+    "passed_tests": 8,
+    "failed_tests": 6,
+    "success_rate": 57.14285714285714,
+    "test_timestamp": "2025-08-18T00:12:21.970071",
     "test_engine_service_url": "http://localhost:8005",
     "main_backend_url": "https://quiz-api.preview.emergentagent.com",
     "focus": "Complete Test Engine microservice and integration testing"
@@ -14,9 +14,9 @@
       "test": "Test Engine Health Check",
       "success": true,
       "message": "Service healthy: healthy",
-      "timestamp": "2025-08-18T00:09:33.632074",
+      "timestamp": "2025-08-18T00:12:21.671282",
       "details": {
-        "database": "unavailable",
+        "database": "connected",
         "events": "connected",
         "event_details": {
           "rabbitmq_connected": false,
@@ -29,7 +29,7 @@
       "test": "Test Engine Configuration",
       "success": true,
       "message": "Configuration endpoint working with expected values: 20 questions, 25 min, 75.0% pass",
-      "timestamp": "2025-08-18T00:09:33.633762",
+      "timestamp": "2025-08-18T00:12:21.673160",
       "details": {
         "questions_per_test": 20,
         "time_limit_minutes": 25,
@@ -47,11 +47,13 @@
       "test": "Test Statistics",
       "success": true,
       "message": "Statistics endpoint working",
-      "timestamp": "2025-08-18T00:09:33.635696",
+      "timestamp": "2025-08-18T00:12:21.684995",
       "details": {
         "statistics": {
-          "error": "Failed to get statistics",
-          "detail": "Database not initialized"
+          "total_tests": 0,
+          "pass_rate": 0.0,
+          "average_score": 0.0,
+          "module": "All"
         }
       }
     },
@@ -59,7 +61,7 @@
       "test": "Events Status",
       "success": true,
       "message": "Events status endpoint working",
-      "timestamp": "2025-08-18T00:09:33.637205",
+      "timestamp": "2025-08-18T00:12:21.686729",
       "details": {
         "events_status": {
           "rabbitmq_connected": false,
@@ -70,63 +72,89 @@
     },
     {
       "test": "Start Test - Provisional",
-      "success": false,
-      "message": "Start test failed with status 503",
-      "timestamp": "2025-08-18T00:09:33.639093",
+      "success": true,
+      "message": "Test started successfully with 20 questions, 25 min limit",
+      "timestamp": "2025-08-18T00:12:21.707533",
       "details": {
-        "response": "{\"detail\":\"Database service unavailable\"}"
+        "test_id": "5ba1dfa6-0076-4537-aa10-2009658ff7f2",
+        "driver_record_id": "fb84b436-faa6-467b-ac39-b6e2975afaf8",
+        "module": "Provisional",
+        "questions_count": 20,
+        "first_question_structure": {
+          "id": "b9011e41-2255-4e1b-bbed-3020cd3ebb00",
+          "question_type": "multiple_choice",
+          "text": "When turning left, you should:",
+          "options": [
+            "Turn from the right lane",
+            "Signal and turn from the left lane",
+            "Not signal if no traffic",
+            "Turn quickly"
+          ]
+        }
+      }
+    },
+    {
+      "test": "Get Test Status",
+      "success": true,
+      "message": "Test status retrieved: in_progress, 1499s remaining",
+      "timestamp": "2025-08-18T00:12:21.712413",
+      "details": {
+        "test_id": "5ba1dfa6-0076-4537-aa10-2009658ff7f2",
+        "status": "in_progress",
+        "time_remaining_seconds": 1499,
+        "expires_at": "2025-08-18T00:37:21.698180+00:00"
       }
     },
     {
       "test": "Start Test - Class-B",
       "success": false,
-      "message": "Start test failed with status 503",
-      "timestamp": "2025-08-18T00:09:33.640831",
+      "message": "Start test failed with status 400",
+      "timestamp": "2025-08-18T00:12:21.719774",
       "details": {
-        "response": "{\"detail\":\"Database service unavailable\"}"
+        "response": "{\"detail\":\"Not enough questions available for TestModule.CLASS_B. Need 20, have 1\"}"
       }
     },
     {
       "test": "Start Test - Class-C",
       "success": false,
-      "message": "Start test failed with status 503",
-      "timestamp": "2025-08-18T00:09:33.642601",
+      "message": "Start test failed with status 400",
+      "timestamp": "2025-08-18T00:12:21.726741",
       "details": {
-        "response": "{\"detail\":\"Database service unavailable\"}"
+        "response": "{\"detail\":\"Not enough questions available for TestModule.CLASS_C. Need 20, have 1\"}"
       }
     },
     {
       "test": "Start Test - PPV",
       "success": false,
-      "message": "Start test failed with status 503",
-      "timestamp": "2025-08-18T00:09:33.644398",
+      "message": "Start test failed with status 400",
+      "timestamp": "2025-08-18T00:12:21.734173",
       "details": {
-        "response": "{\"detail\":\"Database service unavailable\"}"
+        "response": "{\"detail\":\"Not enough questions available for TestModule.PPV. Need 20, have 1\"}"
       }
     },
     {
       "test": "Start Test - HAZMAT",
       "success": false,
-      "message": "Start test failed with status 503",
-      "timestamp": "2025-08-18T00:09:33.646013",
+      "message": "Start test failed with status 400",
+      "timestamp": "2025-08-18T00:12:21.740818",
       "details": {
-        "response": "{\"detail\":\"Database service unavailable\"}"
+        "response": "{\"detail\":\"Not enough questions available for TestModule.HAZMAT. Need 20, have 1\"}"
       }
     },
     {
       "test": "Duplicate Test Prevention",
       "success": false,
-      "message": "Could not start first test: 503",
-      "timestamp": "2025-08-18T00:09:33.647594",
+      "message": "Could not start first test: 400",
+      "timestamp": "2025-08-18T00:12:21.747655",
       "details": {
-        "response": "{\"detail\":\"Database service unavailable\"}"
+        "response": "{\"detail\":\"Not enough questions available for TestModule.HAZMAT. Need 20, have 1\"}"
       }
     },
     {
       "test": "Main Backend - Test Engine Health Check",
       "success": true,
       "message": "Test engine health via main backend: healthy",
-      "timestamp": "2025-08-18T00:09:33.783881",
+      "timestamp": "2025-08-18T00:12:21.852172",
       "details": {
         "health_response": {
           "test_engine_service": "healthy",
@@ -134,7 +162,7 @@
             "status": "healthy",
             "service": "ITADIAS Test Engine Microservice",
             "version": "1.0.0",
-            "database": "unavailable",
+            "database": "connected",
             "events": "connected",
             "event_details": {
               "rabbitmq_connected": false,
@@ -149,7 +177,7 @@
       "test": "Main Backend - Start Test",
       "success": false,
       "message": "Test start via main backend failed: {'success': False, 'error': ''}",
-      "timestamp": "2025-08-18T00:09:33.830256",
+      "timestamp": "2025-08-18T00:12:21.916997",
       "details": {
         "success": false,
         "error": ""
@@ -159,14 +187,18 @@
       "test": "Main Backend - Statistics",
       "success": true,
       "message": "Statistics retrieved via main backend",
-      "timestamp": "2025-08-18T00:09:33.874089",
+      "timestamp": "2025-08-18T00:12:21.969800",
       "details": {
         "statistics": {
-          "error": "Failed to get statistics",
-          "detail": "Database not initialized"
+          "total_tests": 0,
+          "pass_rate": 0.0,
+          "average_score": 0.0,
+          "module": "All"
         }
       }
     }
   ],
-  "created_tests": []
+  "created_tests": [
+    "5ba1dfa6-0076-4537-aa10-2009658ff7f2"
+  ]
 }
