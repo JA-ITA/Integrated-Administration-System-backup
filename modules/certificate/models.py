@@ -84,7 +84,7 @@ class Certificate(Base):
             "file_url": self.file_url,
             "qr_code": self.qr_code,
             "verification_token": self.verification_token,
-            "metadata": self.metadata,
+            "certificate_metadata": self.certificate_metadata,
             "is_valid": self.is_valid(),
             "created_at": self.created_at.isoformat() if self.created_at else None
         }
