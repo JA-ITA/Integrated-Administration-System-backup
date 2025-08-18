@@ -12,6 +12,7 @@ import logging
 
 from database import init_db, get_db_engine
 from routes.tests import router as tests_router
+from routes.questions import router as questions_router
 from services.event_service import EventService
 from services.test_service import TestService
 from services.seed_service import SeedService
