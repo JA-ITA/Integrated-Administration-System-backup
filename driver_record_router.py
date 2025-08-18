@@ -113,7 +113,7 @@ class TheoryAttempt(BaseModel):
     attempt_no: int = Field(..., ge=1, le=10, description="Attempt number (1-10)")
     module: str = Field(..., min_length=1, max_length=50, description="Test module name")
     score: int = Field(..., ge=0, le=20, description="Score out of 20")
-    pass: bool = Field(..., description="Whether the attempt was successful")
+    passed: bool = Field(..., description="Whether the attempt was successful")
     attempt_date: date = Field(default_factory=date.today, description="Date of attempt")
 
     class Config:
