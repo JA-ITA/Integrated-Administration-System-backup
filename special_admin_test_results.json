@@ -1,0 +1,180 @@
+{
+  "summary": {
+    "total_tests": 17,
+    "passed_tests": 0,
+    "failed_tests": 17,
+    "success_rate": 0.0,
+    "test_timestamp": "2025-08-18T02:25:03.973167",
+    "special_admin_service_url": "http://localhost:8007",
+    "test_engine_service_url": "http://localhost:8005",
+    "main_backend_url": "https://special-test-manager.preview.emergentagent.com",
+    "focus": "Special Admin microservice integration and functionality"
+  },
+  "test_results": [
+    {
+      "test": "Special Admin Health Check (Direct)",
+      "success": false,
+      "message": "Health check error: HTTPConnectionPool(host='localhost', port=8007): Max retries exceeded with url: /health (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0xfcc63a86c6d0>: Failed to establish a new connection: [Errno 111] Connection refused'))",
+      "timestamp": "2025-08-18T02:25:03.374998",
+      "details": {
+        "error": "HTTPConnectionPool(host='localhost', port=8007): Max retries exceeded with url: /health (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0xfcc63a86c6d0>: Failed to establish a new connection: [Errno 111] Connection refused'))"
+      }
+    },
+    {
+      "test": "Main Backend Special Admin Integration",
+      "success": false,
+      "message": "Service unavailable: unavailable",
+      "timestamp": "2025-08-18T02:25:03.508704",
+      "details": {
+        "special_admin_service": "unavailable",
+        "status": null
+      }
+    },
+    {
+      "test": "Get Special Types (Main Backend)",
+      "success": false,
+      "message": "Request failed: Service unavailable",
+      "timestamp": "2025-08-18T02:25:03.561826",
+      "details": {
+        "success": false,
+        "error": "Service unavailable"
+      }
+    },
+    {
+      "test": "Create Special Type (Main Backend)",
+      "success": false,
+      "message": "Creation failed: All connection attempts failed",
+      "timestamp": "2025-08-18T02:25:03.613023",
+      "details": {
+        "success": false,
+        "error": "All connection attempts failed"
+      }
+    },
+    {
+      "test": "Get Special Type by ID (Main Backend)",
+      "success": false,
+      "message": "No special types created to test with",
+      "timestamp": "2025-08-18T02:25:03.613107",
+      "details": {}
+    },
+    {
+      "test": "Get Certificate Templates (Main Backend)",
+      "success": false,
+      "message": "Request failed: Service unavailable",
+      "timestamp": "2025-08-18T02:25:03.661900",
+      "details": {
+        "success": false,
+        "error": "Service unavailable"
+      }
+    },
+    {
+      "test": "Create Certificate Template (Main Backend)",
+      "success": false,
+      "message": "Creation failed: All connection attempts failed",
+      "timestamp": "2025-08-18T02:25:03.705359",
+      "details": {
+        "success": false,
+        "error": "All connection attempts failed"
+      }
+    },
+    {
+      "test": "Template Preview Functionality",
+      "success": false,
+      "message": "No templates created to test preview with",
+      "timestamp": "2025-08-18T02:25:03.705418",
+      "details": {}
+    },
+    {
+      "test": "Live Template Preview",
+      "success": false,
+      "message": "Live preview failed: All connection attempts failed",
+      "timestamp": "2025-08-18T02:25:03.749828",
+      "details": {
+        "success": false,
+        "error": "All connection attempts failed"
+      }
+    },
+    {
+      "test": "Default Template Config",
+      "success": false,
+      "message": "Config retrieval failed: All connection attempts failed",
+      "timestamp": "2025-08-18T02:25:03.793831",
+      "details": {
+        "success": false,
+        "error": "All connection attempts failed"
+      }
+    },
+    {
+      "test": "Get Question Modules (Main Backend)",
+      "success": false,
+      "message": "Request failed: Service unavailable",
+      "timestamp": "2025-08-18T02:25:03.838453",
+      "details": {
+        "success": false,
+        "error": "Service unavailable"
+      }
+    },
+    {
+      "test": "Create Question Module (Main Backend)",
+      "success": false,
+      "message": "Creation failed: All connection attempts failed",
+      "timestamp": "2025-08-18T02:25:03.881184",
+      "details": {
+        "success": false,
+        "error": "All connection attempts failed"
+      }
+    },
+    {
+      "test": "CSV Questions Upload",
+      "success": false,
+      "message": "Upload failed: All connection attempts failed",
+      "timestamp": "2025-08-18T02:25:03.925386",
+      "details": {
+        "success": false,
+        "error": "All connection attempts failed"
+      }
+    },
+    {
+      "test": "CSV Template Download",
+      "success": false,
+      "message": "Template retrieval failed: All connection attempts failed",
+      "timestamp": "2025-08-18T02:25:03.969211",
+      "details": {
+        "success": false,
+        "error": "All connection attempts failed"
+      }
+    },
+    {
+      "test": "Test Engine Health Check",
+      "success": false,
+      "message": "Health check error: HTTPConnectionPool(host='localhost', port=8005): Max retries exceeded with url: /health (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0xfcc63a86f990>: Failed to establish a new connection: [Errno 111] Connection refused'))",
+      "timestamp": "2025-08-18T02:25:03.970482",
+      "details": {
+        "error": "HTTPConnectionPool(host='localhost', port=8005): Max retries exceeded with url: /health (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0xfcc63a86f990>: Failed to establish a new connection: [Errno 111] Connection refused'))"
+      }
+    },
+    {
+      "test": "Test Engine Special Modules Support",
+      "success": false,
+      "message": "Request error: HTTPConnectionPool(host='localhost', port=8005): Max retries exceeded with url: /api/v1/questions (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0xfcc63a86fd90>: Failed to establish a new connection: [Errno 111] Connection refused'))",
+      "timestamp": "2025-08-18T02:25:03.971914",
+      "details": {
+        "error": "HTTPConnectionPool(host='localhost', port=8005): Max retries exceeded with url: /api/v1/questions (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0xfcc63a86fd90>: Failed to establish a new connection: [Errno 111] Connection refused'))"
+      }
+    },
+    {
+      "test": "Test Engine Config Check",
+      "success": false,
+      "message": "Request error: HTTPConnectionPool(host='localhost', port=8005): Max retries exceeded with url: /config (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0xfcc63a88f310>: Failed to establish a new connection: [Errno 111] Connection refused'))",
+      "timestamp": "2025-08-18T02:25:03.972865",
+      "details": {
+        "error": "HTTPConnectionPool(host='localhost', port=8005): Max retries exceeded with url: /config (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0xfcc63a88f310>: Failed to establish a new connection: [Errno 111] Connection refused'))"
+      }
+    }
+  ],
+  "created_resources": {
+    "special_types": [],
+    "templates": [],
+    "modules": []
+  }
+}
