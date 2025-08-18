@@ -235,11 +235,11 @@ agent_communication:
 
   - task: "Special Admin Microservice - Database and Service Setup"
     implemented: true
-    working: false
+    working: true
     file: "/modules/special-admin/app.py"
-    stuck_count: 1
+    stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: false
         agent: "main"
@@ -247,6 +247,9 @@ agent_communication:
       - working: false
         agent: "testing"
         comment: "❌ CRITICAL INFRASTRUCTURE ISSUE: Special Admin microservice (port 8007) cannot start due to PostgreSQL database dependency. Service requires PostgreSQL with 'config' schema but database is not available in testing environment. Main backend integration endpoints return 'Service unavailable' errors. Test Engine microservice (port 8005) also fails to start due to missing dependencies (aiormq module). All Special Admin functionality (special test types, certificate templates, question modules, CSV upload) is inaccessible. This is an infrastructure/deployment issue preventing testing of implemented functionality. Service architecture is properly implemented but requires database infrastructure to be operational."
+      - working: true
+        agent: "main"
+        comment: "✅ FIXED DATABASE CONNECTIVITY: Successfully installed and configured PostgreSQL 15 with 'config' schema and user 'ita_admin'. Created database 'itadias' and granted all necessary permissions. Service now running on port 8009 with healthy status and database connectivity. All API endpoints accessible and event service working with RabbitMQ fallback mode."
 
   - task: "Registration Microservice - Tables Implementation"
     implemented: true
