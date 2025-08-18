@@ -640,9 +640,7 @@ class SpecialAdminPort8009Tester:
         try:
             module_id = self.created_resources['modules'][0]
             update_data = {
-                "name": "Special Hazardous Materials Transport - Updated",
                 "description": "Updated questions for hazardous materials transport certification",
-                "difficulty_level": "expert",
                 "pass_percentage": 90,
                 "time_limit_minutes": 75,
                 "status": "active"
@@ -656,15 +654,15 @@ class SpecialAdminPort8009Tester:
             if response.status_code == 200:
                 data = response.json()
                 
-                if data.get("name") == update_data["name"] and data.get("difficulty_level") == update_data["difficulty_level"]:
+                if data.get("description") == update_data["description"] and data.get("pass_percentage") == update_data["pass_percentage"]:
                     self.log_test(
                         "PUT Update Module",
                         True,
-                        f"Module updated successfully: {data.get('name')}",
+                        f"Module updated successfully: {data.get('code')}",
                         {
                             "id": data.get("id"),
-                            "name": data.get("name"),
-                            "difficulty_level": data.get("difficulty_level"),
+                            "code": data.get("code"),
+                            "description": data.get("description"),
                             "pass_percentage": data.get("pass_percentage")
                         }
                     )
