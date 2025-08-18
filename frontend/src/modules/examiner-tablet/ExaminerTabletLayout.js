@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { CheckSquare, Wifi, WifiOff, Users, Activity, Sync, Bell } from "lucide-react";
+import { CheckSquare, Wifi, WifiOff, Users, Activity, RefreshCw, Bell } from "lucide-react";
 
 const ExaminerTabletLayout = () => {
   const navigate = useNavigate();
