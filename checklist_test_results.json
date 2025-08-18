@@ -5,7 +5,7 @@
     "failed_tests": 0,
     "success_rate": 100.0,
     "test_timestamp": "2025-08-18T15:29:18.984423",
-    "main_backend_url": "https://compliance-trace.preview.emergentagent.com",
+    "main_backend_url": "https://audit-trail-1.preview.emergentagent.com",
     "focus": "Checklist Management System for Examiner Tablets"
   },
   "test_results": [
