@@ -20,6 +20,8 @@ class TestModule(str, enum.Enum):
     CLASS_C = "Class-C"
     PPV = "PPV"
     HAZMAT = "HAZMAT"
+    SPECIAL_TEST = "SPECIAL-TEST"
+    DANGEROUS_GOODS = "DANGEROUS-GOODS"
 
 class QuestionType(str, enum.Enum):
     MULTIPLE_CHOICE = "multiple_choice"
