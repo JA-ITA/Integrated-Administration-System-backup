@@ -4,6 +4,7 @@ Handles Handlebars compilation and HTML preview generation
 """
 import json
 import base64
+import re
 from typing import Dict, Any, Optional
 from jinja2 import Environment, BaseLoader, Template
 import logging
