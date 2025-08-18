@@ -122,7 +122,7 @@ class TheoryAttempt(BaseModel):
                 "attempt_no": 1,
                 "module": "Traffic Signs and Rules",
                 "score": 18,
-                "pass": True,
+                "passed": True,
                 "attempt_date": "2024-01-20"
             }
         }
