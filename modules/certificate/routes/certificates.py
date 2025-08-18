@@ -19,6 +19,7 @@ from models import (
 from services.certificate_service import CertificateService
 from services.storage_service import StorageService
 from services.event_service import EventService
+from services.fallback_storage import fallback_storage
 
 logger = logging.getLogger(__name__)
 
