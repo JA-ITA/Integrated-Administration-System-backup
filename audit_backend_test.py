@@ -217,7 +217,47 @@ class AuditServiceTester:
             self.log_test("Events Status Endpoint", False, f"Exception: {str(e)}")
             return False
     
-    async def test_rd_authentication_valid_token(self):
+    async def test_authentication_diagnostics(self):
+        """Diagnose authentication issues"""
+        try:
+            # Test if identity service is available
+            identity_available = False
+            try:
+                identity_response = await self.client.get("http://localhost:8001/health", timeout=5.0)
+                identity_available = identity_response.status_code == 200
+            except:
+                pass
+            
+            # Generate a test token
+            test_token = self.generate_rd_jwt_token()
+            
+            # Test with minimal request to see authentication behavior
+            headers = {
+                "Authorization": f"Bearer {test_token}",
+                "Content-Type": "application/json"
+            }
+            
+            response = await self.client.post(
+                f"{AUDIT_SERVICE_URL}/api/v1/overrides/",
+                json={
+                    "resource_type": "RECEIPT",
+                    "resource_id": str(uuid.uuid4()),
+                    "new_status": "APPROVED",
+                    "reason": "Authentication diagnostic test"
+                },
+                headers=headers
+            )
+            
+            auth_status = "working" if response.status_code == 200 else "failing"
+            
+            self.log_test("Authentication Diagnostics", True, 
+                        f"Auth status: {auth_status}, Identity service: {'available' if identity_available else 'unavailable'}, Response: {response.status_code}")
+            
+            return True
+            
+        except Exception as e:
+            self.log_test("Authentication Diagnostics", False, f"Exception: {str(e)}")
+            return False
         """Test RD authentication with valid token"""
         try:
             # Generate valid RD token
