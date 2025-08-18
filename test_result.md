@@ -206,14 +206,13 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Registration Microservice - Tables Implementation"
-    - "POST /api/v1/registrations Endpoint with Business Rules"
-    - "Document Processing and File Upload Handling"
-    - "Age and Medical Certificate Validation Rules"
-    - "External Service Integration (Calendar & Receipt)"
-    - "RegistrationCompleted Event Publishing"
-    - "Registration Service Independence (Port 8004)"
-    - "Main Backend Registration Integration"
+    - "Test Engine Microservice - Tables Implementation"
+    - "POST /api/v1/tests/start Endpoint"
+    - "POST /api/v1/tests/{id}/submit Endpoint with Auto-grading"
+    - "Sample Questions Seeding (60 per module)"
+    - "TestCompleted Event Publishing"
+    - "Test Engine Service Independence (Port 8005)"
+    - "Main Backend Test Engine Integration"
   stuck_tasks: []
   test_all: true
   test_priority: "high_first"
