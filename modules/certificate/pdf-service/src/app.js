@@ -128,13 +128,24 @@ async function loadFont(fontPath) {
 function parseHTMLForPDF(htmlContent) {
     const elements = [];
     
+    // Helper function to clean text and remove problematic characters
+    function cleanText(text) {
+        return text
+            .replace(/<[^>]*>/g, '') // Remove HTML tags
+            .replace(/\n/g, ' ') // Replace newlines with spaces
+            .replace(/\r/g, ' ') // Replace carriage returns with spaces
+            .replace(/\t/g, ' ') // Replace tabs with spaces
+            .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+            .trim();
+    }
+    
     // Extract certificate elements based on CSS classes and structure
     // This is a simplified parser - in production you might use a proper HTML parser
     
     // Extract title
     const titleMatch = htmlContent.match(/<div[^>]*class="certificate-title"[^>]*>(.*?)<\/div>/s);
     if (titleMatch) {
-        const title = titleMatch[1].replace(/<[^>]*>/g, '').trim();
+        const title = cleanText(titleMatch[1]);
         elements.push({
             type: 'title',
             text: title,
@@ -149,7 +160,7 @@ function parseHTMLForPDF(htmlContent) {
     // Extract recipient name
     const nameMatch = htmlContent.match(/<div[^>]*class="recipient-name"[^>]*>(.*?)<\/div>/s);
     if (nameMatch) {
-        const name = nameMatch[1].replace(/<[^>]*>/g, '').trim();
+        const name = cleanText(nameMatch[1]);
         elements.push({
             type: 'name',
             text: name,
@@ -163,7 +174,7 @@ function parseHTMLForPDF(htmlContent) {
     // Extract certificate content
     const contentMatch = htmlContent.match(/<div[^>]*class="certificate-content"[^>]*>(.*?)<\/div>/s);
     if (contentMatch) {
-        const content = contentMatch[1].replace(/<[^>]*>/g, '').trim();
+        const content = cleanText(contentMatch[1]);
         elements.push({
             type: 'content',
             text: content,
@@ -181,8 +192,8 @@ function parseHTMLForPDF(htmlContent) {
         rows.forEach(row => {
             const cells = row.match(/<td[^>]*>(.*?)<\/td>/gs) || [];
             if (cells.length >= 2) {
-                const label = cells[0].replace(/<[^>]*>/g, '').trim();
-                const value = cells[1].replace(/<[^>]*>/g, '').trim();
+                const label = cleanText(cells[0]);
+                const value = cleanText(cells[1]);
                 
                 elements.push({
                     type: 'detail',
