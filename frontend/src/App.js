@@ -10,6 +10,13 @@ import SpecialTestTypes from "./modules/special-admin/pages/SpecialTestTypes";
 import QuestionUpload from "./modules/special-admin/pages/QuestionUpload";
 import CertificateDesigner from "./modules/special-admin/pages/CertificateDesigner";
 
+// Examiner Tablet Components
+import ExaminerTabletLayout from "./modules/examiner-tablet/ExaminerTabletLayout";
+import ActiveChecklists from "./modules/examiner-tablet/pages/ActiveChecklists";
+import NewChecklist from "./modules/examiner-tablet/pages/NewChecklist";
+import ChecklistDetail from "./modules/examiner-tablet/pages/ChecklistDetail";
+import ChecklistHistory from "./modules/examiner-tablet/pages/ChecklistHistory";
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
