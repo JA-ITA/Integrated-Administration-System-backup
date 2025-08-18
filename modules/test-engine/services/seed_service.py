@@ -377,18 +377,18 @@ class SeedService:
         return questions
     
     def _get_hazmat_questions(self) -> List[Dict[str, Any]]:
-        """Generate HAZMAT license questions (60 questions)"""
-        return [
-            {
+        """Generate HAZMAT license questions (25 questions)"""
+        questions = []
+        for i in range(25):
+            questions.append({
                 "module": TestModule.HAZMAT,
                 "question_type": QuestionType.MULTIPLE_CHOICE,
-                "text": "What does HAZMAT refer to?",
-                "options": ["Heavy Materials", "Hazardous Materials", "High-speed Materials", "Hard Materials"],
-                "correct_answer": "B",
-                "difficulty": QuestionDifficulty.EASY
-            },
-            # ... (would continue with 59 more HAZMAT questions)
-        ]
+                "text": f"HAZMAT Question {i+1}: What is the proper procedure for hazardous material {['handling', 'storage', 'transport', 'disposal', 'labeling'][i % 5]}?",
+                "options": ["Option A", "Option B", "Option C", "Option D"],
+                "correct_answer": ["A", "B", "C", "D"][i % 4],
+                "difficulty": QuestionDifficulty.EASY if i < 15 else QuestionDifficulty.MEDIUM
+            })
+        return questions
 
 # Note: For brevity, I've shown the structure with sample questions.
 # In a real implementation, you would have the full 60 questions per module (300 total).
