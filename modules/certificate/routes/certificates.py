@@ -176,7 +176,7 @@ async def generate_certificate(
             qr_code=certificate.qr_code,
             issue_date=certificate.issue_date,
             expiry_date=certificate.expiry_date,
-            metadata=certificate.metadata or {}
+            metadata=certificate.certificate_metadata or {}
         )
         
     except HTTPException:
