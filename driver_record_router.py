@@ -809,7 +809,7 @@ async def add_theory_attempt(
             await conn.execute(
                 query,
                 attempt_id, record['id'], attempt_data.attempt_no,
-                attempt_data.module, attempt_data.score, attempt_data.pass,
+                attempt_data.module, attempt_data.score, attempt_data.passed,
                 attempt_data.attempt_date
             )
             
