@@ -586,18 +586,29 @@ async def get_certificate_status(
     """Get certificate status and metadata"""
     
     try:
-        if not db:
-            raise HTTPException(status_code=503, detail="Database service unavailable")
+        certificate = None
+        certificate_data = None
         
-        # Find certificate
-        cert_query = select(Certificate).where(Certificate.id == certificate_id)
-        result = await db.execute(cert_query)
-        certificate = result.scalar_one_or_none()
+        if db:
+            # Try database first
+            cert_query = select(Certificate).where(Certificate.id == certificate_id)
+            result = await db.execute(cert_query)
+            certificate = result.scalar_one_or_none()
+            
+            if not certificate:
+                # Fall back to fallback storage
+                certificate_data = fallback_storage.find_certificate_by_id(certificate_id)
+        else:
+            # Use fallback storage
+            certificate_data = fallback_storage.find_certificate_by_id(certificate_id)
         
-        if not certificate:
+        if not certificate and not certificate_data:
             raise HTTPException(status_code=404, detail="Certificate not found")
         
-        return certificate.to_dict()
+        if certificate:
+            return certificate.to_dict()
+        else:
+            return fallback_storage.certificate_to_dict(certificate_data)
         
     except HTTPException:
         raise
