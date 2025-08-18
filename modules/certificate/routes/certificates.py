@@ -220,7 +220,7 @@ async def generate_certificate(
         
         logger.info(f"Certificate generated successfully", extra={
             "request_id": request_id,
-            "certificate_id": str(certificate.id),
+            "certificate_id": str(certificate_id),
             "file_size": upload_result["file_size"]
         })
         
