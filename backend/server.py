@@ -41,6 +41,47 @@ class StatusCheck(BaseModel):
 class StatusCheckCreate(BaseModel):
     client_name: str
 
+# Checklist Models
+class ChecklistItem(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    category: str
+    description: str
+    checked: bool = False
+    breach_type: Optional[Literal["minor", "major"]] = None
+    notes: Optional[str] = ""
+    timestamp: Optional[datetime] = Field(default_factory=datetime.utcnow)
+
+class Checklist(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    driver_record_id: str
+    examiner_id: str
+    test_type: Literal["Class B", "Class C", "PPV", "Special"]
+    test_category: Literal["Yard", "Road"]
+    status: Literal["in_progress", "completed", "submitted"] = "in_progress"
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    synced: bool = True
+    items: List[ChecklistItem] = []
+    
+    # Summary fields for quick assessment
+    total_items: int = 0
+    checked_items: int = 0
+    minor_breaches: int = 0
+    major_breaches: int = 0
+    pass_fail_status: Optional[Literal["pass", "fail"]] = None
+
+class ChecklistCreate(BaseModel):
+    driver_record_id: str
+    examiner_id: str
+    test_type: Literal["Class B", "Class C", "PPV", "Special"]
+    test_category: Literal["Yard", "Road"]
+    items: Optional[List[ChecklistItem]] = []
+
+class ChecklistUpdate(BaseModel):
+    status: Optional[Literal["in_progress", "completed", "submitted"]] = None
+    items: Optional[List[ChecklistItem]] = None
+    synced: Optional[bool] = None
+
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
 async def root():
